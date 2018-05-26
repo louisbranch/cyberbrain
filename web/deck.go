@@ -7,6 +7,11 @@ type Deck struct {
 	Slug        string `db:"slug"`
 	Name        string `db:"name"`
 	Description string `db:"description"`
+	ImageURL    string `db:"image_url"`
+	Field1      string `db:"field_1"`
+	Field2      string `db:"field_2"`
+	Field3      string `db:"field_3"`
+	Cards       Cards
 }
 
 func (d *Deck) Type() string {

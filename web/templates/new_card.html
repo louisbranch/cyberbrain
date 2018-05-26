@@ -1,0 +1,42 @@
+{{ define "content"}}
+  <form action="/cards/" method="post" accept-charset="utf-8">
+    <input type="hidden" name="deck" id="deck" value="{{ .Slug }}" />
+    <h1 class="title">Add Card to {{ .Name }}</h1>
+    <div class="columns">
+      <div class="column">
+        <div class="field">
+          <label class="label">Image URL</label>
+          <div class="control">
+            <input class="input" type="text" name="image_url" minlength="2" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ .Field1 }}</label>
+          <div class="control">
+            <input class="input" type="text" name="field_1" minlength="1" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ .Field2 }}</label>
+          <div class="control">
+            <input class="input" type="text" name="field_2" minlength="1" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ .Field3 }}</label>
+          <div class="control">
+            <input class="input" type="text" name="field_3" minlength="1" />
+          </div>
+        </div>
+        <div class="field is-grouped">
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Submit" />
+          </div>
+          <div class="control">
+            <a class="button is-text" href="/decks/{{ .Slug }}">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{{ end }}

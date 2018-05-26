@@ -38,7 +38,23 @@ func New(path string) (*Database, error) {
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
-			image_url TEXT
+			image_url TEXT,
+			field_1 TEXT NOT NULL CHECK(field_1 <> ''),
+			field_2 TEXT NOT NULL CHECK(field_2 <> ''),
+			field_3 TEXT NOT NULL CHECK(field_3 <> '')
+		);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS cards(
+			id INTEGER PRIMARY KEY,
+			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
+			deck_id INTEGER NOT NULL,
+			image_url TEXT,
+			audio_url TEXT,
+			field_1 TEXT NOT NULL CHECK(field_1 <> ''),
+			field_2 TEXT NOT NULL CHECK(field_2 <> ''),
+			field_3 TEXT NOT NULL CHECK(field_3 <> ''),
+			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
 		);
 		`,
 	}

@@ -2,7 +2,7 @@
   <form action="/decks/" method="post" accept-charset="utf-8">
     <h1 class="title">Create Deck</h1>
     <div class="columns">
-      <div class="column">
+      <div class="column is-4">
         <div class="field">
           <label class="label">Name</label>
           <div class="control">
@@ -15,20 +15,30 @@
             <textarea class="textarea" name="description" rows="2"></textarea>
           </div>
         </div>
+        <div class="field">
+          <label class="label">Field 1</label>
+          <div class="control">
+            <input class="input" type="text" name="field_1" minlength="2" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Field 2</label>
+          <div class="control">
+            <input class="input" type="text" name="field_2" minlength="2" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Field 3</label>
+          <div class="control">
+            <input class="input" type="text" name="field_3" minlength="2" />
+          </div>
+        </div>
         <div class="field is-grouped">
           <div class="control">
             <input class="button is-primary" type="submit" value="Submit" />
           </div>
           <div class="control">
             <a class="button is-text" href="/decks">Cancel</a>
-          </div>
-        </div>
-      </div>
-      <div class="column">
-        <div class="field">
-          <label class="label">Image</label>
-          <div class="control">
-            <input type="file" name="image" />
           </div>
         </div>
       </div>

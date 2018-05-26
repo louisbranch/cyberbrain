@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/luizbranco/srs/web"
@@ -17,12 +18,14 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 
 		srv.deckShow(path, w, r)
 	case "POST":
-		name := r.FormValue("name")
-		desc := r.FormValue("description")
 
 		deck := web.Deck{
-			Name:        name,
-			Description: desc,
+			Name:        r.FormValue("name"),
+			Description: r.FormValue("description"),
+			ImageURL:    r.FormValue("image_url"),
+			Field1:      r.FormValue("field_1"),
+			Field2:      r.FormValue("field_2"),
+			Field3:      r.FormValue("field_3"),
 		}
 
 		err := srv.Database.Create(&deck)
@@ -44,7 +47,7 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := web.Page{
-		Title:      "New Decks",
+		Title:      "New Deck",
 		ActiveMenu: "decks",
 		Partials:   []string{"new_deck"},
 	}
@@ -85,6 +88,18 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		srv.renderError(w, err)
 		return
 	}
+
+	cards := &web.Cards{}
+
+	where := fmt.Sprintf("deck_id = %d", deck.ID)
+
+	err = srv.Database.Query(where, cards)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	deck.Cards = *cards
 
 	page := web.Page{
 		Title:      deck.Name + " Deck",

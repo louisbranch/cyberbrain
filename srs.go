@@ -13,6 +13,7 @@ type Deck interface {
 	ID() string
 	Name() string
 	Description() string
+	Definitions() []string
 	Cards() ([]Card, error)
 	AddCard(Card) error
 }

@@ -18,8 +18,10 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	fs := http.FileServer(http.Dir("web/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	mux.HandleFunc("/decks/new", srv.newDeck)
+	mux.HandleFunc("/decks/new/", srv.newDeck)
 	mux.HandleFunc("/decks/", srv.decks)
+	mux.HandleFunc("/cards/new", srv.newCard)
+	mux.HandleFunc("/cards/", srv.cards)
 	mux.HandleFunc("/", srv.index)
 
 	return mux
@@ -51,7 +53,7 @@ func (srv *Server) renderNotFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 	page := web.Page{
 		Title:    "Not Found",
-		Partials: []string{"400"},
+		Partials: []string{"404"},
 	}
 	srv.render(w, page)
 }
@@ -61,5 +63,11 @@ func (srv *Server) index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+
+	if r.URL.Path != "/" {
+		srv.renderNotFound(w)
+		return
+	}
+
 	http.Redirect(w, r, "/decks/", http.StatusMovedPermanently)
 }
