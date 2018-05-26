@@ -1,0 +1,7 @@
+{{ define "content" }}
+  <h1 class="title">Decks</h1>
+  <a class="button is-primary" href="/decks/new">Create Deck</a>
+  {{ range .Decks }}
+    {{ .ID }} {{ .Name }}
+  {{ end }}
+{{ end }}
