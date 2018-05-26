@@ -2,22 +2,20 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/luizbranco/srs/web"
-	"github.com/pkg/errors"
 )
 
 func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		id := r.URL.Path[len("/decks/"):]
-		if id == "" {
+		path := r.URL.Path[len("/decks/"):]
+		if path == "" {
 			srv.decksList(w, r)
 			return
 		}
 
-		srv.deckShow(id, w, r)
+		srv.deckShow(path, w, r)
 	case "POST":
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
@@ -79,17 +77,10 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) deckShow(id string, w http.ResponseWriter, r *http.Request) {
+func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request) {
 	deck := &web.Deck{}
 
-	n, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		err = errors.Wrapf(err, "invalid id %s", id)
-		srv.renderError(w, err)
-		return
-	}
-
-	err = srv.Database.Get(uint(n), deck)
+	err := srv.Database.Get(slug, deck)
 	if err != nil {
 		srv.renderError(w, err)
 		return

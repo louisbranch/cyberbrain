@@ -17,12 +17,13 @@ type Template interface {
 type Database interface {
 	Create(Record) error
 	Query(string, Collection) error
-	Get(uint, Record) error
+	Get(string, Record) error
 }
 
 type Record interface {
 	SetID(uint)
 	Type() string
+	GenerateSlug() error
 }
 
 type Collection interface {

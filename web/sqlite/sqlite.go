@@ -35,6 +35,7 @@ func New(path string) (*Database, error) {
 		`
 		CREATE TABLE IF NOT EXISTS decks(
 			id INTEGER PRIMARY KEY,
+			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
 			image_url TEXT
@@ -54,6 +55,11 @@ func New(path string) (*Database, error) {
 }
 
 func (db *Database) Create(r web.Record) error {
+	err := r.GenerateSlug()
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate slug for %v", r)
+	}
+
 	rv := reflect.ValueOf(r)
 
 	if rv.Kind() != reflect.Ptr {
@@ -175,7 +181,7 @@ func (db *Database) Query(where string, col web.Collection) error {
 	return nil
 }
 
-func (db *Database) Get(id uint, r web.Record) error {
+func (db *Database) Get(slug string, r web.Record) error {
 	rv := reflect.ValueOf(r)
 
 	if rv.Kind() != reflect.Ptr {
@@ -201,8 +207,8 @@ func (db *Database) Get(id uint, r web.Record) error {
 		fields = append(fields, field)
 	}
 
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE id = %d LIMIT 1;",
-		strings.Join(columns, ", "), r.Type(), id)
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE slug = %q LIMIT 1;",
+		strings.Join(columns, ", "), r.Type(), slug)
 
 	rows, err := db.DB.Query(q)
 	if err != nil {
