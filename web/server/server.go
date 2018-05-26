@@ -18,8 +18,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	fs := http.FileServer(http.Dir("web/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	mux.HandleFunc("/decks", srv.decks)
 	mux.HandleFunc("/decks/new", srv.newDeck)
+	mux.HandleFunc("/decks/", srv.decks)
 	mux.HandleFunc("/", srv.index)
 
 	return mux
@@ -61,5 +61,5 @@ func (srv *Server) index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	http.Redirect(w, r, "/decks", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/decks/", http.StatusMovedPermanently)
 }

@@ -112,7 +112,6 @@ func (db *Database) Query(where string, col web.Collection) error {
 	rt := reflect.TypeOf(rv.Interface())
 
 	var columns []string
-	var fields []interface{}
 
 	for i := 0; i < rt.NumField(); i++ {
 		f := rt.Field(i)
@@ -123,7 +122,6 @@ func (db *Database) Query(where string, col web.Collection) error {
 		}
 
 		columns = append(columns, tag)
-		fields = append(fields, rv.Field(i).Interface())
 	}
 
 	if where != "" {
@@ -173,6 +171,56 @@ func (db *Database) Query(where string, col web.Collection) error {
 	err = rows.Err()
 	if err != nil {
 		return errors.Wrap(err, "find to query records")
+	}
+	return nil
+}
+
+func (db *Database) Get(id uint, r web.Record) error {
+	rv := reflect.ValueOf(r)
+
+	if rv.Kind() != reflect.Ptr {
+		return errors.Errorf("cannot query database records for %v", r)
+	}
+
+	rv = rv.Elem()
+	rt := reflect.TypeOf(rv.Interface())
+
+	var columns []string
+	var fields []interface{}
+
+	for i := 0; i < rt.NumField(); i++ {
+		f := rt.Field(i)
+		tag := f.Tag.Get("db")
+
+		if tag == "" {
+			continue
+		}
+
+		columns = append(columns, tag)
+		field := rv.Field(i).Addr().Interface()
+		fields = append(fields, field)
+	}
+
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE id = %d LIMIT 1;",
+		strings.Join(columns, ", "), r.Type(), id)
+
+	rows, err := db.DB.Query(q)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get record %s", q)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(fields...)
+		if err != nil {
+			return errors.Wrap(err, "failed to scan record")
+		}
+
+		return nil
+	}
+	err = rows.Err()
+	if err != nil {
+		return errors.Wrap(err, "find to get record")
 	}
 	return nil
 }

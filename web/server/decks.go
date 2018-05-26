@@ -2,35 +2,22 @@ package server
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/luizbranco/srs/web"
+	"github.com/pkg/errors"
 )
 
 func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		decks := &web.Decks{}
-
-		err := srv.Database.Query("", decks)
-		if err != nil {
-			srv.renderError(w, err)
+		id := r.URL.Path[len("/decks/"):]
+		if id == "" {
+			srv.decksList(w, r)
 			return
 		}
 
-		content := struct {
-			Decks *web.Decks
-		}{
-			Decks: decks,
-		}
-
-		page := web.Page{
-			Title:      "Decks",
-			ActiveMenu: "decks",
-			Partials:   []string{"decks"},
-			Content:    content,
-		}
-
-		srv.render(w, page)
+		srv.deckShow(id, w, r)
 	case "POST":
 		name := r.FormValue("name")
 		desc := r.FormValue("description")
@@ -62,6 +49,57 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 		Title:      "New Decks",
 		ActiveMenu: "decks",
 		Partials:   []string{"new_deck"},
+	}
+
+	srv.render(w, page)
+}
+
+func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
+	decks := &web.Decks{}
+
+	err := srv.Database.Query("", decks)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	content := struct {
+		Decks *web.Decks
+	}{
+		Decks: decks,
+	}
+
+	page := web.Page{
+		Title:      "Decks",
+		ActiveMenu: "decks",
+		Partials:   []string{"decks"},
+		Content:    content,
+	}
+
+	srv.render(w, page)
+}
+
+func (srv *Server) deckShow(id string, w http.ResponseWriter, r *http.Request) {
+	deck := &web.Deck{}
+
+	n, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		err = errors.Wrapf(err, "invalid id %s", id)
+		srv.renderError(w, err)
+		return
+	}
+
+	err = srv.Database.Get(uint(n), deck)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	page := web.Page{
+		Title:      deck.Name + " Deck",
+		ActiveMenu: "decks",
+		Partials:   []string{"deck"},
+		Content:    deck,
 	}
 
 	srv.render(w, page)

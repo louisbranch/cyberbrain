@@ -1,7 +1,18 @@
 {{ define "content" }}
   <h1 class="title">Decks</h1>
+  <div class="columns">
+    {{ range .Decks }}
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <h3 class="title"><a href="/decks/{{ .ID }}">{{ .Name }}</a></h3>
+            <div class="content">
+              {{ .Description }}
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ end }}
+  </div>
   <a class="button is-primary" href="/decks/new">Create Deck</a>
-  {{ range .Decks }}
-    {{ .ID }} {{ .Name }}
-  {{ end }}
 {{ end }}
