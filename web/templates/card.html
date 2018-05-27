@@ -28,12 +28,12 @@
           <div class="card-content">
             <div class="content">
               <dl>
-                <dt>{{ .Deck.Field1 }}</dt>
-                <dd>{{ .Card.Field1 }}</dd>
-                <dt>{{ .Deck.Field2 }}</dt>
-                <dd>{{ .Card.Field2 }}</dd>
-                <dt>{{ .Deck.Field3 }}</dt>
-                <dd>{{ .Card.Field3 }}</dd>
+                <dt>Definition</dt>
+                <dd>{{ .Card.Definition }}</dd>
+                <dt>Alt Definition</dt>
+                <dd>{{ .Card.AltDefinition }}</dd>
+                <dt>Pronunciation</dt>
+                <dd>{{ .Card.Pronunciation }}</dd>
               </dl>
               <div>
                 {{ range .Card.Tags }}

@@ -38,10 +38,7 @@ func New(path string) (*Database, error) {
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
-			image_url TEXT,
-			field_1 TEXT NOT NULL CHECK(field_1 <> ''),
-			field_2 TEXT NOT NULL CHECK(field_2 <> ''),
-			field_3 TEXT NOT NULL CHECK(field_3 <> '')
+			image_url TEXT
 		);
 		`,
 		`
@@ -50,9 +47,9 @@ func New(path string) (*Database, error) {
 			deck_id INTEGER NOT NULL,
 			image_url TEXT NOT NULL CHECK(image_url <> ''),
 			audio_url TEXT,
-			field_1 TEXT NOT NULL CHECK(field_1 <> ''),
-			field_2 TEXT NOT NULL CHECK(field_2 <> ''),
-			field_3 TEXT NOT NULL CHECK(field_3 <> ''),
+			definition TEXT NOT NULL CHECK(definition <> ''),
+			alt_definition TEXT,
+			pronunciation TEXT,
 			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
 		);
 		`,

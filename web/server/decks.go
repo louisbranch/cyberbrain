@@ -23,9 +23,6 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 			Name:        r.FormValue("name"),
 			Description: r.FormValue("description"),
 			ImageURL:    r.FormValue("image_url"),
-			Field1:      r.FormValue("field_1"),
-			Field2:      r.FormValue("field_2"),
-			Field3:      r.FormValue("field_3"),
 		}
 
 		err := srv.Database.Create(&deck)

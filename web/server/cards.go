@@ -45,12 +45,12 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		card := &web.Card{
-			DeckID:   deck.ID,
-			ImageURL: r.FormValue("image_url"),
-			AudioURL: r.FormValue("audio_url"),
-			Field1:   r.FormValue("field_1"),
-			Field2:   r.FormValue("field_2"),
-			Field3:   r.FormValue("field_3"),
+			DeckID:        deck.ID,
+			ImageURL:      r.FormValue("image_url"),
+			AudioURL:      r.FormValue("audio_url"),
+			Definition:    r.FormValue("definition"),
+			AltDefinition: r.FormValue("alt_definition"),
+			Pronunciation: r.FormValue("pronunciation"),
 		}
 
 		err = srv.Database.Create(card)

@@ -3,14 +3,14 @@ package web
 import "fmt"
 
 type Card struct {
-	ID       uint   `db:"id"`
-	DeckID   uint   `db:"deck_id"`
-	ImageURL string `db:"image_url"`
-	AudioURL string `db:"audio_url"`
-	Field1   string `db:"field_1"`
-	Field2   string `db:"field_2"`
-	Field3   string `db:"field_3"`
-	Tags     Tags
+	ID            uint   `db:"id"`
+	DeckID        uint   `db:"deck_id"`
+	ImageURL      string `db:"image_url"`
+	AudioURL      string `db:"audio_url"`
+	Definition    string `db:"definition"`
+	AltDefinition string `db:"alt_definition"`
+	Pronunciation string `db:"pronunciation"`
+	Tags          Tags
 }
 
 func (c *Card) Type() string {
