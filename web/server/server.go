@@ -20,10 +20,16 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 	mux.HandleFunc("/decks/new/", srv.newDeck)
 	mux.HandleFunc("/decks/", srv.decks)
+
 	mux.HandleFunc("/cards/new", srv.newCard)
 	mux.HandleFunc("/cards/", srv.cards)
+
 	mux.HandleFunc("/tags/new", srv.newTag)
 	mux.HandleFunc("/tags/", srv.tags)
+
+	mux.HandleFunc("/practices/new", srv.newPractice)
+	mux.HandleFunc("/practices/", srv.practice)
+
 	mux.HandleFunc("/", srv.index)
 
 	return mux

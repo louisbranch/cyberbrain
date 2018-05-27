@@ -9,13 +9,7 @@ import (
 func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		path := r.URL.Path[len("/tags/"):]
-		if path == "" {
-			http.Redirect(w, r, "/decks", http.StatusFound)
-			return
-		}
-
-		srv.deckShow(path, w, r)
+		http.Redirect(w, r, "/decks", http.StatusFound)
 	case "POST":
 		slug := r.FormValue("deck")
 

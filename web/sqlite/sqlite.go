@@ -54,9 +54,9 @@ func New(path string) (*Database, error) {
 		`
 		CREATE TABLE IF NOT EXISTS tags(
 			id INTEGER PRIMARY KEY,
+			deck_id INTEGER NOT NULL,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			name TEXT NOT NULL UNIQUE CHECK(name <> ''),
-			deck_id INTEGER NOT NULL,
 			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
 		);
 		`,
@@ -67,6 +67,28 @@ func New(path string) (*Database, error) {
 			tag_id INTEGER NOT NULL,
 			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE,
 			FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
+		);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS practices(
+			id INTEGER PRIMARY KEY,
+			deck_id INTEGER NOT NULL,
+			state TEXT NOT NULL CHECK(state <> ''),
+			rounds INTEGER NOT NULL CHECK(rounds > 0),
+			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
+		);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS practice_rounds(
+			id INTEGER PRIMARY KEY,
+			practice_id INTEGER NOT NULL,
+			card_id INTEGER NOT NULL,
+			round INTEGER NOT NULL CHECK(round > 0),
+			expect TEXT NOT NULL CHECK(expect <> ''),
+			answer TEXT NOT NULL CHECK(answer <> ''),
+			correct BOOLEAN,
+			FOREIGN KEY(practice_id) REFERENCES practices(id) ON DELETE CASCADE,
+			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE
 		);
 		`,
 	}
