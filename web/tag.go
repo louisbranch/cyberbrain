@@ -44,3 +44,21 @@ func (t *Tags) Less(i, j int) bool {
 func (t *Tags) Swap(i, j int) {
 	(*t)[i], (*t)[j] = (*t)[j], (*t)[i]
 }
+
+type CardTag struct {
+	ID     uint `db:"id"`
+	CardID uint `db:"card_id"`
+	TagID  uint `db:"tag_id"`
+}
+
+func (ct *CardTag) Type() string {
+	return "card_tags"
+}
+
+func (ct *CardTag) SetID(id uint) {
+	ct.ID = id
+}
+
+func (ct *CardTag) GenerateSlug() error {
+	return nil
+}

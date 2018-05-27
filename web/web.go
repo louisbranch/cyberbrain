@@ -17,6 +17,7 @@ type Template interface {
 type Database interface {
 	Create(Record) error
 	Query(string, Collection) error
+	QueryRaw(string, Collection) error
 	Get(string, Record) error
 }
 

@@ -49,7 +49,7 @@ func New(path string) (*Database, error) {
 			id INTEGER PRIMARY KEY,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			deck_id INTEGER NOT NULL,
-			image_url TEXT,
+			image_url TEXT NOT NULL CHECK(image_url <> ''),
 			audio_url TEXT,
 			field_1 TEXT NOT NULL CHECK(field_1 <> ''),
 			field_2 TEXT NOT NULL CHECK(field_2 <> ''),
@@ -168,11 +168,55 @@ func (db *Database) Query(where string, col web.Collection) error {
 		where = "WHERE " + where
 	}
 
-	q := fmt.Sprintf("SELECT %s FROM %s %s;", strings.Join(columns, ", "), r.Type(), where)
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", strings.Join(columns, ", "),
+		r.Type(), where)
 
-	rows, err := db.DB.Query(q)
+	return db.QueryRaw(query, col)
+}
+
+func (db *Database) Get(slug string, r web.Record) error {
+	rv := reflect.ValueOf(r)
+
+	if rv.Kind() != reflect.Ptr {
+		return errors.Errorf("cannot query database records for %v", r)
+	}
+
+	rv = rv.Elem()
+	rt := reflect.TypeOf(rv.Interface())
+
+	var columns []string
+	var fields []interface{}
+
+	for i := 0; i < rt.NumField(); i++ {
+		f := rt.Field(i)
+		tag := f.Tag.Get("db")
+
+		if tag == "" {
+			continue
+		}
+
+		columns = append(columns, tag)
+		field := rv.Field(i).Addr().Interface()
+		fields = append(fields, field)
+	}
+
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE slug = %q;",
+		strings.Join(columns, ", "), r.Type(), slug)
+
+	row := db.DB.QueryRow(q)
+
+	err := row.Scan(fields...)
 	if err != nil {
-		return errors.Wrapf(err, "failed to query records %s", q)
+		return errors.Wrap(err, "failed to scan record")
+	}
+
+	return nil
+}
+
+func (db *Database) QueryRaw(query string, col web.Collection) error {
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		return errors.Wrapf(err, "failed to query records %s", query)
 	}
 	defer rows.Close()
 
@@ -211,56 +255,6 @@ func (db *Database) Query(where string, col web.Collection) error {
 	err = rows.Err()
 	if err != nil {
 		return errors.Wrap(err, "find to query records")
-	}
-	return nil
-}
-
-func (db *Database) Get(slug string, r web.Record) error {
-	rv := reflect.ValueOf(r)
-
-	if rv.Kind() != reflect.Ptr {
-		return errors.Errorf("cannot query database records for %v", r)
-	}
-
-	rv = rv.Elem()
-	rt := reflect.TypeOf(rv.Interface())
-
-	var columns []string
-	var fields []interface{}
-
-	for i := 0; i < rt.NumField(); i++ {
-		f := rt.Field(i)
-		tag := f.Tag.Get("db")
-
-		if tag == "" {
-			continue
-		}
-
-		columns = append(columns, tag)
-		field := rv.Field(i).Addr().Interface()
-		fields = append(fields, field)
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE slug = %q LIMIT 1;",
-		strings.Join(columns, ", "), r.Type(), slug)
-
-	rows, err := db.DB.Query(q)
-	if err != nil {
-		return errors.Wrapf(err, "failed to get record %s", q)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		err = rows.Scan(fields...)
-		if err != nil {
-			return errors.Wrap(err, "failed to scan record")
-		}
-
-		return nil
-	}
-	err = rows.Err()
-	if err != nil {
-		return errors.Wrap(err, "find to get record")
 	}
 	return nil
 }
