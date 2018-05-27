@@ -3,8 +3,6 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
-	"strings"
 
 	"github.com/luizbranco/srs/web"
 	"github.com/mattn/go-sqlite3"
@@ -90,36 +88,15 @@ func (db *Database) Create(r web.Record) error {
 		return errors.Wrapf(err, "failed to generate slug for %v", r)
 	}
 
-	rv := reflect.ValueOf(r)
-
-	if rv.Kind() != reflect.Ptr {
-		return errors.Errorf("cannot create database record for %v", r)
+	q, err := QueryFromRecord(r, "id")
+	if err != nil {
+		return errors.Wrapf(err, "failed to get record fields %v", r)
 	}
 
-	rv = rv.Elem()
-	rt := reflect.TypeOf(rv.Interface())
+	query := fmt.Sprintf("INSERT into %s (%s) values (%s);", q.Table(), q.Columns(),
+		q.Placeholders())
 
-	var columns []string
-	var vars []string
-	var fields []interface{}
-
-	for i := 0; i < rt.NumField(); i++ {
-		f := rt.Field(i)
-		tag := f.Tag.Get("db")
-
-		if tag == "" || tag == "id" {
-			continue
-		}
-
-		columns = append(columns, tag)
-		vars = append(vars, "?")
-		fields = append(fields, rv.Field(i).Interface())
-	}
-
-	q := fmt.Sprintf("INSERT into %s (%s) values (%s);", r.Type(),
-		strings.Join(columns, ", "), strings.Join(vars, ", "))
-
-	res, err := db.Exec(q, fields...)
+	res, err := db.Exec(query, q.fields...)
 
 	if err != nil {
 		return errors.Wrap(err, "failed to create db record")
@@ -136,138 +113,68 @@ func (db *Database) Create(r web.Record) error {
 	return nil
 }
 
-func (db *Database) Query(w web.Where, col web.Collection) error {
-	r := col.NewRecord()
-	rv := reflect.ValueOf(r)
-
-	if rv.Kind() != reflect.Ptr {
-		return errors.Errorf("cannot query database records for %v", col)
+func (db *Database) Query(w web.Where, rs web.Records) error {
+	r := rs.NewRecord()
+	q, err := QueryFromRecord(r)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get record fields %s", q)
 	}
 
-	rv = rv.Elem()
-	rt := reflect.TypeOf(rv.Interface())
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(w))
 
-	var columns []string
-
-	for i := 0; i < rt.NumField(); i++ {
-		f := rt.Field(i)
-		tag := f.Tag.Get("db")
-
-		if tag == "" {
-			continue
-		}
-
-		columns = append(columns, tag)
-	}
-
-	query := fmt.Sprintf("SELECT %s FROM %s %s;", strings.Join(columns, ", "),
-		r.Type(), where(w))
-
-	return db.QueryRaw(query, col)
+	return db.QueryRaw(query, rs)
 }
 
 func (db *Database) Get(w web.Where, r web.Record) error {
-	rv := reflect.ValueOf(r)
-
-	if rv.Kind() != reflect.Ptr {
-		return errors.Errorf("cannot query database records for %v", r)
-	}
-
-	rv = rv.Elem()
-	rt := reflect.TypeOf(rv.Interface())
-
-	var columns []string
-	var fields []interface{}
-
-	for i := 0; i < rt.NumField(); i++ {
-		f := rt.Field(i)
-		tag := f.Tag.Get("db")
-
-		if tag == "" {
-			continue
-		}
-
-		columns = append(columns, tag)
-		field := rv.Field(i).Addr().Interface()
-		fields = append(fields, field)
-	}
-
-	q := fmt.Sprintf("SELECT %s FROM %s %s;",
-		strings.Join(columns, ", "), r.Type(), where(w))
-
-	row := db.DB.QueryRow(q)
-
-	err := row.Scan(fields...)
+	q, err := QueryFromRecord(r)
 	if err != nil {
-		return errors.Wrapf(err, "failed to scan record %q", q)
+		return errors.Wrapf(err, "failed to get record fields %s", q)
+	}
+
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(w))
+
+	row := db.DB.QueryRow(query)
+
+	err = row.Scan(q.fields...)
+	if err != nil {
+		return errors.Wrapf(err, "failed to scan record %q", query)
 	}
 
 	return nil
 }
 
-func (db *Database) QueryRaw(query string, col web.Collection) error {
+func (db *Database) QueryRaw(query string, rs web.Records) error {
 	rows, err := db.DB.Query(query)
 	if err != nil {
-		return errors.Wrapf(err, "failed to query records %s", query)
+		return errors.Wrapf(err, "failed to query records %q", query)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 
-		r := col.NewRecord()
-		rv := reflect.ValueOf(r)
+		r := rs.NewRecord()
 
-		if rv.Kind() != reflect.Ptr {
-			return errors.Errorf("cannot query database records for %v", col)
-		}
-
-		rv = rv.Elem()
-		rt := reflect.TypeOf(rv.Interface())
-		var fields []interface{}
-
-		for i := 0; i < rt.NumField(); i++ {
-			f := rt.Field(i)
-			tag := f.Tag.Get("db")
-
-			if tag == "" {
-				continue
-			}
-
-			field := rv.Field(i).Addr().Interface()
-			fields = append(fields, field)
-		}
-
-		err = rows.Scan(fields...)
+		q, err := QueryFromRecord(r)
 		if err != nil {
-			return errors.Wrap(err, "failed to scan records")
+			return errors.Wrapf(err, "failed to get record fields %q", query)
 		}
 
-		col.Append(r)
+		err = rows.Scan(q.fields...)
+		if err != nil {
+			return errors.Wrapf(err, "failed to scan records %q", query)
+		}
+
+		rs.Append(r)
 	}
+
 	err = rows.Err()
 	if err != nil {
-		return errors.Wrap(err, "find to query records")
+		return errors.Wrapf(err, "failed to query records %q", query)
 	}
+
 	return nil
 }
 
-func where(where web.Where) string {
-	if len(where) == 0 {
-		return ""
-	}
-
-	var clause []string
-	for k, v := range where {
-		switch t := v.(type) {
-		case string:
-			clause = append(clause, fmt.Sprintf("%s = %q", k, v))
-		case uint, uint64, int, int64, int32:
-			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
-		default:
-			err := fmt.Sprintf("invalid type %v for where clause", t)
-			panic(err)
-		}
-	}
-
-	return "WHERE " + strings.Join(clause, " AND ")
+func Random(n int, rs web.Records) string {
+	return `SELECT * FROM table WHERE id IN (SELECT id FROM table ORDER BY RANDOM() LIMIT x)`
 }

@@ -16,8 +16,8 @@ type Template interface {
 
 type Database interface {
 	Create(Record) error
-	Query(Where, Collection) error
-	QueryRaw(string, Collection) error
+	Query(Where, Records) error
+	QueryRaw(string, Records) error
 	Get(Where, Record) error
 }
 
@@ -27,7 +27,7 @@ type Record interface {
 	GenerateSlug() error
 }
 
-type Collection interface {
+type Records interface {
 	NewRecord() Record
 	Append(Record)
 }
