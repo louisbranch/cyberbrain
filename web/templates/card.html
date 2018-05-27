@@ -35,6 +35,11 @@
                 <dt>{{ .Deck.Field3 }}</dt>
                 <dd>{{ .Card.Field3 }}</dd>
               </dl>
+              <div>
+                {{ range .Card.Tags }}
+                  <span class="tag">{{ .Name }}</span>
+                {{ end }}
+              </div>
             </div>
           </div>
         </div>

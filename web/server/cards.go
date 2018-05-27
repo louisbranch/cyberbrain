@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,8 +45,6 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tags := r.Form["tags"]
-
 		card := &web.Card{
 			DeckID:   deck.ID,
 			ImageURL: r.FormValue("image_url"),
@@ -60,6 +59,8 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			srv.renderError(w, err)
 			return
 		}
+
+		tags := r.Form["tags"]
 
 		for _, tag := range tags {
 			tid, err := strconv.ParseUint(tag, 10, 64)
@@ -152,6 +153,21 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 		srv.renderError(w, err)
 		return
 	}
+
+	id := fmt.Sprintf("%d", card.ID)
+
+	wRaw := `SELECT t.id, t.deck_id, t.slug, name FROM tags t
+	LEFT JOIN card_tags ct ON t.id = ct.tag_id
+	WHERE ct.card_id = ` + id + ";"
+
+	tags := &web.Tags{}
+	err = srv.Database.QueryRaw(wRaw, tags)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	card.Tags = *tags
 
 	content := struct {
 		Card *web.Card

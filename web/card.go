@@ -11,6 +11,7 @@ type Card struct {
 	Field1   string `db:"field_1"`
 	Field2   string `db:"field_2"`
 	Field3   string `db:"field_3"`
+	Tags     Tags
 }
 
 func (c *Card) Type() string {
