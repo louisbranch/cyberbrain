@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/luizbranco/srs/web"
 )
@@ -99,6 +100,8 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	deck.Cards = *cards
+
 	tags := &web.Tags{}
 
 	err = srv.Database.Query(where, tags)
@@ -107,6 +110,7 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	sort.Sort(tags)
 	deck.Tags = *tags
 
 	page := web.Page{
