@@ -8,13 +8,26 @@
 	</nav>
 
   <section class="section">
-    <h1 class="title">{{ .Name }}</h1>
-    <p class="subtitle">{{ .Description }}</p>
-    <a class="button is-primary" href="/cards/new?deck={{ .Slug }}">Add Card</a>
+    <div class="columns">
+      <div class="column is-4">
+        <h1 class="title">{{ .Name }}</h1>
+        <p class="subtitle">{{ .Description }}</p>
+      </div>
+      <div class="column is-4">
+        <h3 class="title is-4">Tags</h3>
+        <ul>
+          {{ range .Tags }}
+            <li>{{ .Name }}</li>
+          {{ end }}
+        </ul>
+        <a class="button is-primary" href="/tags/new?deck={{ .Slug }}">Add Tag</a>
+      </div>
+    </div>
   </section>
 
   <section class="section">
-    <h2 class="title is-4">Cards</h1>
+    <h2 class="title is-4">Cards</h2>
+    <a class="button is-primary" href="/cards/new?deck={{ .Slug }}">Add Card</a>
     <div class="columns">
       {{ $deck := . }}
       {{ range .Cards }}

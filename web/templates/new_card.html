@@ -3,11 +3,17 @@
     <input type="hidden" name="deck" id="deck" value="{{ .Slug }}" />
     <h1 class="title">Add Card to {{ .Name }}</h1>
     <div class="columns">
-      <div class="column">
+      <div class="column is-4">
         <div class="field">
           <label class="label">Image URL</label>
           <div class="control">
             <input class="input" type="text" name="image_url" minlength="2" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Audio URL</label>
+          <div class="control">
+            <input class="input" type="text" name="audio_url" />
           </div>
         </div>
         <div class="field">
@@ -34,6 +40,20 @@
           </div>
           <div class="control">
             <a class="button is-text" href="/decks/{{ .Slug }}">Cancel</a>
+          </div>
+        </div>
+      </div>
+      <div class="column is-4">
+        <div class="field">
+          <label class="label">Tags</label>
+          <div class="control">
+            <div class="select is-multiple">
+              <select name="tags" multiple size="10">
+                {{ range .Tags }}
+                  <option value="{{ .ID }}">{{ .Name }}</option>
+                {{ end }}
+              </select>
+            </div>
           </div>
         </div>
       </div>

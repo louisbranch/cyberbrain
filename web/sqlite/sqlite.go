@@ -57,6 +57,24 @@ func New(path string) (*Database, error) {
 			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
 		);
 		`,
+		`
+		CREATE TABLE IF NOT EXISTS tags(
+			id INTEGER PRIMARY KEY,
+			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
+			name TEXT NOT NULL UNIQUE CHECK(name <> ''),
+			deck_id INTEGER NOT NULL,
+			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
+		);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS card_tags(
+			id INTEGER PRIMARY KEY,
+			card_id INTEGER NOT NULL,
+			tag_id INTEGER NOT NULL,
+			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE,
+			FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
+		);
+		`,
 	}
 
 	for _, q := range queries {

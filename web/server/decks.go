@@ -89,9 +89,9 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	cards := &web.Cards{}
-
 	where := fmt.Sprintf("deck_id = %d", deck.ID)
+
+	cards := &web.Cards{}
 
 	err = srv.Database.Query(where, cards)
 	if err != nil {
@@ -99,7 +99,15 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	deck.Cards = *cards
+	tags := &web.Tags{}
+
+	err = srv.Database.Query(where, tags)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	deck.Tags = *tags
 
 	page := web.Page{
 		Title:      deck.Name + " Deck",

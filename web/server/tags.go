@@ -1,16 +1,15 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/luizbranco/srs/web"
 )
 
-func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
+func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		path := r.URL.Path[len("/cards/"):]
+		path := r.URL.Path[len("/tags/"):]
 		if path == "" {
 			http.Redirect(w, r, "/decks", http.StatusFound)
 			return
@@ -33,16 +32,12 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		card := web.Card{
-			DeckID:   deck.ID,
-			ImageURL: r.FormValue("image_url"),
-			AudioURL: r.FormValue("audio_url"),
-			Field1:   r.FormValue("field_1"),
-			Field2:   r.FormValue("field_2"),
-			Field3:   r.FormValue("field_3"),
+		tag := web.Tag{
+			DeckID: deck.ID,
+			Name:   r.FormValue("name"),
 		}
 
-		err = srv.Database.Create(&card)
+		err = srv.Database.Create(&tag)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -54,7 +49,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
+func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -76,21 +71,9 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	where := fmt.Sprintf("deck_id = %d", deck.ID)
-
-	tags := &web.Tags{}
-
-	err = srv.Database.Query(where, tags)
-	if err != nil {
-		srv.renderError(w, err)
-		return
-	}
-
-	deck.Tags = *tags
-
 	page := web.Page{
-		Title:    "New Card",
-		Partials: []string{"new_card"},
+		Title:    "New Tag",
+		Partials: []string{"new_tag"},
 		Content:  deck,
 	}
 

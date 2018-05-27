@@ -12,6 +12,7 @@ type Deck struct {
 	Field2      string `db:"field_2"`
 	Field3      string `db:"field_3"`
 	Cards       Cards
+	Tags        Tags
 }
 
 func (d *Deck) Type() string {
