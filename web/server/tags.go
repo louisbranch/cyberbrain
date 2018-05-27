@@ -26,7 +26,11 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 
 		deck := &web.Deck{}
 
-		err := srv.Database.Get(slug, deck)
+		where := web.Where{
+			"slug": slug,
+		}
+
+		err := srv.Database.Get(where, deck)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -63,9 +67,13 @@ func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	where := web.Where{
+		"slug": slug,
+	}
+
 	deck := &web.Deck{}
 
-	err := srv.Database.Get(slug, deck)
+	err := srv.Database.Get(where, deck)
 	if err != nil {
 		srv.renderError(w, err)
 		return

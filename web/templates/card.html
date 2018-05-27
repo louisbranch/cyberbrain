@@ -1,0 +1,44 @@
+{{ define "content" }}
+  <nav class="breadcrumb" aria-label="breadcrumbs">
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/decks/">Decks</a></li>
+      <li><a href="/decks/{{ .Deck.Slug }}">{{ .Deck.Name }}</a></li>
+			<li class="is-active"><a href="#" aria-current="page">Card</a></li>
+		</ul>
+	</nav>
+
+  <section class="section">
+    <div class="columns">
+      <div class="column is-8">
+        <h1 class="title">Card #{{ .Card.Slug }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="columns">
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-image">
+            <figure class="image is-4by3">
+              <img src="{{ .Card.ImageURL }}">
+            </figure>
+          </div>
+          <div class="card-content">
+            <div class="content">
+              <dl>
+                <dt>{{ .Deck.Field1 }}</dt>
+                <dd>{{ .Card.Field1 }}</dd>
+                <dt>{{ .Deck.Field2 }}</dt>
+                <dd>{{ .Card.Field2 }}</dd>
+                <dt>{{ .Deck.Field3 }}</dt>
+                <dd>{{ .Card.Field3 }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}

@@ -16,9 +16,9 @@ type Template interface {
 
 type Database interface {
 	Create(Record) error
-	Query(string, Collection) error
+	Query(Where, Collection) error
 	QueryRaw(string, Collection) error
-	Get(string, Record) error
+	Get(Where, Record) error
 }
 
 type Record interface {
@@ -31,3 +31,5 @@ type Collection interface {
 	NewRecord() Record
 	Append(Record)
 }
+
+type Where map[string]interface{}

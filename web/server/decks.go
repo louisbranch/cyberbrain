@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 
@@ -59,7 +58,7 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 	decks := &web.Decks{}
 
-	err := srv.Database.Query("", decks)
+	err := srv.Database.Query(nil, decks)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -84,13 +83,17 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request) {
 	deck := &web.Deck{}
 
-	err := srv.Database.Get(slug, deck)
+	where := web.Where{"slug": slug}
+
+	err := srv.Database.Get(where, deck)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	where := fmt.Sprintf("deck_id = %d", deck.ID)
+	where = web.Where{
+		"deck_id": deck.ID,
+	}
 
 	cards := &web.Cards{}
 

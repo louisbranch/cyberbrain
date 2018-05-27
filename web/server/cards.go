@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,13 +11,13 @@ import (
 func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		path := r.URL.Path[len("/cards/"):]
-		if path == "" {
+		slug := r.URL.Path[len("/cards/"):]
+		if slug == "" {
 			http.Redirect(w, r, "/decks", http.StatusFound)
 			return
 		}
 
-		srv.deckShow(path, w, r)
+		srv.cardShow(slug, w, r)
 	case "POST":
 		err := r.ParseForm()
 		if err != nil {
@@ -35,7 +34,11 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 
 		deck := &web.Deck{}
 
-		err = srv.Database.Get(slug, deck)
+		where := web.Where{
+			"slug": slug,
+		}
+
+		err = srv.Database.Get(where, deck)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -98,15 +101,17 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	where := web.Where{"slug": slug}
+
 	deck := &web.Deck{}
 
-	err := srv.Database.Get(slug, deck)
+	err := srv.Database.Get(where, deck)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	where := fmt.Sprintf("deck_id = %d", deck.ID)
+	where = web.Where{"deck_id": deck.ID}
 
 	tags := &web.Tags{}
 
@@ -122,6 +127,44 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		Title:    "New Card",
 		Partials: []string{"new_card"},
 		Content:  deck,
+	}
+
+	srv.render(w, page)
+}
+
+func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request) {
+	where := web.Where{"slug": slug}
+
+	card := &web.Card{}
+
+	err := srv.Database.Get(where, card)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	where = web.Where{"id": card.DeckID}
+
+	deck := &web.Deck{}
+
+	err = srv.Database.Get(where, deck)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	content := struct {
+		Card *web.Card
+		Deck *web.Deck
+	}{
+		Card: card,
+		Deck: deck,
+	}
+
+	page := web.Page{
+		Title:    "Card #" + card.Slug,
+		Partials: []string{"card"},
+		Content:  content,
 	}
 
 	srv.render(w, page)

@@ -140,7 +140,7 @@ func (db *Database) Create(r web.Record) error {
 	return nil
 }
 
-func (db *Database) Query(where string, col web.Collection) error {
+func (db *Database) Query(w web.Where, col web.Collection) error {
 	r := col.NewRecord()
 	rv := reflect.ValueOf(r)
 
@@ -164,17 +164,13 @@ func (db *Database) Query(where string, col web.Collection) error {
 		columns = append(columns, tag)
 	}
 
-	if where != "" {
-		where = "WHERE " + where
-	}
-
 	query := fmt.Sprintf("SELECT %s FROM %s %s;", strings.Join(columns, ", "),
-		r.Type(), where)
+		r.Type(), where(w))
 
 	return db.QueryRaw(query, col)
 }
 
-func (db *Database) Get(slug string, r web.Record) error {
+func (db *Database) Get(w web.Where, r web.Record) error {
 	rv := reflect.ValueOf(r)
 
 	if rv.Kind() != reflect.Ptr {
@@ -200,14 +196,14 @@ func (db *Database) Get(slug string, r web.Record) error {
 		fields = append(fields, field)
 	}
 
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE slug = %q;",
-		strings.Join(columns, ", "), r.Type(), slug)
+	q := fmt.Sprintf("SELECT %s FROM %s %s;",
+		strings.Join(columns, ", "), r.Type(), where(w))
 
 	row := db.DB.QueryRow(q)
 
 	err := row.Scan(fields...)
 	if err != nil {
-		return errors.Wrap(err, "failed to scan record")
+		return errors.Wrapf(err, "failed to scan record %q", q)
 	}
 
 	return nil
@@ -257,4 +253,22 @@ func (db *Database) QueryRaw(query string, col web.Collection) error {
 		return errors.Wrap(err, "find to query records")
 	}
 	return nil
+}
+
+func where(where web.Where) string {
+	if len(where) == 0 {
+		return ""
+	}
+
+	var clause []string
+	for k, v := range where {
+		switch v.(type) {
+		case string:
+			clause = append(clause, fmt.Sprintf("%s = %q", k, v))
+		case uint, int:
+			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
+		}
+	}
+
+	return "WHERE " + strings.Join(clause, " AND ")
 }
