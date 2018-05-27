@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -134,11 +133,18 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request) {
-	where := web.Where{"slug": slug}
+	id, err := strconv.ParseUint(slug, 10, 64)
+	if err != nil {
+		err = errors.Wrapf(err, "invalid card id %d", slug)
+		srv.renderError(w, err)
+		return
+	}
+
+	where := web.Where{"id": id}
 
 	card := &web.Card{}
 
-	err := srv.Database.Get(where, card)
+	err = srv.Database.Get(where, card)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -154,11 +160,9 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id := fmt.Sprintf("%d", card.ID)
-
 	wRaw := `SELECT t.id, t.deck_id, t.slug, name FROM tags t
 	LEFT JOIN card_tags ct ON t.id = ct.tag_id
-	WHERE ct.card_id = ` + id + ";"
+	WHERE ct.card_id = ` + slug + ";"
 
 	tags := &web.Tags{}
 	err = srv.Database.QueryRaw(wRaw, tags)
@@ -178,7 +182,7 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 	}
 
 	page := web.Page{
-		Title:    "Card #" + card.Slug,
+		Title:    "Card #" + slug,
 		Partials: []string{"card"},
 		Content:  content,
 	}

@@ -5,7 +5,6 @@ import "fmt"
 type Card struct {
 	ID       uint   `db:"id"`
 	DeckID   uint   `db:"deck_id"`
-	Slug     string `db:"slug"`
 	ImageURL string `db:"image_url"`
 	AudioURL string `db:"audio_url"`
 	Field1   string `db:"field_1"`
@@ -23,8 +22,11 @@ func (c *Card) SetID(id uint) {
 }
 
 func (c *Card) GenerateSlug() error {
-	c.Slug = fmt.Sprintf("%d", c.ID)
 	return nil
+}
+
+func (c *Card) Slug() string {
+	return fmt.Sprintf("%d", c.ID)
 }
 
 type Cards []Card

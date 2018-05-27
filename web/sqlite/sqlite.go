@@ -47,7 +47,6 @@ func New(path string) (*Database, error) {
 		`
 		CREATE TABLE IF NOT EXISTS cards(
 			id INTEGER PRIMARY KEY,
-			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			deck_id INTEGER NOT NULL,
 			image_url TEXT NOT NULL CHECK(image_url <> ''),
 			audio_url TEXT,
@@ -262,11 +261,14 @@ func where(where web.Where) string {
 
 	var clause []string
 	for k, v := range where {
-		switch v.(type) {
+		switch t := v.(type) {
 		case string:
 			clause = append(clause, fmt.Sprintf("%s = %q", k, v))
-		case uint, int:
+		case uint, uint64, int, int64, int32:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
+		default:
+			err := fmt.Sprintf("invalid type %v for where clause", t)
+			panic(err)
 		}
 	}
 
