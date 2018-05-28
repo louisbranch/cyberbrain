@@ -15,4 +15,22 @@
       </div>
     </div>
   </section>
+
+
+  {{ if .Card }}
+    <section class="section">
+      <div class="columns">
+        <div class="column is-4">
+          <div class="card">
+            <div class="card-image">
+              <figure class="image is-4by3">
+                <img src="{{ .Card.ImageURL }}">
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {{ end }}
+
 {{ end }}

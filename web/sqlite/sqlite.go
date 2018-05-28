@@ -85,7 +85,7 @@ func New(path string) (*Database, error) {
 			card_id INTEGER NOT NULL,
 			round INTEGER NOT NULL CHECK(round > 0),
 			expect TEXT NOT NULL CHECK(expect <> ''),
-			answer TEXT NOT NULL CHECK(answer <> ''),
+			answer TEXT,
 			correct BOOLEAN,
 			FOREIGN KEY(practice_id) REFERENCES practices(id) ON DELETE CASCADE,
 			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE
@@ -197,6 +197,30 @@ func (db *Database) QueryRaw(query string, rs web.Records) error {
 	return nil
 }
 
-func Random(n int, rs web.Records) string {
-	return `SELECT * FROM table WHERE id IN (SELECT id FROM table ORDER BY RANDOM() LIMIT x)`
+func (db *Database) Count(w web.Where, r web.Record) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", r.Type(), where(w))
+
+	row := db.DB.QueryRow(query)
+
+	var n int
+
+	err := row.Scan(&n)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to count records %q", query)
+	}
+
+	return n, nil
+}
+
+func (db *Database) Random(n int, rs web.Records) error {
+	r := rs.NewRecord()
+	q, err := QueryFromRecord(r)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get record fields %v", r)
+	}
+
+	query := fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
+		q.Columns(), q.Table(), q.Table(), n)
+
+	return db.QueryRaw(query, rs)
 }

@@ -19,6 +19,8 @@ type Database interface {
 	Query(Where, Records) error
 	QueryRaw(string, Records) error
 	Get(Where, Record) error
+	Count(Where, Record) (int, error)
+	Random(int, Records) error
 }
 
 type Record interface {

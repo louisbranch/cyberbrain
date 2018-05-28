@@ -4,6 +4,7 @@ import "fmt"
 
 const (
 	PracticeStateInProgress = "in_progress"
+	PracticeStateFinished   = "finished"
 )
 
 type Practice struct {
@@ -29,6 +30,10 @@ func (p *Practice) Slug() string {
 	return fmt.Sprintf("%d", p.ID)
 }
 
+func (p *Practice) Finished() bool {
+	return p.State == PracticeStateFinished
+}
+
 type Practices []Practice
 
 func (p *Practices) NewRecord() Record {
@@ -44,7 +49,7 @@ type PracticeRound struct {
 	ID         uint   `db:"id"`
 	PracticeID uint   `db:"practice_id"`
 	CardID     uint   `db:"card_id"`
-	Round      uint   `db:"round"`
+	Round      int    `db:"round"`
 	Expect     string `db:"expect"`
 	Answer     string `db:"answer"`
 	Correct    bool   `db:"correct"`
