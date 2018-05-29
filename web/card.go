@@ -10,7 +10,7 @@ type Card struct {
 	Definition    string `db:"definition"`
 	AltDefinition string `db:"alt_definition"`
 	Pronunciation string `db:"pronunciation"`
-	Tags          Tags
+	Tags          []Tag
 }
 
 func (c *Card) Type() string {
@@ -27,15 +27,4 @@ func (c *Card) GenerateSlug() error {
 
 func (c *Card) Slug() string {
 	return fmt.Sprintf("%d", c.ID)
-}
-
-type Cards []Card
-
-func (c *Cards) NewRecord() Record {
-	return &Card{}
-}
-
-func (c *Cards) Append(r Record) {
-	card := r.(*Card)
-	*c = append(*c, *card)
 }

@@ -16,11 +16,11 @@ type Template interface {
 
 type Database interface {
 	Create(Record) error
-	Query(Where, Records) error
-	QueryRaw(string, Records) error
-	Get(Where, Record) error
-	Count(Where, Record) (int, error)
-	Random(int, Records) error
+	Query(Condition) ([]Record, error)
+	QueryRaw(Condition) ([]Record, error)
+	Get(Condition) (Record, error)
+	Count(Condition) (int, error)
+	Random(Condition, int) ([]Record, error)
 }
 
 type Record interface {
@@ -29,9 +29,8 @@ type Record interface {
 	GenerateSlug() error
 }
 
-type Records interface {
-	NewRecord() Record
-	Append(Record)
+type Condition struct {
+	Record Record
+	Where  map[string]interface{}
+	Raw    string
 }
-
-type Where map[string]interface{}

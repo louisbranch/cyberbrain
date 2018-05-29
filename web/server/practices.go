@@ -27,11 +27,7 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		deck := &web.Deck{}
-
-		where := web.Where{"slug": slug}
-
-		err := srv.Database.Get(where, deck)
+		deck, err := FindDeckBySlug(srv.Database, slug)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -79,11 +75,7 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	where := web.Where{"slug": slug}
-
-	deck := &web.Deck{}
-
-	err := srv.Database.Get(where, deck)
+	deck, err := FindDeckBySlug(srv.Database, slug)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -106,21 +98,13 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	where := web.Where{"id": id}
-
-	p := &web.Practice{}
-
-	err = srv.Database.Get(where, p)
+	p, err := FindPracticeByID(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	where = web.Where{"id": p.DeckID}
-
-	deck := &web.Deck{}
-
-	err = srv.Database.Get(where, deck)
+	deck, err := FindDeckByID(srv.Database, p.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -147,37 +131,25 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	where = web.Where{"id": p.ID}
-
-	pr := &web.PracticeRound{}
-	n, err := srv.Database.Count(where, pr)
+	n, err := CountPracticeRounds(srv.Database, p.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	if n < p.Rounds {
-		cards := &web.Cards{}
-
-		err := srv.Database.Random(1, cards)
+		card, err := FindRandomCard(srv.Database, p.DeckID)
 		if err != nil {
-			err = errors.Wrap(err, "failed to get random card")
 			srv.renderError(w, err)
 			return
 		}
 
-		if len(*cards) == 0 {
-			err = errors.New("not enough cards")
-			srv.renderError(w, err)
-			return
+		pr := &web.PracticeRound{
+			PracticeID: p.ID,
+			CardID:     card.ID,
+			Expect:     card.Definition,
+			Round:      n + 1,
 		}
-
-		c := (*cards)[0]
-
-		pr.PracticeID = p.ID
-		pr.CardID = c.ID
-		pr.Expect = c.Definition
-		pr.Round = n + 1
 
 		err = srv.Database.Create(pr)
 		if err != nil {
@@ -185,22 +157,16 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		content.Card = &c
+		content.Card = card
 		content.Round = pr
 	} else {
-		where := web.Where{"round": n, "practice_id": p.ID}
-
-		err := srv.Database.Get(where, pr)
+		pr, err := FindPracticeRound(srv.Database, p.ID, n)
 		if err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		where = web.Where{"id": pr.CardID}
-
-		card := &web.Card{}
-
-		err = srv.Database.Get(where, card)
+		card, err := FindCardByID(srv.Database, uint64(pr.CardID))
 		if err != nil {
 			srv.renderError(w, err)
 			return

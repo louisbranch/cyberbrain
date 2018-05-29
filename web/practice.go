@@ -34,17 +34,6 @@ func (p *Practice) Finished() bool {
 	return p.State == PracticeStateFinished
 }
 
-type Practices []Practice
-
-func (p *Practices) NewRecord() Record {
-	return &Practice{}
-}
-
-func (p *Practices) Append(r Record) {
-	practice := r.(*Practice)
-	*p = append(*p, *practice)
-}
-
 type PracticeRound struct {
 	ID         uint   `db:"id"`
 	PracticeID uint   `db:"practice_id"`
@@ -65,15 +54,4 @@ func (pr *PracticeRound) SetID(id uint) {
 
 func (pr *PracticeRound) GenerateSlug() error {
 	return nil
-}
-
-type PracticeRounds []PracticeRound
-
-func (pr *PracticeRounds) NewRecord() Record {
-	return &PracticeRound{}
-}
-
-func (pr *PracticeRounds) Append(r Record) {
-	round := r.(*PracticeRound)
-	*pr = append(*pr, *round)
 }

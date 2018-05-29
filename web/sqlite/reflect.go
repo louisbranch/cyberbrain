@@ -70,13 +70,13 @@ func contains(list []string, s string) bool {
 	return false
 }
 
-func where(where web.Where) string {
-	if len(where) == 0 {
+func where(cond web.Condition) string {
+	if len(cond.Where) == 0 {
 		return ""
 	}
 
 	var clause []string
-	for k, v := range where {
+	for k, v := range cond.Where {
 		switch t := v.(type) {
 		case string:
 			clause = append(clause, fmt.Sprintf("%s = %q", k, v))

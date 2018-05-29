@@ -53,16 +53,14 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
-	decks := &web.Decks{}
-
-	err := srv.Database.Query(nil, decks)
+	decks, err := FindDecks(srv.Database)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	content := struct {
-		Decks *web.Decks
+		Decks []web.Deck
 	}{
 		Decks: decks,
 	}
@@ -78,40 +76,30 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request) {
-	deck := &web.Deck{}
-
-	where := web.Where{"slug": slug}
-
-	err := srv.Database.Get(where, deck)
+	deck, err := FindDeckBySlug(srv.Database, slug)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	where = web.Where{
-		"deck_id": deck.ID,
-	}
-
-	cards := &web.Cards{}
-
-	err = srv.Database.Query(where, cards)
+	cards, err := FindCardsByDeckID(srv.Database, deck.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck.Cards = *cards
-
-	tags := &web.Tags{}
-
-	err = srv.Database.Query(where, tags)
+	tags, err := FindTagsByDeckID(srv.Database, deck.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	sort.Sort(tags)
-	deck.Tags = *tags
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].Name < tags[j].Name
+	})
+
+	deck.Cards = cards
+	deck.Tags = tags
 
 	page := web.Page{
 		Title:      deck.Name + " Deck",

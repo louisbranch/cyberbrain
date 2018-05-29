@@ -22,29 +22,6 @@ func (t *Tag) GenerateSlug() error {
 	return nil
 }
 
-type Tags []Tag
-
-func (t *Tags) NewRecord() Record {
-	return &Tag{}
-}
-
-func (t *Tags) Append(r Record) {
-	tag := r.(*Tag)
-	*t = append(*t, *tag)
-}
-
-func (t *Tags) Len() int {
-	return len(*t)
-}
-
-func (t *Tags) Less(i, j int) bool {
-	return (*t)[i].Slug < (*t)[j].Slug
-}
-
-func (t *Tags) Swap(i, j int) {
-	(*t)[i], (*t)[j] = (*t)[j], (*t)[i]
-}
-
 type CardTag struct {
 	ID     uint `db:"id"`
 	CardID uint `db:"card_id"`

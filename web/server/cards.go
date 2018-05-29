@@ -26,21 +26,14 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 		}
 
 		slug := r.FormValue("deck")
-
 		if slug == "" {
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck := &web.Deck{}
-
-		where := web.Where{
-			"slug": slug,
-		}
-
-		err = srv.Database.Get(where, deck)
+		deck, err := FindDeckBySlug(srv.Database, slug)
 		if err != nil {
-			srv.renderError(w, err)
+			srv.renderNotFound(w)
 			return
 		}
 
@@ -101,27 +94,21 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	where := web.Where{"slug": slug}
-
-	deck := &web.Deck{}
-
-	err := srv.Database.Get(where, deck)
+	deck, err := FindDeckBySlug(srv.Database, slug)
 	if err != nil {
+		// FIXME
 		srv.renderError(w, err)
 		return
 	}
 
-	where = web.Where{"deck_id": deck.ID}
-
-	tags := &web.Tags{}
-
-	err = srv.Database.Query(where, tags)
+	tags, err := FindTagsByDeckID(srv.Database, deck.ID)
 	if err != nil {
+		// FIXME
 		srv.renderError(w, err)
 		return
 	}
 
-	deck.Tags = *tags
+	deck.Tags = tags
 
 	page := web.Page{
 		Title:    "New Card",
@@ -140,38 +127,25 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	where := web.Where{"id": id}
-
-	card := &web.Card{}
-
-	err = srv.Database.Get(where, card)
+	card, err := FindCardByID(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	where = web.Where{"id": card.DeckID}
-
-	deck := &web.Deck{}
-
-	err = srv.Database.Get(where, deck)
+	deck, err := FindDeckByID(srv.Database, card.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	wRaw := `SELECT t.id, t.deck_id, t.slug, name FROM tags t
-	LEFT JOIN card_tags ct ON t.id = ct.tag_id
-	WHERE ct.card_id = ` + slug + ";"
-
-	tags := &web.Tags{}
-	err = srv.Database.QueryRaw(wRaw, tags)
+	tags, err := FindTagsByCardID(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	card.Tags = *tags
+	card.Tags = tags
 
 	content := struct {
 		Card *web.Card

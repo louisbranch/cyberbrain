@@ -135,70 +135,73 @@ func (db *Database) Create(r web.Record) error {
 	return nil
 }
 
-func (db *Database) Query(w web.Where, rs web.Records) error {
-	r := rs.NewRecord()
-	q, err := QueryFromRecord(r)
+func (db *Database) Query(cond web.Condition) ([]web.Record, error) {
+	q, err := QueryFromRecord(cond.Record)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get record fields %s", q)
+		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(w))
+	cond.Raw = fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(cond))
 
-	return db.QueryRaw(query, rs)
+	return db.QueryRaw(cond)
 }
 
-func (db *Database) Get(w web.Where, r web.Record) error {
+func (db *Database) Get(cond web.Condition) (web.Record, error) {
+	r := cond.Record
+
 	q, err := QueryFromRecord(r)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get record fields %s", q)
+		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(w))
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(cond))
 
 	row := db.DB.QueryRow(query)
 
 	err = row.Scan(q.fields...)
 	if err != nil {
-		return errors.Wrapf(err, "failed to scan record %q", query)
+		return nil, errors.Wrapf(err, "failed to scan record %q", query)
 	}
 
-	return nil
+	return r, nil
 }
 
-func (db *Database) QueryRaw(query string, rs web.Records) error {
-	rows, err := db.DB.Query(query)
+func (db *Database) QueryRaw(cond web.Condition) ([]web.Record, error) {
+	rows, err := db.DB.Query(cond.Raw)
 	if err != nil {
-		return errors.Wrapf(err, "failed to query records %q", query)
+		return nil, errors.Wrapf(err, "failed to query records %v", cond)
 	}
 	defer rows.Close()
 
+	var records []web.Record
+
 	for rows.Next() {
 
-		r := rs.NewRecord()
+		r := cond.Record
 
 		q, err := QueryFromRecord(r)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get record fields %q", query)
+			return nil, errors.Wrapf(err, "failed to get record fields %v", cond)
 		}
 
 		err = rows.Scan(q.fields...)
 		if err != nil {
-			return errors.Wrapf(err, "failed to scan records %q", query)
+			return nil, errors.Wrapf(err, "failed to scan records %v", cond)
 		}
 
-		rs.Append(r)
+		records = append(records, r)
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return errors.Wrapf(err, "failed to query records %q", query)
+		return nil, errors.Wrapf(err, "failed to query records %v", cond)
 	}
 
-	return nil
+	return records, nil
 }
 
-func (db *Database) Count(w web.Where, r web.Record) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", r.Type(), where(w))
+func (db *Database) Count(cond web.Condition) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", cond.Record.Type(), where(cond))
 
 	row := db.DB.QueryRow(query)
 
@@ -212,15 +215,15 @@ func (db *Database) Count(w web.Where, r web.Record) (int, error) {
 	return n, nil
 }
 
-func (db *Database) Random(n int, rs web.Records) error {
-	r := rs.NewRecord()
+func (db *Database) Random(cond web.Condition, n int) ([]web.Record, error) {
+	r := cond.Record
 	q, err := QueryFromRecord(r)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get record fields %v", r)
+		return nil, errors.Wrapf(err, "failed to get record fields %v", cond)
 	}
 
-	query := fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
+	cond.Raw = fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
 		q.Columns(), q.Table(), q.Table(), n)
 
-	return db.QueryRaw(query, rs)
+	return db.QueryRaw(cond)
 }

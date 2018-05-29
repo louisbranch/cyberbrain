@@ -8,8 +8,8 @@ type Deck struct {
 	Name        string `db:"name"`
 	Description string `db:"description"`
 	ImageURL    string `db:"image_url"`
-	Cards       Cards
-	Tags        Tags
+	Cards       []Card
+	Tags        []Tag
 }
 
 func (d *Deck) Type() string {
@@ -23,15 +23,4 @@ func (d *Deck) SetID(id uint) {
 func (d *Deck) GenerateSlug() error {
 	d.Slug = slug.Make(d.Name)
 	return nil
-}
-
-type Decks []Deck
-
-func (d *Decks) NewRecord() Record {
-	return &Deck{}
-}
-
-func (d *Decks) Append(r Record) {
-	deck := r.(*Deck)
-	*d = append(*d, *deck)
 }
