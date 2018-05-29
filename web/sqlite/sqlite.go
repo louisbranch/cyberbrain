@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"github.com/luizbranco/srs/web"
 	"github.com/mattn/go-sqlite3"
@@ -43,6 +44,7 @@ func New(path string) (*Database, error) {
 		CREATE TABLE IF NOT EXISTS cards(
 			id INTEGER PRIMARY KEY,
 			deck_id INTEGER NOT NULL,
+			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			image_url TEXT NOT NULL CHECK(image_url <> ''),
 			audio_url TEXT,
 			definition TEXT NOT NULL CHECK(definition <> ''),
@@ -73,6 +75,7 @@ func New(path string) (*Database, error) {
 		CREATE TABLE IF NOT EXISTS practices(
 			id INTEGER PRIMARY KEY,
 			deck_id INTEGER NOT NULL,
+			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			state TEXT NOT NULL CHECK(state <> ''),
 			rounds INTEGER NOT NULL CHECK(rounds > 0),
 			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
@@ -105,11 +108,6 @@ func New(path string) (*Database, error) {
 }
 
 func (db *Database) Create(r web.Record) error {
-	err := r.GenerateSlug()
-	if err != nil {
-		return errors.Wrapf(err, "failed to generate slug for %v", r)
-	}
-
 	q, err := QueryFromRecord(r, "id")
 	if err != nil {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
@@ -124,37 +122,38 @@ func (db *Database) Create(r web.Record) error {
 		return errors.Wrap(err, "failed to create db record")
 	}
 
-	id, err := res.LastInsertId()
-
+	last, err := res.LastInsertId()
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve last inserted id")
 	}
 
-	r.SetID(uint(id))
+	id := strconv.FormatInt(last, 10)
+
+	r.SetID(web.ID(id))
 
 	return nil
 }
 
-func (db *Database) Query(cond web.Condition) ([]web.Record, error) {
-	q, err := QueryFromRecord(cond.Record)
+func (db *Database) Query(wq web.Query) ([]web.Record, error) {
+	q, err := QueryFromRecord(wq.NewRecord())
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
 
-	cond.Raw = fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(cond))
+	raw := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(wq))
 
-	return db.QueryRaw(cond)
+	return db.queryRows(wq, raw)
 }
 
-func (db *Database) Get(cond web.Condition) (web.Record, error) {
-	r := cond.Record
+func (db *Database) Get(wq web.Query) (web.Record, error) {
+	r := wq.NewRecord()
 
 	q, err := QueryFromRecord(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(cond))
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", q.Columns(), q.Table(), where(wq))
 
 	row := db.DB.QueryRow(query)
 
@@ -166,42 +165,14 @@ func (db *Database) Get(cond web.Condition) (web.Record, error) {
 	return r, nil
 }
 
-func (db *Database) QueryRaw(cond web.Condition) ([]web.Record, error) {
-	rows, err := db.DB.Query(cond.Raw)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to query records %v", cond)
-	}
-	defer rows.Close()
-
-	var records []web.Record
-
-	for rows.Next() {
-
-		r := cond.Record
-
-		q, err := QueryFromRecord(r)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get record fields %v", cond)
-		}
-
-		err = rows.Scan(q.fields...)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to scan records %v", cond)
-		}
-
-		records = append(records, r)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to query records %v", cond)
-	}
-
-	return records, nil
+func (db *Database) QueryRaw(wq web.Query) ([]web.Record, error) {
+	return db.queryRows(wq, wq.Raw())
 }
 
-func (db *Database) Count(cond web.Condition) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", cond.Record.Type(), where(cond))
+func (db *Database) Count(wq web.Query) (int, error) {
+	table := wq.NewRecord().Type() + "s"
+
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", table, where(wq))
 
 	row := db.DB.QueryRow(query)
 
@@ -215,15 +186,49 @@ func (db *Database) Count(cond web.Condition) (int, error) {
 	return n, nil
 }
 
-func (db *Database) Random(cond web.Condition, n int) ([]web.Record, error) {
-	r := cond.Record
+func (db *Database) Random(wq web.Query, n int) ([]web.Record, error) {
+	r := wq.NewRecord()
 	q, err := QueryFromRecord(r)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get record fields %v", cond)
+		return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
 	}
 
-	cond.Raw = fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
+	raw := fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
 		q.Columns(), q.Table(), q.Table(), n)
 
-	return db.QueryRaw(cond)
+	return db.queryRows(wq, raw)
+}
+
+func (db *Database) queryRows(wq web.Query, query string) ([]web.Record, error) {
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to query records %v", wq)
+	}
+	defer rows.Close()
+
+	var records []web.Record
+
+	for rows.Next() {
+
+		r := wq.NewRecord()
+
+		q, err := QueryFromRecord(r)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
+		}
+
+		err = rows.Scan(q.fields...)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to scan records %v", wq)
+		}
+
+		records = append(records, r)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to query records %v", wq)
+	}
+
+	return records, nil
 }

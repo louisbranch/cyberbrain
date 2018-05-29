@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs/web/models"
 )
 
 func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
@@ -19,13 +20,18 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 		srv.deckShow(path, w, r)
 	case "POST":
 
-		deck := web.Deck{
-			Name:        r.FormValue("name"),
-			Description: r.FormValue("description"),
-			ImageURL:    r.FormValue("image_url"),
+		if err := r.ParseForm(); err != nil {
+			srv.renderError(w, err)
+			return
 		}
 
-		err := srv.Database.Create(&deck)
+		deck, err := models.NewDeckFromForm(r.Form)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		err = srv.Database.Create(deck)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -53,14 +59,14 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
-	decks, err := FindDecks(srv.Database)
+	decks, err := models.FindDecks(srv.Database)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	content := struct {
-		Decks []web.Deck
+		Decks []models.Deck
 	}{
 		Decks: decks,
 	}
@@ -76,19 +82,19 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request) {
-	deck, err := FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeckBySlug(srv.Database, slug)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	cards, err := FindCardsByDeckID(srv.Database, deck.ID)
+	cards, err := models.FindCardsByDeckID(srv.Database, deck.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := FindTagsByDeckID(srv.Database, deck.ID)
+	tags, err := models.FindTagsByDeckID(srv.Database, deck.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return

@@ -2,10 +2,9 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/luizbranco/srs/web"
-	"github.com/pkg/errors"
+	"github.com/luizbranco/srs/web/models"
 )
 
 func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
@@ -19,31 +18,27 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 
 		srv.cardShow(slug, w, r)
 	case "POST":
-		err := r.ParseForm()
-		if err != nil {
+		if err := r.ParseForm(); err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		slug := r.FormValue("deck")
+		slug := r.Form.Get("deck")
 		if slug == "" {
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck, err := FindDeckBySlug(srv.Database, slug)
+		deck, err := models.FindDeckBySlug(srv.Database, slug)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
 		}
 
-		card := &web.Card{
-			DeckID:        deck.ID,
-			ImageURL:      r.FormValue("image_url"),
-			AudioURL:      r.FormValue("audio_url"),
-			Definition:    r.FormValue("definition"),
-			AltDefinition: r.FormValue("alt_definition"),
-			Pronunciation: r.FormValue("pronunciation"),
+		card, err := models.NewCardFromForm(deck.ID, r.Form)
+		if err != nil {
+			srv.renderError(w, err)
+			return
 		}
 
 		err = srv.Database.Create(card)
@@ -55,19 +50,12 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 		tags := r.Form["tags"]
 
 		for _, tag := range tags {
-			tid, err := strconv.ParseUint(tag, 10, 64)
-			if err != nil {
-				err = errors.Wrapf(err, "invalid tag id %d", tag)
-				srv.renderError(w, err)
-				return
-			}
-
-			ct := &web.CardTag{
+			ct := models.CardTag{
 				CardID: card.ID,
-				TagID:  uint(tid),
+				TagID:  web.ID(tag),
 			}
 
-			err = srv.Database.Create(ct)
+			err = srv.Database.Create(&ct)
 			if err != nil {
 				srv.renderError(w, err)
 				return
@@ -94,14 +82,14 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeckBySlug(srv.Database, slug)
 	if err != nil {
 		// FIXME
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := FindTagsByDeckID(srv.Database, deck.ID)
+	tags, err := models.FindTagsByDeckID(srv.Database, deck.ID)
 	if err != nil {
 		// FIXME
 		srv.renderError(w, err)
@@ -120,26 +108,19 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseUint(slug, 10, 64)
-	if err != nil {
-		err = errors.Wrapf(err, "invalid card id %d", slug)
-		srv.renderError(w, err)
-		return
-	}
-
-	card, err := FindCardByID(srv.Database, id)
+	card, err := models.FindCardBySlug(srv.Database, slug)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck, err := FindDeckByID(srv.Database, card.DeckID)
+	deck, err := models.FindDeckByID(srv.Database, card.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := FindTagsByCardID(srv.Database, id)
+	tags, err := models.FindTagsByCardID(srv.Database, card.ID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -148,8 +129,8 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 	card.Tags = tags
 
 	content := struct {
-		Card *web.Card
-		Deck *web.Deck
+		Card *models.Card
+		Deck *models.Deck
 	}{
 		Card: card,
 		Deck: deck,

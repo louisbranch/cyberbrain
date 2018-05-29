@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs/web/models"
 )
 
 func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
@@ -11,25 +12,31 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		http.Redirect(w, r, "/decks", http.StatusFound)
 	case "POST":
-		slug := r.FormValue("deck")
+		if err := r.ParseForm(); err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		slug := r.Form.Get("deck")
 
 		if slug == "" {
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck, err := FindDeckBySlug(srv.Database, slug)
+		deck, err := models.FindDeckBySlug(srv.Database, slug)
 		if err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		tag := web.Tag{
-			DeckID: deck.ID,
-			Name:   r.FormValue("name"),
+		tag, err := models.NewTagFromForm(deck.ID, r.Form)
+		if err != nil {
+			srv.renderError(w, err)
+			return
 		}
 
-		err = srv.Database.Create(&tag)
+		err = srv.Database.Create(tag)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -55,7 +62,7 @@ func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeckBySlug(srv.Database, slug)
 	if err != nil {
 		srv.renderError(w, err)
 		return

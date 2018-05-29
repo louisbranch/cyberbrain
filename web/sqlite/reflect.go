@@ -22,7 +22,7 @@ func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
 	}
 
 	q := &Query{
-		table: r.Type(),
+		table: r.Type() + "s",
 	}
 
 	rv = rv.Elem()
@@ -44,6 +44,15 @@ func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
 	return q, nil
 }
 
+func contains(l []string, s string) bool {
+	for _, i := range l {
+		if i == s {
+			return true
+		}
+	}
+	return false
+}
+
 func (q *Query) Table() string {
 	return q.table
 }
@@ -61,29 +70,22 @@ func (q *Query) Columns() string {
 	return strings.Join(q.columns, ", ")
 }
 
-func contains(list []string, s string) bool {
-	for i := range list {
-		if list[i] == s {
-			return true
-		}
-	}
-	return false
-}
+func where(cond web.Query) string {
+	where := cond.Where()
 
-func where(cond web.Condition) string {
-	if len(cond.Where) == 0 {
+	if len(where) == 0 {
 		return ""
 	}
 
 	var clause []string
-	for k, v := range cond.Where {
+	for k, v := range where {
 		switch t := v.(type) {
-		case string:
+		case string, web.ID:
 			clause = append(clause, fmt.Sprintf("%s = %q", k, v))
-		case uint, uint64, int, int64, int32:
+		case int:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
 		default:
-			err := fmt.Sprintf("invalid type %v for where clause", t)
+			err := fmt.Sprintf("invalid type %q for where clause", t)
 			panic(err)
 		}
 	}
