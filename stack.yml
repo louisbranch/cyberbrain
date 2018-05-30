@@ -1,0 +1,13 @@
+version: '3.2'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: srs
+      POSTGRES_USER: srs
+      POSTGRES_PASSWORD: s3cr3t
