@@ -1,12 +1,11 @@
-package sqlite
+package psql
 
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
 
+	_ "github.com/lib/pq"
 	"github.com/luizbranco/srs/web"
-	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 )
 
@@ -14,18 +13,11 @@ type Database struct {
 	*sql.DB
 }
 
-func init() {
-	sql.Register("sqlite3_with_fk",
-		&sqlite3.SQLiteDriver{
-			ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-				_, err := conn.Exec("PRAGMA foreign_keys = ON", nil)
-				return err
-			},
-		})
-}
+func New(host, port, dbname, user, pass string) (*Database, error) {
+	params := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host,
+		port, dbname, user, pass)
 
-func New(path string) (*Database, error) {
-	db, err := sql.Open("sqlite3_with_fk", path)
+	db, err := sql.Open("postgres", params)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +25,7 @@ func New(path string) (*Database, error) {
 	queries := []string{
 		`
 		CREATE TABLE IF NOT EXISTS decks(
-			id INTEGER PRIMARY KEY,
+			id SERIAL PRIMARY KEY,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
@@ -42,56 +34,51 @@ func New(path string) (*Database, error) {
 		`,
 		`
 		CREATE TABLE IF NOT EXISTS cards(
-			id INTEGER PRIMARY KEY,
-			deck_id INTEGER NOT NULL,
+			id SERIAL PRIMARY KEY,
+			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			image_url TEXT NOT NULL CHECK(image_url <> ''),
 			audio_url TEXT,
 			definition TEXT NOT NULL CHECK(definition <> ''),
 			alt_definition TEXT,
-			pronunciation TEXT,
-			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
+			pronunciation TEXT
 		);
 		`,
 		`
 		CREATE TABLE IF NOT EXISTS tags(
-			id INTEGER PRIMARY KEY,
-			deck_id INTEGER NOT NULL,
+			id SERIAL PRIMARY KEY,
+			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
-			name TEXT NOT NULL UNIQUE CHECK(name <> ''),
-			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
+			name TEXT NOT NULL UNIQUE CHECK(name <> '')
 		);
 		`,
 		`
 		CREATE TABLE IF NOT EXISTS card_tags(
-			id INTEGER PRIMARY KEY,
-			card_id INTEGER NOT NULL,
-			tag_id INTEGER NOT NULL,
-			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE,
-			FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
+			id SERIAL PRIMARY KEY,
+			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
+			tag_id INTEGER NOT NULL REFERENCES tags ON DELETE CASCADE,
+			UNIQUE (card_id, tag_id)
 		);
 		`,
 		`
 		CREATE TABLE IF NOT EXISTS practices(
-			id INTEGER PRIMARY KEY,
-			deck_id INTEGER NOT NULL,
+			id SERIAL PRIMARY KEY,
+			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
 			state TEXT NOT NULL CHECK(state <> ''),
-			rounds INTEGER NOT NULL CHECK(rounds > 0),
-			FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE
+			rounds INTEGER NOT NULL CHECK(rounds > 0)
 		);
 		`,
 		`
 		CREATE TABLE IF NOT EXISTS practice_rounds(
-			id INTEGER PRIMARY KEY,
-			practice_id INTEGER NOT NULL,
-			card_id INTEGER NOT NULL,
+			id SERIAL PRIMARY KEY,
+			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
+			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE CASCADE,
 			round INTEGER NOT NULL CHECK(round > 0),
 			expect TEXT NOT NULL CHECK(expect <> ''),
 			answer TEXT,
 			correct BOOLEAN,
-			FOREIGN KEY(practice_id) REFERENCES practices(id) ON DELETE CASCADE,
-			FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE
+			UNIQUE (card_id, practice_id)
 		);
 		`,
 	}
@@ -113,23 +100,17 @@ func (db *Database) Create(r web.Record) error {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
 	}
 
-	query := fmt.Sprintf("INSERT into %s (%s) values (%s);", q.Table(), q.Columns(),
+	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING id;", q.Table(), q.Columns(),
 		q.Placeholders())
 
-	res, err := db.Exec(query, q.fields...)
+	var id web.ID
 
+	err = db.QueryRow(query, q.fields...).Scan(&id)
 	if err != nil {
-		return errors.Wrap(err, "failed to create db record")
+		return errors.Wrapf(err, "failed to create db record %q", query)
 	}
 
-	last, err := res.LastInsertId()
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve last inserted id")
-	}
-
-	id := strconv.FormatInt(last, 10)
-
-	r.SetID(web.ID(id))
+	r.SetID(id)
 
 	return nil
 }

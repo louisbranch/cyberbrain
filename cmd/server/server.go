@@ -6,13 +6,12 @@ import (
 	"net/http"
 
 	"github.com/luizbranco/srs/web/html"
+	"github.com/luizbranco/srs/web/psql"
 	"github.com/luizbranco/srs/web/server"
-	"github.com/luizbranco/srs/web/sqlite"
 )
 
 func main() {
-	db, err := sqlite.New("srs.db")
-
+	db, err := psql.New("192.168.0.11", "5432", "srs", "srs", "s3cr3t")
 	if err != nil {
 		log.Fatal(err)
 	}

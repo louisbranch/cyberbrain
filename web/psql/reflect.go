@@ -1,4 +1,4 @@
-package sqlite
+package psql
 
 import (
 	"fmt"
@@ -60,7 +60,7 @@ func (q *Query) Table() string {
 func (q *Query) Placeholders() string {
 	v := make([]string, len(q.columns))
 	for i := range v {
-		v[i] = "?"
+		v[i] = fmt.Sprintf("$%d", i+1)
 	}
 
 	return strings.Join(v, ", ")
@@ -81,7 +81,7 @@ func where(cond web.Query) string {
 	for k, v := range where {
 		switch t := v.(type) {
 		case string, web.ID:
-			clause = append(clause, fmt.Sprintf("%s = %q", k, v))
+			clause = append(clause, fmt.Sprintf("%s = '%s'", k, v))
 		case int:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
 		default:
