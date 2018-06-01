@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
@@ -13,6 +14,7 @@ type Query struct {
 	table   string
 	columns []string
 	fields  []interface{}
+	addrs   []interface{}
 }
 
 func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
@@ -36,8 +38,21 @@ func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
 			continue
 		}
 
-		field := rv.Field(i).Addr().Interface()
-		q.fields = append(q.fields, field)
+		field := rv.Field(i)
+		addr := field.Addr().Interface()
+
+		if field.Kind() == reflect.Slice {
+			switch e := field.Type().Elem(); e.Kind() {
+			case reflect.String:
+				var s pq.StringArray
+				addr = &s
+			default:
+				return nil, errors.Errorf("slice type %v not supported", e)
+			}
+		}
+
+		q.fields = append(q.fields, addr)
+		q.addrs = append(q.addrs, addr)
 		q.columns = append(q.columns, tag)
 	}
 

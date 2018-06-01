@@ -1,10 +1,19 @@
 package models
 
 import (
+	"time"
+
 	"github.com/dchest/uniuri"
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
+
+type Model struct {
+	ID        web.ID    `db:"id"`
+	Version   int       `db:"version"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+}
 
 func FindDecks(db web.Database) ([]Deck, error) {
 	q := newDeckQuery()

@@ -22,68 +22,7 @@ func New(host, port, dbname, user, pass string) (*Database, error) {
 		return nil, err
 	}
 
-	queries := []string{
-		`
-		CREATE TABLE IF NOT EXISTS decks(
-			id SERIAL PRIMARY KEY,
-			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
-			name TEXT NOT NULL CHECK(name <> ''),
-			description TEXT,
-			image_url TEXT
-		);
-		`,
-		`
-		CREATE TABLE IF NOT EXISTS cards(
-			id SERIAL PRIMARY KEY,
-			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
-			image_url TEXT NOT NULL CHECK(image_url <> ''),
-			audio_url TEXT,
-			definition TEXT NOT NULL CHECK(definition <> ''),
-			alt_definition TEXT,
-			pronunciation TEXT
-		);
-		`,
-		`
-		CREATE TABLE IF NOT EXISTS tags(
-			id SERIAL PRIMARY KEY,
-			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
-			name TEXT NOT NULL UNIQUE CHECK(name <> '')
-		);
-		`,
-		`
-		CREATE TABLE IF NOT EXISTS card_tags(
-			id SERIAL PRIMARY KEY,
-			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
-			tag_id INTEGER NOT NULL REFERENCES tags ON DELETE CASCADE,
-			UNIQUE (card_id, tag_id)
-		);
-		`,
-		`
-		CREATE TABLE IF NOT EXISTS practices(
-			id SERIAL PRIMARY KEY,
-			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			slug TEXT NOT NULL UNIQUE CHECK(slug <> ''),
-			state TEXT NOT NULL CHECK(state <> ''),
-			rounds INTEGER NOT NULL CHECK(rounds > 0)
-		);
-		`,
-		`
-		CREATE TABLE IF NOT EXISTS practice_rounds(
-			id SERIAL PRIMARY KEY,
-			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
-			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE CASCADE,
-			round INTEGER NOT NULL CHECK(round > 0),
-			expect TEXT NOT NULL CHECK(expect <> ''),
-			answer TEXT,
-			correct BOOLEAN,
-			UNIQUE (card_id, practice_id)
-		);
-		`,
-	}
-
-	for _, q := range queries {
+	for _, q := range tableQueries {
 		_, err = db.Exec(q)
 
 		if err != nil {
@@ -105,7 +44,7 @@ func (db *Database) Create(r web.Record) error {
 
 	var id web.ID
 
-	err = db.QueryRow(query, q.fields...).Scan(&id)
+	err = db.QueryRow(query, q.addrs...).Scan(&id)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create db record %q", query)
 	}
@@ -138,7 +77,7 @@ func (db *Database) Get(wq web.Query) (web.Record, error) {
 
 	row := db.DB.QueryRow(query)
 
-	err = row.Scan(q.fields...)
+	err = row.Scan(q.addrs...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to scan record %q", query)
 	}
@@ -198,7 +137,7 @@ func (db *Database) queryRows(wq web.Query, query string) ([]web.Record, error) 
 			return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
 		}
 
-		err = rows.Scan(q.fields...)
+		err = rows.Scan(q.addrs...)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to scan records %v", wq)
 		}
