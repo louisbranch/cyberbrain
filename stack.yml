@@ -7,7 +7,14 @@ services:
     restart: always
     ports:
       - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: srs
       POSTGRES_USER: srs
       POSTGRES_PASSWORD: s3cr3t
+
+volumes:
+  db-data:
+    external:
+      name: srs-db-data
