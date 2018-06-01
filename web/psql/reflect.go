@@ -41,17 +41,19 @@ func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
 		field := rv.Field(i)
 		addr := field.Addr().Interface()
 
+		q.fields = append(q.fields, addr)
+
 		if field.Kind() == reflect.Slice {
 			switch e := field.Type().Elem(); e.Kind() {
 			case reflect.String:
-				var s pq.StringArray
-				addr = &s
+				slice := field.Interface().([]string)
+				sa := pq.StringArray(slice)
+				addr = &sa
 			default:
 				return nil, errors.Errorf("slice type %v not supported", e)
 			}
 		}
 
-		q.fields = append(q.fields, addr)
 		q.addrs = append(q.addrs, addr)
 		q.columns = append(q.columns, tag)
 	}
@@ -83,6 +85,29 @@ func (q *Query) Placeholders() string {
 
 func (q *Query) Columns() string {
 	return strings.Join(q.columns, ", ")
+}
+
+type Scannable interface {
+	Scan(...interface{}) error
+}
+
+func (q *Query) Scan(row Scannable) error {
+	err := row.Scan(q.addrs...)
+	if err != nil {
+		return errors.Wrap(err, "failed to scan records")
+	}
+
+	for i, addr := range q.addrs {
+		switch addr.(type) {
+		case *pq.StringArray:
+			slice := addr.(*pq.StringArray)
+			ss := []string(*slice)
+			f := q.fields[i].(*[]string)
+			*f = ss
+		}
+	}
+
+	return nil
 }
 
 func where(cond web.Query) string {

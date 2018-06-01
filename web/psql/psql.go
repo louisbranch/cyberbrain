@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
@@ -77,7 +76,7 @@ func (db *Database) Get(wq web.Query) (web.Record, error) {
 
 	row := db.DB.QueryRow(query)
 
-	err = row.Scan(q.addrs...)
+	err = q.Scan(row)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to scan record %q", query)
 	}
@@ -137,7 +136,7 @@ func (db *Database) queryRows(wq web.Query, query string) ([]web.Record, error) 
 			return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
 		}
 
-		err = rows.Scan(q.addrs...)
+		err = q.Scan(rows)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to scan records %v", wq)
 		}

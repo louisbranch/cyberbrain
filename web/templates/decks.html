@@ -11,9 +11,12 @@
       <div class="column is-4">
         <div class="card">
           <div class="card-content">
-            <h3 class="title"><a href="/decks/{{ .Slug }}">{{ .Name }}</a></h3>
+            <h3 class="title"><a href="/decks/{{ .ID }}">{{ .Name }}</a></h3>
             <div class="content">
               {{ .Description }}
+            </div>
+            <div class="content">
+              {{ range .CardFields }} {{ . }} {{ end }}
             </div>
           </div>
         </div>
