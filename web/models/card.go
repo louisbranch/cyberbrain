@@ -25,16 +25,22 @@ func NewCardFromForm(deckID web.ID, form url.Values) (*Card, error) {
 		DeckID: deckID,
 	}
 
-	for _, cf := range form["image_urls"] {
-		c.ImageURLs = append(c.ImageURLs, cf)
+	for _, f := range form["image_urls"] {
+		if f != "" {
+			c.ImageURLs = append(c.ImageURLs, f)
+		}
 	}
 
-	for _, cf := range form["audio_urls"] {
-		c.AudioURLs = append(c.AudioURLs, cf)
+	for _, f := range form["audio_urls"] {
+		if f != "" {
+			c.AudioURLs = append(c.AudioURLs, f)
+		}
 	}
 
-	for _, cf := range form["definitions"] {
-		c.Definitions = append(c.Definitions, cf)
+	for _, f := range form["definitions"] {
+		if f != "" {
+			c.Definitions = append(c.Definitions, f)
+		}
 	}
 
 	return c, nil

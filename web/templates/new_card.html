@@ -7,21 +7,23 @@
         <div class="field">
           <label class="label">Image URLs</label>
           <div class="control">
-            <input class="input" type="text" name="image_url" minlength="2" />
+            <input class="input" type="text" name="image_urls" minlength="2" />
           </div>
         </div>
         <div class="field">
           <label class="label">Audio URLs</label>
           <div class="control">
-            <input class="input" type="text" name="audio_url" />
+            <input class="input" type="text" name="audio_urls" />
           </div>
         </div>
-        <div class="field">
-          <label class="label">Definitions</label>
-          <div class="control">
-            <input class="input" type="text" name="definition" minlength="1" />
+        {{ range .CardFields }}
+          <div class="field">
+            <label class="label">{{ . }}</label>
+            <div class="control">
+              <input class="input" type="text" name="definitions" />
+            </div>
           </div>
-        </div>
+        {{ end }}
         <div class="field is-grouped">
           <div class="control">
             <input class="button is-primary" type="submit" value="Submit" />

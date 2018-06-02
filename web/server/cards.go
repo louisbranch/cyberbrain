@@ -147,7 +147,7 @@ func (srv *Server) cardShow(id web.ID, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := models.FindTagsByCard(srv.Database, card.MetaID)
+	tags, err := models.FindTagsByCard(srv.Database, card.ID())
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -155,12 +155,24 @@ func (srv *Server) cardShow(id web.ID, w http.ResponseWriter, r *http.Request) {
 
 	card.Tags = tags
 
+	dr, err := deck.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	cr, err := card.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
 	content := struct {
-		Card *models.Card
-		Deck *models.Deck
+		Card *models.CardRendered
+		Deck *models.DeckRendered
 	}{
-		Card: card,
-		Deck: deck,
+		Card: cr,
+		Deck: dr,
 	}
 
 	page := web.Page{

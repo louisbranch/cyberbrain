@@ -29,7 +29,9 @@ func NewDeckFromForm(form url.Values) (*Deck, error) {
 	d.ImageURL = form.Get("image_url")
 
 	for _, cf := range form["card_fields"] {
-		d.CardFields = append(d.CardFields, cf)
+		if cf != "" {
+			d.CardFields = append(d.CardFields, cf)
+		}
 	}
 
 	return d, nil

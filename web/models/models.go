@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
@@ -74,9 +76,11 @@ func FindCardsByDeck(db web.Database, deckID web.ID) ([]Card, error) {
 }
 
 func FindTagsByCard(db web.Database, cardID web.ID) ([]Tag, error) {
+	id := strconv.Itoa(int(cardID))
+
 	raw := `SELECT t.id, t.deck_id, name FROM tags t
 	LEFT JOIN card_tags ct ON t.id = ct.tag_id
-	WHERE ct.card_id = ` + string(cardID) + ";"
+	WHERE ct.card_id = ` + id + ";"
 
 	q := newTagQuery()
 	q.raw = raw

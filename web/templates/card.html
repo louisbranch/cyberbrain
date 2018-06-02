@@ -3,7 +3,7 @@
 		<ul>
 			<li><a href="/">Home</a></li>
 			<li><a href="/decks/">Decks</a></li>
-      <li><a href="/decks/{{ .Deck.Slug }}">{{ .Deck.Name }}</a></li>
+      <li><a href="{{ .Deck.Path }}">{{ .Deck.Name }}</a></li>
 			<li class="is-active"><a href="#" aria-current="page">Card</a></li>
 		</ul>
 	</nav>
@@ -11,7 +11,7 @@
   <section class="section">
     <div class="columns">
       <div class="column is-8">
-        <h1 class="title">Card #{{ .Card.ID }}</h1>
+        <h1 class="title">Card</h1>
       </div>
     </div>
   </section>
@@ -20,20 +20,21 @@
     <div class="columns">
       <div class="column is-4">
         <div class="card">
-          <div class="card-image">
-            <figure class="image is-4by3">
-              <img src="{{ .Card.ImageURL }}">
-            </figure>
-          </div>
+          {{ range .Card.ImageURLs }}
+            <div class="card-image">
+              <figure class="image is-4by3">
+                <img src="{{ . }}">
+              </figure>
+            </div>
+          {{ end }}
           <div class="card-content">
             <div class="content">
               <dl>
-                <dt>Definition</dt>
-                <dd>{{ .Card.Definition }}</dd>
-                <dt>Alt Definition</dt>
-                <dd>{{ .Card.AltDefinition }}</dd>
-                <dt>Pronunciation</dt>
-                <dd>{{ .Card.Pronunciation }}</dd>
+                {{ $deck := .Deck }}
+                {{ range $i, $d := .Card.Definitions }}
+                  <dt>{{ index $deck.CardFields $i }}</dt>
+                  <dd>{{ $d }}</dd>
+                {{ end }}
               </dl>
               <div>
                 {{ range .Card.Tags }}
