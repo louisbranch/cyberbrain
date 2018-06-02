@@ -40,6 +40,8 @@ type Query interface {
 }
 
 type URLBuilder interface {
+	ParseID(string) (ID, error)
+	EncodeID(ID) (string, error)
+
 	Path(string, Record, ...Record) (string, error)
-	ID(string) (ID, error)
 }

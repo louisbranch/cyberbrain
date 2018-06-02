@@ -3,7 +3,6 @@ package html
 import (
 	"html/template"
 	"io"
-	"log"
 	"path"
 	"path/filepath"
 	"sort"
@@ -14,10 +13,9 @@ import (
 )
 
 type HTML struct {
-	basepath   string
-	sync       sync.RWMutex
-	cache      map[string]*template.Template
-	URLBuilder web.URLBuilder
+	basepath string
+	sync     sync.RWMutex
+	cache    map[string]*template.Template
 }
 
 func New(basepath string) *HTML {
@@ -60,8 +58,6 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 	h.sync.RUnlock()
 
 	if !ok {
-		fns["path"] = h.buildPath()
-
 		tpl = template.New(path.Base(names[0])).Funcs(fns)
 
 		tpl, err = tpl.ParseFiles(names...)
@@ -74,18 +70,6 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 	}
 
 	return tpl, nil
-}
-
-func (h *HTML) buildPath() func(string, web.Record, ...web.Record) string {
-	return func(method string, r web.Record, params ...web.Record) string {
-		path, err := h.URLBuilder.Path(method, r, params...)
-		if err != nil {
-			log.Printf("error building path for %s %v", method, r)
-			return ""
-		}
-
-		return path
-	}
 }
 
 func contains(list []string, item string) bool {

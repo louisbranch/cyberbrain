@@ -1,37 +1,25 @@
 {{ define "content"}}
   <form action="/cards/" method="post" accept-charset="utf-8">
-    <input type="hidden" name="deck" id="deck" value="{{ .Slug }}" />
+    <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
     <h1 class="title">Add Card to {{ .Name }}</h1>
     <div class="columns">
       <div class="column is-4">
         <div class="field">
-          <label class="label">Image URL</label>
+          <label class="label">Image URLs</label>
           <div class="control">
             <input class="input" type="text" name="image_url" minlength="2" />
           </div>
         </div>
         <div class="field">
-          <label class="label">Audio URL</label>
+          <label class="label">Audio URLs</label>
           <div class="control">
             <input class="input" type="text" name="audio_url" />
           </div>
         </div>
         <div class="field">
-          <label class="label">Definition</label>
+          <label class="label">Definitions</label>
           <div class="control">
             <input class="input" type="text" name="definition" minlength="1" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Alt Definition</label>
-          <div class="control">
-            <input class="input" type="text" name="alt_definition" minlength="1" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Pronunciation</label>
-          <div class="control">
-            <input class="input" type="text" name="pronunciation" minlength="1" />
           </div>
         </div>
         <div class="field is-grouped">
@@ -39,7 +27,7 @@
             <input class="button is-primary" type="submit" value="Submit" />
           </div>
           <div class="control">
-            <a class="button is-text" href="/decks/{{ .Slug }}">Cancel</a>
+            <a class="button is-text" href="{{ .Path }}">Cancel</a>
           </div>
         </div>
       </div>

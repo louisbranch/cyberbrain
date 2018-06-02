@@ -18,7 +18,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(path)
+		id, err := srv.URLBuilder.ParseID(path)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
@@ -31,7 +31,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		id, err := srv.URLBuilder.ParseID(r.Form.Get("deck"))
 		if err != nil {
 			// FIXME bad request
 			srv.renderNotFound(w)
@@ -44,7 +44,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		card, err := models.NewCardFromForm(deck.MetaID, r.Form)
+		card, err := models.NewCardFromForm(deck.ID(), r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -97,7 +97,7 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	id, err := srv.URLBuilder.ParseID(query.Get("deck"))
 	if err != nil {
 		srv.renderNotFound(w)
 		return
@@ -119,10 +119,16 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 
 	deck.Tags = tags
 
+	content, err := deck.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
 	page := web.Page{
 		Title:    "New Card",
 		Partials: []string{"new_card"},
-		Content:  deck,
+		Content:  content,
 	}
 
 	srv.render(w, page)

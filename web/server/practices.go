@@ -16,7 +16,7 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(path)
+		id, err := srv.URLBuilder.ParseID(path)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
@@ -29,7 +29,7 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		id, err := srv.URLBuilder.ParseID(r.Form.Get("deck"))
 		if err != nil {
 			// FIXME bad request
 			srv.renderNotFound(w)
@@ -68,7 +68,7 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 
-	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	id, err := srv.URLBuilder.ParseID(query.Get("deck"))
 	if err != nil {
 		// FIXME bad request
 		srv.renderNotFound(w)

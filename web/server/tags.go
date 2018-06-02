@@ -17,7 +17,7 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		id, err := srv.URLBuilder.ParseID(r.Form.Get("deck"))
 		if err != nil {
 			// FIXME bad request
 			srv.renderNotFound(w)
@@ -62,7 +62,7 @@ func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 
-	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	id, err := srv.URLBuilder.ParseID(query.Get("deck"))
 	if err != nil {
 		// FIXME bad request
 		srv.renderNotFound(w)

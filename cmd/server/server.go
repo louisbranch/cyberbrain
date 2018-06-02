@@ -23,7 +23,6 @@ func main() {
 	}
 
 	tpl := html.New("web/templates")
-	tpl.URLBuilder = ub
 
 	srv := &server.Server{
 		Template:   tpl,

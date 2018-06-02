@@ -17,7 +17,7 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := srv.URLBuilder.ID(path)
+		id, err := srv.URLBuilder.ParseID(path)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
@@ -71,10 +71,16 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content := struct {
-		Decks []models.Deck
-	}{
-		Decks: decks,
+	var content []*models.DeckRendered
+
+	for _, d := range decks {
+		dr, err := d.Render(srv.URLBuilder)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		content = append(content, dr)
 	}
 
 	page := web.Page{
@@ -113,11 +119,17 @@ func (srv *Server) deckShow(id web.ID, w http.ResponseWriter, r *http.Request) {
 	deck.Cards = cards
 	deck.Tags = tags
 
+	content, err := deck.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
 	page := web.Page{
 		Title:      deck.Name + " Deck",
 		ActiveMenu: "decks",
 		Partials:   []string{"deck"},
-		Content:    deck,
+		Content:    content,
 	}
 
 	srv.render(w, page)
