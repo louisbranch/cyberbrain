@@ -45,6 +45,7 @@ func (h *HTML) Render(w io.Writer, page web.Page) error {
 
 var fns = template.FuncMap{
 	"contains": contains,
+	"first":    first,
 }
 
 func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
@@ -70,6 +71,14 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 	}
 
 	return tpl, nil
+}
+
+func first(list []string) string {
+	if len(list) == 0 {
+		return ""
+	}
+
+	return list[0]
 }
 
 func contains(list []string, item string) bool {
