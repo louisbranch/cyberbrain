@@ -75,10 +75,16 @@ func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content, err := deck.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
 	page := web.Page{
 		Title:    "New Tag",
 		Partials: []string{"new_tag"},
-		Content:  deck,
+		Content:  content,
 	}
 
 	srv.render(w, page)

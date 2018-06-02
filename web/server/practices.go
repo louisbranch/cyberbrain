@@ -81,10 +81,16 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content, err := deck.Render(srv.URLBuilder)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
 	page := web.Page{
 		Title:    "New Practice",
 		Partials: []string{"new_practice"},
-		Content:  deck,
+		Content:  content,
 	}
 
 	srv.render(w, page)

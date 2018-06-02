@@ -1,6 +1,6 @@
 {{ define "content"}}
   <form action="/practices/" method="post" accept-charset="utf-8">
-    <input type="hidden" name="deck" id="deck" value="{{ .Slug }}" />
+    <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
     <h1 class="title">Practice</h1>
     <div class="columns">
       <div class="column is-4">
@@ -15,7 +15,7 @@
             <input class="button is-primary" type="submit" value="Start" />
           </div>
           <div class="control">
-            <a class="button is-text" href="/decks/{{ .Slug }}">Cancel</a>
+            <a class="button is-text" href="{{ .Path }}">Cancel</a>
           </div>
         </div>
       </div>
