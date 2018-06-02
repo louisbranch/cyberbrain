@@ -36,7 +36,7 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		p, err := models.NewPracticeFromForm(deck.ID, r.Form)
+		p, err := models.NewPracticeFromForm(deck.MetaID, r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -48,7 +48,7 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/practices/"+p.Slug, http.StatusFound)
+		http.Redirect(w, r, "/practices/", http.StatusFound) // FIXME
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -117,7 +117,7 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	n, err := models.CountPracticeRounds(srv.Database, p.ID)
+	n, err := models.CountPracticeRounds(srv.Database, p.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -131,9 +131,9 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 		}
 
 		pr := &models.PracticeRound{
-			PracticeID: p.ID,
-			CardID:     card.ID,
-			Expect:     card.Definition,
+			PracticeID: p.MetaID,
+			CardID:     card.MetaID,
+			Expect:     card.Definitions[0], // FIXME cannot be first always
 			Round:      n + 1,
 		}
 
@@ -146,7 +146,7 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 		content.Card = card
 		content.Round = pr
 	} else {
-		pr, err := models.FindPracticeRound(srv.Database, p.ID, n)
+		pr, err := models.FindPracticeRound(srv.Database, p.MetaID, n)
 		if err != nil {
 			srv.renderError(w, err)
 			return

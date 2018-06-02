@@ -30,7 +30,7 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tag, err := models.NewTagFromForm(deck.ID, r.Form)
+		tag, err := models.NewTagFromForm(deck.MetaID, r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return

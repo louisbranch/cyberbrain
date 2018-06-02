@@ -8,8 +8,9 @@ import (
 )
 
 type Server struct {
-	Template web.Template
-	Database web.Database
+	Template   web.Template
+	Database   web.Database
+	URLBuilder web.URLBuilder
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {

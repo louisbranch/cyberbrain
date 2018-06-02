@@ -1,11 +1,7 @@
 package web
 
 import (
-	"database/sql/driver"
 	"io"
-	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 type Page struct {
@@ -20,22 +16,7 @@ type Template interface {
 	Render(w io.Writer, page Page) error
 }
 
-type ID string
-
-func (id *ID) Value() (driver.Value, error) {
-	return strconv.ParseInt(string(*id), 10, 64)
-}
-
-func (id *ID) Scan(v interface{}) error {
-	switch t := v.(type) {
-	case int64:
-		sid := ID(strconv.FormatInt(v.(int64), 10))
-		*id = sid
-		return nil
-	default:
-		return errors.Errorf("failed to scan value %q into ID", t)
-	}
-}
+type ID int
 
 type Database interface {
 	Create(Record) error
@@ -47,6 +28,7 @@ type Database interface {
 }
 
 type Record interface {
+	ID() ID
 	SetID(ID)
 	Type() string
 }
@@ -55,4 +37,9 @@ type Query interface {
 	NewRecord() Record
 	Where() map[string]interface{}
 	Raw() string
+}
+
+type URLBuilder interface {
+	Path(string, Record, ...Record) (string, error)
+	ID(string) (ID, error)
 }

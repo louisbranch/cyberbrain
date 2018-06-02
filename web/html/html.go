@@ -1,9 +1,9 @@
 package html
 
 import (
-	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"path"
 	"path/filepath"
 	"sort"
@@ -14,9 +14,10 @@ import (
 )
 
 type HTML struct {
-	basepath string
-	sync     sync.RWMutex
-	cache    map[string]*template.Template
+	basepath   string
+	sync       sync.RWMutex
+	cache      map[string]*template.Template
+	URLBuilder web.URLBuilder
 }
 
 func New(basepath string) *HTML {
@@ -45,7 +46,6 @@ func (h *HTML) Render(w io.Writer, page web.Page) error {
 }
 
 var fns = template.FuncMap{
-	"currency": currency,
 	"contains": contains,
 }
 
@@ -60,6 +60,8 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 	h.sync.RUnlock()
 
 	if !ok {
+		fns["path"] = h.buildPath()
+
 		tpl = template.New(path.Base(names[0])).Funcs(fns)
 
 		tpl, err = tpl.ParseFiles(names...)
@@ -74,25 +76,16 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 	return tpl, nil
 }
 
-func currency(val int64) string {
-	symbol := "$"
-	if val < 0 {
-		symbol = "-" + symbol
-		val *= -1
+func (h *HTML) buildPath() func(string, web.Record, ...web.Record) string {
+	return func(method string, r web.Record, params ...web.Record) string {
+		path, err := h.URLBuilder.Path(method, r, params...)
+		if err != nil {
+			log.Printf("error building path for %s %v", method, r)
+			return ""
+		}
+
+		return path
 	}
-
-	res := fmt.Sprintf(".%02d", val%100)
-
-	val = val / 100
-
-	for val >= 1000 {
-		res = fmt.Sprintf(",%03d", val%1000) + res
-		val = val / 1000
-	}
-
-	res = fmt.Sprintf("%s%d", symbol, val) + res
-
-	return res
 }
 
 func contains(list []string, item string) bool {

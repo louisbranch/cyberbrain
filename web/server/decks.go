@@ -88,13 +88,13 @@ func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	cards, err := models.FindCardsByDeckID(srv.Database, deck.ID)
+	cards, err := models.FindCardsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := models.FindTagsByDeckID(srv.Database, deck.ID)
+	tags, err := models.FindTagsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return

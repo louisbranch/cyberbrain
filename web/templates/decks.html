@@ -11,7 +11,7 @@
       <div class="column is-4">
         <div class="card">
           <div class="card-content">
-            <h3 class="title"><a href="/decks/{{ .ID }}">{{ .Name }}</a></h3>
+            <h3 class="title"><a href='{{ path  "INDEX" . }}'>{{ .Name }}</a></h3>
             <div class="content">
               {{ .Description }}
             </div>

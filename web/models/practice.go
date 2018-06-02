@@ -3,6 +3,7 @@ package models
 import (
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
@@ -14,15 +15,14 @@ const (
 )
 
 type Practice struct {
-	ID     web.ID `db:"id"`
+	MetaID        web.ID    `db:"id"`
+	MetaVersion   int       `db:"version"`
+	MetaCreatedAt time.Time `db:"created_at"`
+	MetaUpdatedAt time.Time `db:"updated_at"`
+
 	DeckID web.ID `db:"deck_id"`
-	Slug   string `db:"slug"`
 	Rounds int    `db:"rounds"`
 	State  string `db:"state"`
-}
-
-func NewPractice() *Practice {
-	return &Practice{Slug: NewSlug()}
 }
 
 func NewPracticeFromForm(deckID web.ID, form url.Values) (*Practice, error) {
@@ -32,16 +32,21 @@ func NewPracticeFromForm(deckID web.ID, form url.Values) (*Practice, error) {
 		return nil, errors.Wrap(err, "invalid number of rounds")
 	}
 
-	p := NewPractice()
-	p.DeckID = deckID
-	p.Rounds = n
-	p.State = PracticeStateInProgress
+	p := &Practice{
+		DeckID: deckID,
+		Rounds: n,
+		State:  PracticeStateInProgress,
+	}
 
 	return p, nil
 }
 
+func (p *Practice) ID() web.ID {
+	return p.MetaID
+}
+
 func (p *Practice) SetID(id web.ID) {
-	p.ID = id
+	p.MetaID = id
 }
 
 func (p *Practice) Type() string {
@@ -53,7 +58,7 @@ func (p *Practice) Finished() bool {
 }
 
 type PracticeRound struct {
-	ID         web.ID `db:"id"`
+	MetaID     web.ID `db:"id"`
 	PracticeID web.ID `db:"practice_id"`
 	CardID     web.ID `db:"card_id"`
 	Round      int    `db:"round"`
@@ -62,8 +67,12 @@ type PracticeRound struct {
 	Correct    bool   `db:"correct"`
 }
 
+func (pr *PracticeRound) ID() web.ID {
+	return pr.MetaID
+}
+
 func (pr *PracticeRound) SetID(id web.ID) {
-	pr.ID = id
+	pr.MetaID = id
 }
 
 func (pr *PracticeRound) Type() string {

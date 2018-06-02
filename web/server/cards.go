@@ -2,9 +2,11 @@ package server
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/luizbranco/srs/web"
 	"github.com/luizbranco/srs/web/models"
+	"github.com/pkg/errors"
 )
 
 func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +37,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		card, err := models.NewCardFromForm(deck.ID, r.Form)
+		card, err := models.NewCardFromForm(deck.MetaID, r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -50,9 +52,16 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 		tags := r.Form["tags"]
 
 		for _, tag := range tags {
+			id, err := strconv.Atoi(tag)
+			if err != nil {
+				err = errors.Wrapf(err, "invalid tag id %s", tag)
+				srv.renderError(w, err)
+				return
+			}
+
 			ct := models.CardTag{
-				CardID: card.ID,
-				TagID:  web.ID(tag),
+				CardID: card.MetaID,
+				TagID:  web.ID(id),
 			}
 
 			err = srv.Database.Create(&ct)
@@ -89,7 +98,7 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := models.FindTagsByDeckID(srv.Database, deck.ID)
+	tags, err := models.FindTagsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
 		// FIXME
 		srv.renderError(w, err)
@@ -120,7 +129,7 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	tags, err := models.FindTagsByCardID(srv.Database, card.ID)
+	tags, err := models.FindTagsByCardID(srv.Database, card.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return

@@ -8,6 +8,7 @@ import (
 	"github.com/luizbranco/srs/web/html"
 	"github.com/luizbranco/srs/web/psql"
 	"github.com/luizbranco/srs/web/server"
+	"github.com/luizbranco/srs/web/urlbuilder"
 )
 
 func main() {
@@ -16,8 +17,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ub, err := urlbuilder.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpl := html.New("web/templates")
+	tmpl.URLBuilder = ub
+
 	srv := &server.Server{
-		Template: html.New("web/templates"),
+		Template: tmpl,
 		Database: db,
 	}
 	mux := srv.NewServeMux()

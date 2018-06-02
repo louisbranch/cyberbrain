@@ -22,7 +22,7 @@ func (q *query) Raw() string {
 
 func newDeckQuery() *query {
 	fn := func() web.Record {
-		return NewDeck()
+		return &Deck{}
 	}
 
 	return &query{
@@ -33,7 +33,7 @@ func newDeckQuery() *query {
 
 func newCardQuery() *query {
 	fn := func() web.Record {
-		return NewCard()
+		return &Card{}
 	}
 
 	return &query{
@@ -44,7 +44,7 @@ func newCardQuery() *query {
 
 func newTagQuery() *query {
 	fn := func() web.Record {
-		return NewTag()
+		return &Tag{}
 	}
 
 	return &query{
@@ -66,7 +66,7 @@ func newCardTagQuery() *query {
 
 func newPracticeQuery() *query {
 	fn := func() web.Record {
-		return NewPractice()
+		return &Practice{}
 	}
 
 	return &query{

@@ -2,30 +2,35 @@ package models
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/luizbranco/srs/web"
 )
 
 type Tag struct {
-	ID     web.ID `db:"id"`
+	MetaID        web.ID    `db:"id"`
+	MetaVersion   int       `db:"version"`
+	MetaCreatedAt time.Time `db:"created_at"`
+	MetaUpdatedAt time.Time `db:"updated_at"`
+
 	DeckID web.ID `db:"deck_id"`
-	Slug   string `db:"slug"`
 	Name   string `db:"name"`
 }
 
-func NewTag() *Tag {
-	return &Tag{Slug: NewSlug()}
-}
-
 func NewTagFromForm(deckID web.ID, form url.Values) (*Tag, error) {
-	t := NewTag()
-	t.DeckID = deckID
-	t.Name = form.Get("name")
+	t := &Tag{
+		DeckID: deckID,
+		Name:   form.Get("name"),
+	}
 	return t, nil
 }
 
+func (t *Tag) ID() web.ID {
+	return t.MetaID
+}
+
 func (t *Tag) SetID(id web.ID) {
-	t.ID = id
+	t.MetaID = id
 }
 
 func (t *Tag) Type() string {
@@ -33,13 +38,17 @@ func (t *Tag) Type() string {
 }
 
 type CardTag struct {
-	ID     web.ID `db:"id"`
+	MetaID web.ID `db:"id"`
 	CardID web.ID `db:"card_id"`
 	TagID  web.ID `db:"tag_id"`
 }
 
+func (ct *CardTag) ID() web.ID {
+	return ct.MetaID
+}
+
 func (ct *CardTag) SetID(id web.ID) {
-	ct.ID = id
+	ct.MetaID = id
 }
 
 func (ct *CardTag) Type() string {

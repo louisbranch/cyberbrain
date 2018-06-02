@@ -8,24 +8,21 @@ import (
 )
 
 type Deck struct {
-	ID          web.ID    `db:"id"`
-	Version     int       `db:"version"`
-	CreatedAt   time.Time `db:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at"`
-	Name        string    `db:"name"`
-	Description string    `db:"description"`
-	ImageURL    string    `db:"image_url"`
-	CardFields  []string  `db:"card_fields"`
+	MetaID        web.ID    `db:"id"`
+	MetaVersion   int       `db:"version"`
+	MetaCreatedAt time.Time `db:"created_at"`
+	MetaUpdatedAt time.Time `db:"updated_at"`
+
+	Name        string   `db:"name"`
+	Description string   `db:"description"`
+	ImageURL    string   `db:"image_url"`
+	CardFields  []string `db:"card_fields"`
 	Cards       []Card
 	Tags        []Tag
 }
 
-func NewDeck() *Deck {
-	return &Deck{}
-}
-
 func NewDeckFromForm(form url.Values) (*Deck, error) {
-	d := NewDeck()
+	d := &Deck{}
 
 	d.Name = form.Get("name")
 	d.Description = form.Get("description")
@@ -38,8 +35,12 @@ func NewDeckFromForm(form url.Values) (*Deck, error) {
 	return d, nil
 }
 
+func (d *Deck) ID() web.ID {
+	return d.MetaID
+}
+
 func (d *Deck) SetID(id web.ID) {
-	d.ID = id
+	d.MetaID = id
 }
 
 func (d *Deck) Type() string {
