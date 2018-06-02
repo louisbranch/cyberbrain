@@ -59,6 +59,7 @@ var tableQueries = []string{
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			state TEXT NOT NULL CHECK(state <> ''),
+			mode TEXT NOT NULL CHECK(mode <> ''),
 			rounds INTEGER NOT NULL CHECK(rounds > 0)
 		);
 		`,
@@ -69,13 +70,12 @@ var tableQueries = []string{
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
-			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE CASCADE,
-			round INTEGER NOT NULL CHECK(round > 0),
-			expect TEXT NOT NULL CHECK(expect <> ''),
+			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE RESTRICT,
+			mode TEXT NOT NULL CHECK(mode <> ''),
+			card_ids INTEGER[],
+			options TEXT[],
 			answer TEXT,
-			correct BOOLEAN,
-			UNIQUE (card_id, practice_id)
+			correct BOOLEAN
 		);
 		`,
 }

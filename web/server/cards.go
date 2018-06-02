@@ -3,8 +3,10 @@ package server
 import (
 	"net/http"
 
+	"github.com/luizbranco/srs"
+	"github.com/luizbranco/srs/db"
 	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/models"
+	"github.com/luizbranco/srs/web/html"
 	"github.com/pkg/errors"
 )
 
@@ -37,13 +39,13 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		deck, err := models.FindDeck(srv.Database, id)
+		deck, err := db.FindDeck(srv.Database, id)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
 		}
 
-		card, err := models.NewCardFromForm(deck.ID(), r.Form)
+		card, err := html.NewCardFromForm(deck.ID(), r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -65,7 +67,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			ct := models.CardTag{
+			ct := srs.CardTag{
 				CardID: card.MetaID,
 				TagID:  id,
 			}
@@ -102,14 +104,14 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := models.FindDeck(srv.Database, id)
+	deck, err := db.FindDeck(srv.Database, id)
 	if err != nil {
 		// FIXME bad request
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := models.FindTagsByDeckID(srv.Database, deck.MetaID)
+	tags, err := db.FindTagsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
 		// FIXME bad request
 		srv.renderError(w, err)
@@ -118,7 +120,7 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 
 	deck.Tags = tags
 
-	content, err := deck.Render(srv.URLBuilder)
+	content, err := html.RenderDeck(*deck, srv.URLBuilder)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -133,20 +135,20 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) cardShow(id web.ID, w http.ResponseWriter, r *http.Request) {
-	card, err := models.FindCard(srv.Database, id)
+func (srv *Server) cardShow(id srs.ID, w http.ResponseWriter, r *http.Request) {
+	card, err := db.FindCard(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck, err := models.FindDeck(srv.Database, card.DeckID)
+	deck, err := db.FindDeck(srv.Database, card.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := models.FindTagsByCard(srv.Database, card.ID())
+	tags, err := db.FindTagsByCard(srv.Database, card.ID())
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -154,21 +156,21 @@ func (srv *Server) cardShow(id web.ID, w http.ResponseWriter, r *http.Request) {
 
 	card.Tags = tags
 
-	dr, err := deck.Render(srv.URLBuilder)
+	dr, err := html.RenderDeck(*deck, srv.URLBuilder)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	cr, err := card.Render(srv.URLBuilder)
+	cr, err := html.RenderCard(*card, srv.URLBuilder)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	content := struct {
-		Card *models.CardRendered
-		Deck *models.DeckRendered
+		Card *html.Card
+		Deck *html.Deck
 	}{
 		Card: cr,
 		Deck: dr,

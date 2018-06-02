@@ -1,14 +1,14 @@
-package models
+package db
 
-import "github.com/luizbranco/srs/web"
+import "github.com/luizbranco/srs"
 
 type query struct {
-	record func() web.Record
+	record func() srs.Record
 	where  map[string]interface{}
 	raw    string
 }
 
-func (q *query) NewRecord() web.Record {
+func (q *query) NewRecord() srs.Record {
 	return q.record()
 }
 
@@ -21,8 +21,8 @@ func (q *query) Raw() string {
 }
 
 func newDeckQuery() *query {
-	fn := func() web.Record {
-		return &Deck{}
+	fn := func() srs.Record {
+		return &srs.Deck{}
 	}
 
 	return &query{
@@ -32,8 +32,8 @@ func newDeckQuery() *query {
 }
 
 func newCardQuery() *query {
-	fn := func() web.Record {
-		return &Card{}
+	fn := func() srs.Record {
+		return &srs.Card{}
 	}
 
 	return &query{
@@ -43,8 +43,8 @@ func newCardQuery() *query {
 }
 
 func newTagQuery() *query {
-	fn := func() web.Record {
-		return &Tag{}
+	fn := func() srs.Record {
+		return &srs.Tag{}
 	}
 
 	return &query{
@@ -54,8 +54,8 @@ func newTagQuery() *query {
 }
 
 func newCardTagQuery() *query {
-	fn := func() web.Record {
-		return &CardTag{}
+	fn := func() srs.Record {
+		return &srs.CardTag{}
 	}
 
 	return &query{
@@ -65,8 +65,8 @@ func newCardTagQuery() *query {
 }
 
 func newPracticeQuery() *query {
-	fn := func() web.Record {
-		return &Practice{}
+	fn := func() srs.Record {
+		return &srs.Practice{}
 	}
 
 	return &query{
@@ -76,8 +76,8 @@ func newPracticeQuery() *query {
 }
 
 func newPracticeRoundQuery() *query {
-	fn := func() web.Record {
-		return &PracticeRound{}
+	fn := func() srs.Record {
+		return &srs.PracticeRound{}
 	}
 
 	return &query{

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/luizbranco/srs/db/psql"
 	"github.com/luizbranco/srs/web/html"
-	"github.com/luizbranco/srs/web/psql"
 	"github.com/luizbranco/srs/web/server"
 	"github.com/luizbranco/srs/web/urlbuilder"
 )

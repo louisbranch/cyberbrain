@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
 )
 
@@ -32,7 +32,7 @@ func New(host, port, dbname, user, pass string) (*Database, error) {
 	return &Database{db}, nil
 }
 
-func (db *Database) Create(r web.Record) error {
+func (db *Database) Create(r srs.Record) error {
 	q, err := QueryFromRecord(r, "id")
 	if err != nil {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
@@ -41,7 +41,7 @@ func (db *Database) Create(r web.Record) error {
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING id;", q.Table(), q.Columns(),
 		q.Placeholders())
 
-	var id web.ID
+	var id srs.ID
 
 	err = db.QueryRow(query, q.addrs...).Scan(&id)
 	if err != nil {
@@ -53,7 +53,7 @@ func (db *Database) Create(r web.Record) error {
 	return nil
 }
 
-func (db *Database) Query(wq web.Query) ([]web.Record, error) {
+func (db *Database) Query(wq srs.Query) ([]srs.Record, error) {
 	q, err := QueryFromRecord(wq.NewRecord())
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
@@ -64,7 +64,7 @@ func (db *Database) Query(wq web.Query) ([]web.Record, error) {
 	return db.queryRows(wq, raw)
 }
 
-func (db *Database) Get(wq web.Query) (web.Record, error) {
+func (db *Database) Get(wq srs.Query) (srs.Record, error) {
 	r := wq.NewRecord()
 
 	q, err := QueryFromRecord(r)
@@ -84,11 +84,11 @@ func (db *Database) Get(wq web.Query) (web.Record, error) {
 	return r, nil
 }
 
-func (db *Database) QueryRaw(wq web.Query) ([]web.Record, error) {
+func (db *Database) QueryRaw(wq srs.Query) ([]srs.Record, error) {
 	return db.queryRows(wq, wq.Raw())
 }
 
-func (db *Database) Count(wq web.Query) (int, error) {
+func (db *Database) Count(wq srs.Query) (int, error) {
 	table := wq.NewRecord().Type() + "s"
 
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", table, where(wq))
@@ -105,7 +105,7 @@ func (db *Database) Count(wq web.Query) (int, error) {
 	return n, nil
 }
 
-func (db *Database) Random(wq web.Query, n int) ([]web.Record, error) {
+func (db *Database) Random(wq srs.Query, n int) ([]srs.Record, error) {
 	r := wq.NewRecord()
 	q, err := QueryFromRecord(r)
 	if err != nil {
@@ -118,14 +118,14 @@ func (db *Database) Random(wq web.Query, n int) ([]web.Record, error) {
 	return db.queryRows(wq, raw)
 }
 
-func (db *Database) queryRows(wq web.Query, query string) ([]web.Record, error) {
+func (db *Database) queryRows(wq srs.Query, query string) ([]srs.Record, error) {
 	rows, err := db.DB.Query(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to query records %v", wq)
 	}
 	defer rows.Close()
 
-	var records []web.Record
+	var records []srs.Record
 
 	for rows.Next() {
 

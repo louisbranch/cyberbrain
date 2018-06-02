@@ -1,18 +1,19 @@
-package models
+package html
 
 import (
+	"github.com/luizbranco/srs"
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
 
-type DeckRendered struct {
+type Deck struct {
 	ID          string
 	Name        string
 	Description string
 	ImageURL    string
 	CardFields  []string
-	Tags        []*TagRendered
-	Cards       []*CardRendered
+	Tags        []*Tag
+	Cards       []*Card
 
 	Path            string
 	NewCardPath     string
@@ -20,25 +21,25 @@ type DeckRendered struct {
 	NewPracticePath string
 }
 
-type CardRendered struct {
+type Card struct {
 	ID          string
 	ImageURLs   []string
 	AudioURLs   []string
 	Definitions []string
-	Tags        []*TagRendered
+	Tags        []*Tag
 
 	Path string
 }
 
-type TagRendered struct {
+type Tag struct {
 	ID   string
 	Name string
 
 	Path string
 }
 
-func (d *Deck) Render(ub web.URLBuilder) (*DeckRendered, error) {
-	dr := &DeckRendered{
+func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
+	dr := &Deck{
 		Name:        d.Name,
 		Description: d.Description,
 		ImageURL:    d.ImageURL,
@@ -59,21 +60,21 @@ func (d *Deck) Render(ub web.URLBuilder) (*DeckRendered, error) {
 
 	dr.Path = p
 
-	cp, err := ub.Path("NEW", &Card{}, d)
+	cp, err := ub.Path("NEW", &srs.Card{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new card path")
 	}
 
 	dr.NewCardPath = cp
 
-	tp, err := ub.Path("NEW", &Tag{}, d)
+	tp, err := ub.Path("NEW", &srs.Tag{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new tag path")
 	}
 
 	dr.NewTagPath = tp
 
-	pp, err := ub.Path("NEW", &Practice{}, d)
+	pp, err := ub.Path("NEW", &srs.Practice{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new practice path")
 	}
@@ -81,7 +82,7 @@ func (d *Deck) Render(ub web.URLBuilder) (*DeckRendered, error) {
 	dr.NewPracticePath = pp
 
 	for _, c := range d.Cards {
-		cr, err := c.Render(ub)
+		cr, err := RenderCard(c, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render deck card")
 		}
@@ -90,7 +91,7 @@ func (d *Deck) Render(ub web.URLBuilder) (*DeckRendered, error) {
 	}
 
 	for _, t := range d.Tags {
-		tr, err := t.Render(ub)
+		tr, err := RenderTag(t, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render deck tag")
 		}
@@ -101,8 +102,8 @@ func (d *Deck) Render(ub web.URLBuilder) (*DeckRendered, error) {
 	return dr, nil
 }
 
-func (c *Card) Render(ub web.URLBuilder) (*CardRendered, error) {
-	cr := &CardRendered{
+func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
+	cr := &Card{
 		ImageURLs:   c.ImageURLs,
 		AudioURLs:   c.AudioURLs,
 		Definitions: c.Definitions,
@@ -123,7 +124,7 @@ func (c *Card) Render(ub web.URLBuilder) (*CardRendered, error) {
 	cr.Path = p
 
 	for _, t := range c.Tags {
-		tr, err := t.Render(ub)
+		tr, err := RenderTag(t, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render card tag")
 		}
@@ -134,8 +135,8 @@ func (c *Card) Render(ub web.URLBuilder) (*CardRendered, error) {
 	return cr, nil
 }
 
-func (t *Tag) Render(ub web.URLBuilder) (*TagRendered, error) {
-	tr := &TagRendered{
+func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
+	tr := &Tag{
 		Name: t.Name,
 	}
 

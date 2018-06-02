@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/luizbranco/srs"
 	"github.com/luizbranco/srs/web"
 )
 
 type Server struct {
 	Template   web.Template
-	Database   web.Database
 	URLBuilder web.URLBuilder
+	Database   srs.Database
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {

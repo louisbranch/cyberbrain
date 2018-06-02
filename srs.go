@@ -1,23 +1,28 @@
 package srs
 
-// Card represents a single flash card.
-type Card interface {
-	ID() string
-	Definitions() Definitions
-	Image() []byte
-	Audio() []byte
+type ID int
+
+type Identifiable interface {
+	ID() ID
+	Type() string
 }
 
-// Deck represents a group of flash cards.
-type Deck interface {
-	ID() string
-	Name() string
-	Description() string
-	Definitions() []string
-	Cards() ([]Card, error)
-	AddCard(Card) error
+type Database interface {
+	Create(Record) error
+	Query(Query) ([]Record, error)
+	QueryRaw(Query) ([]Record, error)
+	Get(Query) (Record, error)
+	Count(Query) (int, error)
+	Random(Query, int) ([]Record, error)
 }
 
-// Definitions is map with the type of a definition as key and the definition
-// itself as a value.
-type Definitions map[string]string
+type Record interface {
+	Identifiable
+	SetID(ID)
+}
+
+type Query interface {
+	NewRecord() Record
+	Where() map[string]interface{}
+	Raw() string
+}

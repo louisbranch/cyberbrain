@@ -3,8 +3,10 @@ package server
 import (
 	"net/http"
 
+	"github.com/luizbranco/srs"
+	"github.com/luizbranco/srs/db"
 	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/models"
+	"github.com/luizbranco/srs/web/html"
 )
 
 func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +38,13 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		deck, err := models.FindDeck(srv.Database, id)
+		deck, err := db.FindDeck(srv.Database, id)
 		if err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		p, err := models.NewPracticeFromForm(deck.MetaID, r.Form)
+		p, err := html.NewPracticeFromForm(deck.MetaID, r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -54,7 +56,13 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/practices/", http.StatusFound) // FIXME
+		path, err := srv.URLBuilder.Path("INDEX", p)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, path, http.StatusFound)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -75,13 +83,13 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := models.FindDeck(srv.Database, id)
+	deck, err := db.FindDeck(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	content, err := deck.Render(srv.URLBuilder)
+	content, err := html.RenderDeck(*deck, srv.URLBuilder)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -96,24 +104,24 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) practiceShow(id web.ID, w http.ResponseWriter, r *http.Request) {
-	p, err := models.FindPractice(srv.Database, id)
+func (srv *Server) practiceShow(id srs.ID, w http.ResponseWriter, r *http.Request) {
+	p, err := db.FindPractice(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck, err := models.FindDeck(srv.Database, p.DeckID)
+	deck, err := db.FindDeck(srv.Database, p.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	content := struct {
-		Practice *models.Practice
-		Deck     *models.Deck
-		Card     *models.Card
-		Round    *models.PracticeRound
+		Practice *srs.Practice
+		Deck     *srs.Deck
+		Card     *srs.Card
+		Round    *srs.PracticeRound
 	}{
 		Practice: p,
 		Deck:     deck,
@@ -130,24 +138,22 @@ func (srv *Server) practiceShow(id web.ID, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	n, err := models.CountPracticeRounds(srv.Database, p.MetaID)
+	n, err := db.CountPracticeRounds(srv.Database, p.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
 	if n < p.Rounds {
-		card, err := models.FindRandomCard(srv.Database, p.DeckID)
+		card, err := db.FindRandomCard(srv.Database, p.DeckID)
 		if err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		pr := &models.PracticeRound{
-			PracticeID: p.MetaID,
-			CardID:     card.MetaID,
-			Expect:     card.Definitions[0], // FIXME cannot be first always
-			Round:      n + 1,
+		// FIXME
+		pr := &srs.PracticeRound{
+			PracticeID: p.ID(),
 		}
 
 		err = srv.Database.Create(pr)
@@ -159,19 +165,12 @@ func (srv *Server) practiceShow(id web.ID, w http.ResponseWriter, r *http.Reques
 		content.Card = card
 		content.Round = pr
 	} else {
-		pr, err := models.FindPracticeRound(srv.Database, p.MetaID, n)
+		pr, err := db.FindPracticeRound(srv.Database, p.MetaID, n)
 		if err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		card, err := models.FindCard(srv.Database, pr.CardID)
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		content.Card = card
 		content.Round = pr
 	}
 

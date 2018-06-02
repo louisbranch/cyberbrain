@@ -2,6 +2,8 @@ package web
 
 import (
 	"io"
+
+	"github.com/luizbranco/srs"
 )
 
 type Page struct {
@@ -16,32 +18,9 @@ type Template interface {
 	Render(w io.Writer, page Page) error
 }
 
-type ID int
-
-type Database interface {
-	Create(Record) error
-	Query(Query) ([]Record, error)
-	QueryRaw(Query) ([]Record, error)
-	Get(Query) (Record, error)
-	Count(Query) (int, error)
-	Random(Query, int) ([]Record, error)
-}
-
-type Record interface {
-	ID() ID
-	SetID(ID)
-	Type() string
-}
-
-type Query interface {
-	NewRecord() Record
-	Where() map[string]interface{}
-	Raw() string
-}
-
 type URLBuilder interface {
-	ParseID(string) (ID, error)
-	EncodeID(ID) (string, error)
+	ParseID(string) (srs.ID, error)
+	EncodeID(srs.ID) (string, error)
 
-	Path(string, Record, ...Record) (string, error)
+	Path(string, srs.Identifiable, ...srs.Identifiable) (string, error)
 }

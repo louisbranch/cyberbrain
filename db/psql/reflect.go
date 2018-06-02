@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/lib/pq"
-	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
 )
 
@@ -17,7 +17,7 @@ type Query struct {
 	addrs   []interface{}
 }
 
-func QueryFromRecord(r web.Record, ignored ...string) (*Query, error) {
+func QueryFromRecord(r srs.Record, ignored ...string) (*Query, error) {
 	rv := reflect.ValueOf(r)
 	if rv.Kind() != reflect.Ptr {
 		return nil, errors.Errorf("cannot get database fields for record %v", r)
@@ -110,7 +110,7 @@ func (q *Query) Scan(row Scannable) error {
 	return nil
 }
 
-func where(cond web.Query) string {
+func where(cond srs.Query) string {
 	where := cond.Where()
 
 	if len(where) == 0 {
@@ -122,7 +122,7 @@ func where(cond web.Query) string {
 		switch t := v.(type) {
 		case string:
 			clause = append(clause, fmt.Sprintf("%s = '%s'", k, v))
-		case int, web.ID:
+		case int, srs.ID:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
 		default:
 			err := fmt.Sprintf("invalid type %q for where clause", t)

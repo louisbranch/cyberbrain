@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/luizbranco/srs"
+	"github.com/luizbranco/srs/db"
 	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/models"
+	"github.com/luizbranco/srs/web/html"
 )
 
 func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +33,7 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		deck, err := models.NewDeckFromForm(r.Form)
+		deck, err := html.NewDeckFromForm(r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -65,16 +67,16 @@ func (srv *Server) newDeck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
-	decks, err := models.FindDecks(srv.Database)
+	decks, err := db.FindDecks(srv.Database)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	var content []*models.DeckRendered
+	var content []*html.Deck
 
 	for _, d := range decks {
-		dr, err := d.Render(srv.URLBuilder)
+		dr, err := html.RenderDeck(d, srv.URLBuilder)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -93,20 +95,20 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) deckShow(id web.ID, w http.ResponseWriter, r *http.Request) {
-	deck, err := models.FindDeck(srv.Database, id)
+func (srv *Server) deckShow(id srs.ID, w http.ResponseWriter, r *http.Request) {
+	deck, err := db.FindDeck(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	cards, err := models.FindCardsByDeck(srv.Database, deck.MetaID)
+	cards, err := db.FindCardsByDeck(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := models.FindTagsByDeckID(srv.Database, deck.MetaID)
+	tags, err := db.FindTagsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -119,7 +121,7 @@ func (srv *Server) deckShow(id web.ID, w http.ResponseWriter, r *http.Request) {
 	deck.Cards = cards
 	deck.Tags = tags
 
-	content, err := deck.Render(srv.URLBuilder)
+	content, err := html.RenderDeck(*deck, srv.URLBuilder)
 	if err != nil {
 		srv.renderError(w, err)
 		return

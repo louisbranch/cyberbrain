@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
 	"github.com/speps/go-hashids"
 )
@@ -28,7 +28,7 @@ func New() (*URLBuilder, error) {
 	return &URLBuilder{hashid: h}, nil
 }
 
-func (ub *URLBuilder) Path(method string, r web.Record, params ...web.Record) (string, error) {
+func (ub *URLBuilder) Path(method string, r srs.Identifiable, params ...srs.Identifiable) (string, error) {
 	var qs []string
 
 	var id string
@@ -66,12 +66,12 @@ func (ub *URLBuilder) Path(method string, r web.Record, params ...web.Record) (s
 	}
 }
 
-func (ub *URLBuilder) EncodeID(id web.ID) (string, error) {
+func (ub *URLBuilder) EncodeID(id srs.ID) (string, error) {
 	i := int(id)
 	return ub.hashid.Encode([]int{i})
 }
 
-func (ub *URLBuilder) ParseID(hash string) (web.ID, error) {
+func (ub *URLBuilder) ParseID(hash string) (srs.ID, error) {
 	ids := ub.hashid.Decode(hash)
 	if len(ids) == 0 {
 		return 0, errors.Errorf("invalid id for %s", hash)
@@ -79,5 +79,5 @@ func (ub *URLBuilder) ParseID(hash string) (web.ID, error) {
 
 	id := ids[0]
 
-	return web.ID(id), nil
+	return srs.ID(id), nil
 }
