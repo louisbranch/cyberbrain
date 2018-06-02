@@ -1,5 +1,7 @@
 package srs
 
+import "time"
+
 type ID int
 
 type Identifiable interface {
@@ -18,7 +20,11 @@ type Database interface {
 
 type Record interface {
 	Identifiable
+
 	SetID(ID)
+	SetVersion(int)
+	SetCreatedAt(time.Time)
+	SetUpdatedAt(time.Time)
 }
 
 type Query interface {

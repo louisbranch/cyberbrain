@@ -22,10 +22,22 @@ func (d Deck) ID() ID {
 	return d.MetaID
 }
 
+func (d Deck) Type() string {
+	return "deck"
+}
+
 func (d *Deck) SetID(id ID) {
 	d.MetaID = id
 }
 
-func (d Deck) Type() string {
-	return "deck"
+func (d *Deck) SetVersion(v int) {
+	d.MetaVersion = v
+}
+
+func (d *Deck) SetCreatedAt(t time.Time) {
+	d.MetaCreatedAt = t
+}
+
+func (d *Deck) SetUpdatedAt(t time.Time) {
+	d.MetaUpdatedAt = t
 }

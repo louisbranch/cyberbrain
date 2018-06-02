@@ -21,10 +21,22 @@ func (c Card) ID() ID {
 	return c.MetaID
 }
 
+func (c Card) Type() string {
+	return "card"
+}
+
 func (c *Card) SetID(id ID) {
 	c.MetaID = id
 }
 
-func (c Card) Type() string {
-	return "card"
+func (d *Card) SetVersion(v int) {
+	d.MetaVersion = v
+}
+
+func (d *Card) SetCreatedAt(t time.Time) {
+	d.MetaCreatedAt = t
+}
+
+func (d *Card) SetUpdatedAt(t time.Time) {
+	d.MetaUpdatedAt = t
 }

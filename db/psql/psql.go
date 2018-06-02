@@ -3,10 +3,13 @@ package psql
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
 )
+
+const version = 1
 
 type Database struct {
 	*sql.DB
@@ -33,6 +36,12 @@ func New(host, port, dbname, user, pass string) (*Database, error) {
 }
 
 func (db *Database) Create(r srs.Record) error {
+	now := time.Now()
+
+	r.SetCreatedAt(now)
+	r.SetUpdatedAt(now)
+	r.SetVersion(version)
+
 	q, err := QueryFromRecord(r, "id")
 	if err != nil {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
