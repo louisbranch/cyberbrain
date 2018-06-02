@@ -17,14 +17,14 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		slug := r.Form.Get("deck")
-
-		if slug == "" {
+		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		if err != nil {
+			// FIXME bad request
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck, err := models.FindDeckBySlug(srv.Database, slug)
+		deck, err := models.FindDeck(srv.Database, id)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -42,7 +42,13 @@ func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/decks/"+slug, http.StatusFound)
+		path, err := srv.URLBuilder.Path("SHOW", deck)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, path, http.StatusFound)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -55,14 +61,15 @@ func (srv *Server) newTag(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	slug := query.Get("deck")
 
-	if slug == "" {
+	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	if err != nil {
+		// FIXME bad request
 		srv.renderNotFound(w)
 		return
 	}
 
-	deck, err := models.FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeck(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return

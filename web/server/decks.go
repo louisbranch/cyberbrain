@@ -17,7 +17,13 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		srv.deckShow(path, w, r)
+		id, err := srv.URLBuilder.ID(path)
+		if err != nil {
+			srv.renderNotFound(w)
+			return
+		}
+
+		srv.deckShow(id, w, r)
 	case "POST":
 
 		if err := r.ParseForm(); err != nil {
@@ -81,14 +87,14 @@ func (srv *Server) decksList(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) deckShow(slug string, w http.ResponseWriter, r *http.Request) {
-	deck, err := models.FindDeckBySlug(srv.Database, slug)
+func (srv *Server) deckShow(id web.ID, w http.ResponseWriter, r *http.Request) {
+	deck, err := models.FindDeck(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	cards, err := models.FindCardsByDeckID(srv.Database, deck.MetaID)
+	cards, err := models.FindCardsByDeck(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return

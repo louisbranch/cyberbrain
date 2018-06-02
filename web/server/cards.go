@@ -12,26 +12,33 @@ import (
 func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		slug := r.URL.Path[len("/cards/"):]
-		if slug == "" {
+		path := r.URL.Path[len("/cards/"):]
+		if path == "" {
 			http.Redirect(w, r, "/decks", http.StatusFound)
 			return
 		}
 
-		srv.cardShow(slug, w, r)
+		id, err := srv.URLBuilder.ID(path)
+		if err != nil {
+			srv.renderNotFound(w)
+			return
+		}
+
+		srv.cardShow(id, w, r)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		slug := r.Form.Get("deck")
-		if slug == "" {
+		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		if err != nil {
+			// FIXME bad request
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck, err := models.FindDeckBySlug(srv.Database, slug)
+		deck, err := models.FindDeck(srv.Database, id)
 		if err != nil {
 			srv.renderNotFound(w)
 			return
@@ -71,7 +78,13 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		http.Redirect(w, r, "/decks/"+slug, http.StatusFound)
+		path, err := srv.URLBuilder.Path("SHOW", card)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, path, http.StatusFound)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -84,23 +97,22 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	slug := query.Get("deck")
-
-	if slug == "" {
+	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	if err != nil {
 		srv.renderNotFound(w)
 		return
 	}
 
-	deck, err := models.FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeck(srv.Database, id)
 	if err != nil {
-		// FIXME
+		// FIXME bad request
 		srv.renderError(w, err)
 		return
 	}
 
 	tags, err := models.FindTagsByDeckID(srv.Database, deck.MetaID)
 	if err != nil {
-		// FIXME
+		// FIXME bad request
 		srv.renderError(w, err)
 		return
 	}
@@ -116,20 +128,20 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request) {
-	card, err := models.FindCardBySlug(srv.Database, slug)
+func (srv *Server) cardShow(id web.ID, w http.ResponseWriter, r *http.Request) {
+	card, err := models.FindCard(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck, err := models.FindDeckByID(srv.Database, card.DeckID)
+	deck, err := models.FindDeck(srv.Database, card.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	tags, err := models.FindTagsByCardID(srv.Database, card.MetaID)
+	tags, err := models.FindTagsByCard(srv.Database, card.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -146,7 +158,7 @@ func (srv *Server) cardShow(slug string, w http.ResponseWriter, r *http.Request)
 	}
 
 	page := web.Page{
-		Title:    "Card #" + slug,
+		Title:    "Card",
 		Partials: []string{"card"},
 		Content:  content,
 	}

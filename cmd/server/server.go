@@ -22,13 +22,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tmpl := html.New("web/templates")
-	tmpl.URLBuilder = ub
+	tpl := html.New("web/templates")
+	tpl.URLBuilder = ub
 
 	srv := &server.Server{
-		Template: tmpl,
-		Database: db,
+		Template:   tpl,
+		Database:   db,
+		URLBuilder: ub,
 	}
+
 	mux := srv.NewServeMux()
 
 	fmt.Println("Server listening on port 8080")

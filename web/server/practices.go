@@ -10,27 +10,33 @@ import (
 func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		slug := r.URL.Path[len("/practices/"):]
-		if slug == "" {
+		path := r.URL.Path[len("/practices/"):]
+		if path == "" {
 			http.Redirect(w, r, "/decks", http.StatusFound)
 			return
 		}
 
-		srv.practiceShow(slug, w, r)
+		id, err := srv.URLBuilder.ID(path)
+		if err != nil {
+			srv.renderNotFound(w)
+			return
+		}
+
+		srv.practiceShow(id, w, r)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			srv.renderError(w, err)
 			return
 		}
 
-		slug := r.Form.Get("deck")
-
-		if slug == "" {
+		id, err := srv.URLBuilder.ID(r.Form.Get("deck"))
+		if err != nil {
+			// FIXME bad request
 			srv.renderNotFound(w)
 			return
 		}
 
-		deck, err := models.FindDeckBySlug(srv.Database, slug)
+		deck, err := models.FindDeck(srv.Database, id)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -61,14 +67,15 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	slug := query.Get("deck")
 
-	if slug == "" {
+	id, err := srv.URLBuilder.ID(query.Get("deck"))
+	if err != nil {
+		// FIXME bad request
 		srv.renderNotFound(w)
 		return
 	}
 
-	deck, err := models.FindDeckBySlug(srv.Database, slug)
+	deck, err := models.FindDeck(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -83,14 +90,14 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 	srv.render(w, page)
 }
 
-func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Request) {
-	p, err := models.FindPracticeBySlug(srv.Database, slug)
+func (srv *Server) practiceShow(id web.ID, w http.ResponseWriter, r *http.Request) {
+	p, err := models.FindPractice(srv.Database, id)
 	if err != nil {
 		srv.renderError(w, err)
 		return
 	}
 
-	deck, err := models.FindDeckByID(srv.Database, p.DeckID)
+	deck, err := models.FindDeck(srv.Database, p.DeckID)
 	if err != nil {
 		srv.renderError(w, err)
 		return
@@ -107,7 +114,7 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 	}
 
 	page := web.Page{
-		Title:    "Practice #" + slug,
+		Title:    "Practice",
 		Partials: []string{"practice"},
 		Content:  content,
 	}
@@ -152,7 +159,7 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		card, err := models.FindCardByID(srv.Database, pr.CardID)
+		card, err := models.FindCard(srv.Database, pr.CardID)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -163,7 +170,7 @@ func (srv *Server) practiceShow(slug string, w http.ResponseWriter, r *http.Requ
 	}
 
 	page = web.Page{
-		Title:    "Practice #" + slug,
+		Title:    "Practice",
 		Partials: []string{"practice"},
 		Content:  content,
 	}

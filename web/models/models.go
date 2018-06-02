@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/dchest/uniuri"
 	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
@@ -28,19 +27,10 @@ func FindDecks(db web.Database) ([]Deck, error) {
 	return decks, nil
 }
 
-func FindDeckBySlug(db web.Database, slug string) (*Deck, error) {
-	q := newDeckQuery()
-	q.where["slug"] = slug
-	return findDeck(db, q)
-}
-
-func FindDeckByID(db web.Database, id web.ID) (*Deck, error) {
+func FindDeck(db web.Database, id web.ID) (*Deck, error) {
 	q := newDeckQuery()
 	q.where["id"] = id
-	return findDeck(db, q)
-}
 
-func findDeck(db web.Database, q *query) (*Deck, error) {
 	r, err := db.Get(q)
 	if err != nil {
 		return nil, err
@@ -54,7 +44,7 @@ func findDeck(db web.Database, q *query) (*Deck, error) {
 	return deck, nil
 }
 
-func FindCardByID(db web.Database, id web.ID) (*Card, error) {
+func FindCard(db web.Database, id web.ID) (*Card, error) {
 	q := newCardQuery()
 	q.where["id"] = id
 
@@ -71,24 +61,7 @@ func FindCardByID(db web.Database, id web.ID) (*Card, error) {
 	return card, nil
 }
 
-func FindCardBySlug(db web.Database, slug string) (*Card, error) {
-	q := newCardQuery()
-	q.where["slug"] = slug
-
-	r, err := db.Get(q)
-	if err != nil {
-		return nil, err
-	}
-
-	card, ok := r.(*Card)
-	if !ok {
-		return nil, errors.Errorf("invalid record type %T", r)
-	}
-
-	return card, nil
-}
-
-func FindCardsByDeckID(db web.Database, deckID web.ID) ([]Card, error) {
+func FindCardsByDeck(db web.Database, deckID web.ID) ([]Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
 
@@ -100,8 +73,8 @@ func FindCardsByDeckID(db web.Database, deckID web.ID) ([]Card, error) {
 	return castCards(rs)
 }
 
-func FindTagsByCardID(db web.Database, cardID web.ID) ([]Tag, error) {
-	raw := `SELECT t.id, t.deck_id, t.slug, name FROM tags t
+func FindTagsByCard(db web.Database, cardID web.ID) ([]Tag, error) {
+	raw := `SELECT t.id, t.deck_id, name FROM tags t
 	LEFT JOIN card_tags ct ON t.id = ct.tag_id
 	WHERE ct.card_id = ` + string(cardID) + ";"
 
@@ -144,25 +117,7 @@ func castTags(rs []web.Record) ([]Tag, error) {
 	return tags, nil
 }
 
-func FindPracticeBySlug(db web.Database, slug string) (*Practice, error) {
-	q := newPracticeQuery()
-	q.where["slug"] = slug
-
-	r, err := db.Get(q)
-	if err != nil {
-		return nil, err
-	}
-
-	p, ok := r.(*Practice)
-
-	if !ok {
-		return nil, errors.Errorf("invalid record type %T", r)
-	}
-
-	return p, nil
-}
-
-func FindPracticeByID(db web.Database, id web.ID) (*Practice, error) {
+func FindPractice(db web.Database, id web.ID) (*Practice, error) {
 	q := newPracticeQuery()
 	q.where["id"] = id
 
@@ -240,8 +195,4 @@ func castCards(rs []web.Record) ([]Card, error) {
 	}
 
 	return cards, nil
-}
-
-func NewSlug() string {
-	return uniuri.New()
 }

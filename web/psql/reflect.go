@@ -120,9 +120,9 @@ func where(cond web.Query) string {
 	var clause []string
 	for k, v := range where {
 		switch t := v.(type) {
-		case string, web.ID:
+		case string:
 			clause = append(clause, fmt.Sprintf("%s = '%s'", k, v))
-		case int:
+		case int, web.ID:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
 		default:
 			err := fmt.Sprintf("invalid type %q for where clause", t)

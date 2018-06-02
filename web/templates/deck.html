@@ -1,63 +1,63 @@
 {{ define "content" }}
-  <nav class="breadcrumb" aria-label="breadcrumbs">
-		<ul>
-			<li><a href="/">Home</a></li>
-			<li><a href="/decks/">Decks</a></li>
-			<li class="is-active"><a href="#" aria-current="page">{{ .Name }}</a></li>
-		</ul>
-	</nav>
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/decks/">Decks</a></li>
+    <li class="is-active"><a href="#" aria-current="page">{{ .Name }}</a></li>
+  </ul>
+</nav>
 
-  <section class="section">
-    <div class="columns">
-      <div class="column is-8">
-        <h1 class="title">{{ .Name }}</h1>
-        <p class="subtitle">{{ .Description }}</p>
+<section class="section">
+  <div class="columns">
+    <div class="column is-8">
+      <h1 class="title">{{ .Name }}</h1>
+      <p class="subtitle">{{ .Description }}</p>
+    </div>
+    <div class="column is-4">
+      <h3 class="title is-4">Tags</h3>
+      <div class="content">
+        {{ range .Tags }}
+        <span class="tag">{{ .Name }}</span>
+        {{ end }}
       </div>
-      <div class="column is-4">
-        <h3 class="title is-4">Tags</h3>
-        <div class="content">
-          {{ range .Tags }}
-            <span class="tag">{{ .Name }}</span>
-          {{ end }}
+      <a class="button" href="/tags/new?deck={{ .Slug }}">Add Tag</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="title is-4">Cards</h2>
+  <div class="content">
+    <a class="button is-primary" href="/cards/new?deck={{ .Slug }}">Add Card</a>
+    <a class="button" href="/practices/new?deck={{ .Slug }}">Practice</a>
+  </div>
+  <div class="columns">
+    {{ $deck := . }}
+    {{ range .Cards }}
+    <div class="column is-4">
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-4by3">
+            <a href="/cards/{{ .Slug }}">
+              <img src="{{ .ImageURL }}">
+            </a>
+          </figure>
         </div>
-        <a class="button" href="/tags/new?deck={{ .Slug }}">Add Tag</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2 class="title is-4">Cards</h2>
-    <div class="content">
-      <a class="button is-primary" href="/cards/new?deck={{ .Slug }}">Add Card</a>
-      <a class="button" href="/practices/new?deck={{ .Slug }}">Practice</a>
-    </div>
-    <div class="columns">
-      {{ $deck := . }}
-      {{ range .Cards }}
-        <div class="column is-4">
-          <div class="card">
-            <div class="card-image">
-              <figure class="image is-4by3">
-                <a href="/cards/{{ .Slug }}">
-                  <img src="{{ .ImageURL }}">
-                </a>
-              </figure>
-            </div>
-            <div class="card-content">
-              <div class="content">
-                <dl>
-                  <dt>Definition</dt>
-                  <dd>{{ .Definition }}</dd>
-                  <dt>Alt Definition</dt>
-                  <dd>{{ .AltDefinition }}</dd>
-                  <dt>Pronunciation</dt>
-                  <dd>{{ .Pronunciation }}</dd>
-                </dl>
-              </div>
-            </div>
+        <div class="card-content">
+          <div class="content">
+            <dl>
+              <dt>Definition</dt>
+              <dd>{{ .Definition }}</dd>
+              <dt>Alt Definition</dt>
+              <dd>{{ .AltDefinition }}</dd>
+              <dt>Pronunciation</dt>
+              <dd>{{ .Pronunciation }}</dd>
+            </dl>
           </div>
         </div>
-      {{ end }}
+      </div>
     </div>
-  </section>
+    {{ end }}
+  </div>
+</section>
 {{ end }}
