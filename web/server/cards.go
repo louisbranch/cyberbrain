@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/luizbranco/srs/web"
 	"github.com/luizbranco/srs/web/models"
@@ -59,7 +58,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 		tags := r.Form["tags"]
 
 		for _, tag := range tags {
-			id, err := strconv.Atoi(tag)
+			id, err := srv.URLBuilder.ParseID(tag)
 			if err != nil {
 				err = errors.Wrapf(err, "invalid tag id %s", tag)
 				srv.renderError(w, err)
@@ -68,7 +67,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 
 			ct := models.CardTag{
 				CardID: card.MetaID,
-				TagID:  web.ID(id),
+				TagID:  id,
 			}
 
 			err = srv.Database.Create(&ct)

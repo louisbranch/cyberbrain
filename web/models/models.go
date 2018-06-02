@@ -78,7 +78,7 @@ func FindCardsByDeck(db web.Database, deckID web.ID) ([]Card, error) {
 func FindTagsByCard(db web.Database, cardID web.ID) ([]Tag, error) {
 	id := strconv.Itoa(int(cardID))
 
-	raw := `SELECT t.id, t.deck_id, name FROM tags t
+	raw := `SELECT t.* FROM tags t
 	LEFT JOIN card_tags ct ON t.id = ct.tag_id
 	WHERE ct.card_id = ` + id + ";"
 
