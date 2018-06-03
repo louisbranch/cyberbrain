@@ -61,12 +61,12 @@ var tableQueries = []string{
 			mode INTEGER NOT NULL DEFAULT 0,
 			field INTEGER NOT NULL DEFAULT 0,
 			tag_id INTEGER,
-			rounds INTEGER NOT NULL CHECK(rounds > 0),
+			total_rounds INTEGER NOT NULL CHECK(total_rounds > 0),
 			done BOOLEAN NOT NULL DEFAULT FALSE
 		);
 		`,
 	`
-		CREATE TABLE IF NOT EXISTS practice_rounds(
+		CREATE TABLE IF NOT EXISTS rounds(
 			id SERIAL PRIMARY KEY,
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -76,7 +76,7 @@ var tableQueries = []string{
 			mode INTEGER NOT NULL DEFAULT 0,
 			card_ids INTEGER[] NOT NULL CHECK (cardinality(card_ids) > 0),
 			options TEXT[] NOT NULL CHECK (cardinality(options) > 0),
-			answer TEXT,
+			guess TEXT,
 			correct BOOLEAN NOT NULL DEFAULT FALSE,
 			done BOOLEAN NOT NULL DEFAULT FALSE
 		);

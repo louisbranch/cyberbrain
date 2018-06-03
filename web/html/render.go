@@ -48,6 +48,9 @@ type Practice struct {
 	Deck *Deck
 }
 
+type Round struct {
+}
+
 func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 	dr := &Deck{
 		Name:        d.Name,
@@ -185,7 +188,7 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 
 	pr.State = "In Progress"
 
-	path, err := ub.Path("NEW", &srs.PracticeRound{}, p)
+	path, err := ub.Path("NEW", &srs.Round{}, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build continue practice path")
 	}
@@ -193,4 +196,10 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 	pr.ContinuePath = path
 
 	return pr, nil
+}
+
+func RenderRound(pr srs.Round, ub web.URLBuilder) (*Round, error) {
+	rr := &Round{}
+
+	return rr, nil
 }

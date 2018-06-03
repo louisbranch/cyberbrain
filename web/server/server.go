@@ -8,6 +8,7 @@ import (
 	"github.com/luizbranco/srs/web"
 	"github.com/luizbranco/srs/web/server/practices"
 	"github.com/luizbranco/srs/web/server/response"
+	"github.com/luizbranco/srs/web/server/rounds"
 )
 
 type Server struct {
@@ -40,6 +41,26 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 		switch {
 		case method == "GET" && path == "":
+			handler = rounds.Index()
+		case method == "GET" && path == "new":
+			handler = rounds.New(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
+		case method == "GET":
+			handler = rounds.Show(srv.Database, srv.URLBuilder, path)
+		case method == "POST" && path == "":
+			handler = rounds.Create(srv.Database, srv.URLBuilder)
+		}
+
+		srv.handle(handler, w, r)
+	})
+
+	mux.HandleFunc("/rounds/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/rounds/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
 			handler = practices.Index()
 		case method == "GET" && path == "new":
 			handler = practices.New(srv.Database, srv.URLBuilder)
@@ -51,9 +72,6 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 		srv.handle(handler, w, r)
 	})
-
-	//mux.HandleFunc("/rounds/new", srv.newRound)
-	//mux.HandleFunc("/rounds/", srv.round)
 
 	mux.HandleFunc("/", srv.index)
 

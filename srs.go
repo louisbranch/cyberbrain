@@ -34,5 +34,5 @@ type Query interface {
 }
 
 type PracticeGenerator interface {
-	NewRound(Database, Practice) (PracticeRound, error)
+	NewRound(Database, Practice) (Round, error)
 }

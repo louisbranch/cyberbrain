@@ -85,8 +85,8 @@ func NewPracticeFromForm(deck srs.Deck, form url.Values, ub web.URLBuilder) (*sr
 	}
 
 	p := &srs.Practice{
-		DeckID: deck.ID(),
-		Rounds: n,
+		DeckID:      deck.ID(),
+		TotalRounds: n,
 	}
 
 	tagID := form.Get("tags")

@@ -75,9 +75,9 @@ func newPracticeQuery() *query {
 	}
 }
 
-func newPracticeRoundQuery() *query {
+func newRoundQuery() *query {
 	fn := func() srs.Record {
-		return &srs.PracticeRound{}
+		return &srs.Round{}
 	}
 
 	return &query{

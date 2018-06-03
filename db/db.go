@@ -139,17 +139,16 @@ func FindPractice(db srs.Database, id srs.ID) (*srs.Practice, error) {
 	return p, nil
 }
 
-func FindPracticeRound(db srs.Database, pid srs.ID, round int) (*srs.PracticeRound, error) {
-	q := newPracticeRoundQuery()
-	q.where["practice_id"] = pid
-	q.where["round"] = round
+func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
+	q := newRoundQuery()
+	q.where["id"] = pid
 
 	r, err := db.Get(q)
 	if err != nil {
 		return nil, err
 	}
 
-	p, ok := r.(*srs.PracticeRound)
+	p, ok := r.(*srs.Round)
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
 	}
@@ -157,9 +156,9 @@ func FindPracticeRound(db srs.Database, pid srs.ID, round int) (*srs.PracticeRou
 	return p, nil
 }
 
-func CountPracticeRounds(db srs.Database, id srs.ID) (int, error) {
-	q := newPracticeRoundQuery()
-	q.where["id"] = id
+func CountRounds(db srs.Database, practiceID srs.ID) (int, error) {
+	q := newRoundQuery()
+	q.where["practice_id"] = practiceID
 
 	return db.Count(q)
 }
