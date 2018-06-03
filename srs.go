@@ -32,3 +32,7 @@ type Query interface {
 	Where() map[string]interface{}
 	Raw() string
 }
+
+type PracticeGenerator interface {
+	NewRound(Database, Practice) (PracticeRound, error)
+}

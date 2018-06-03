@@ -38,6 +38,16 @@ type Tag struct {
 	Path string
 }
 
+type Practice struct {
+	State string
+
+	ContinuePath string
+
+	// TODO progress
+
+	Deck *Deck
+}
+
 func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 	dr := &Deck{
 		Name:        d.Name,
@@ -155,4 +165,32 @@ func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
 	tr.Path = p
 
 	return tr, nil
+}
+
+func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
+	pr := &Practice{}
+
+	if p.Deck != nil {
+		dr, err := RenderDeck(*p.Deck, ub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to render deck practice")
+		}
+		pr.Deck = dr
+	}
+
+	if p.Done {
+		pr.State = "Finished"
+		return pr, nil
+	}
+
+	pr.State = "In Progress"
+
+	path, err := ub.Path("NEW", &srs.PracticeRound{}, p)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build continue practice path")
+	}
+
+	pr.ContinuePath = path
+
+	return pr, nil
 }

@@ -14,8 +14,9 @@ type Deck struct {
 	Description string   `db:"description"`
 	ImageURL    string   `db:"image_url"`
 	Fields      []string `db:"fields"`
-	Cards       []Card
-	Tags        []Tag
+
+	Cards []Card
+	Tags  []Tag
 }
 
 func (d Deck) ID() ID {

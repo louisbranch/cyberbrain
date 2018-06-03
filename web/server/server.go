@@ -6,12 +6,15 @@ import (
 
 	"github.com/luizbranco/srs"
 	"github.com/luizbranco/srs/web"
+	"github.com/luizbranco/srs/web/server/practices"
+	"github.com/luizbranco/srs/web/server/response"
 )
 
 type Server struct {
-	Template   web.Template
-	URLBuilder web.URLBuilder
-	Database   srs.Database
+	Template          web.Template
+	URLBuilder        web.URLBuilder
+	Database          srs.Database
+	PracticeGenerator srs.PracticeGenerator
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
@@ -29,8 +32,44 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	mux.HandleFunc("/tags/new", srv.newTag)
 	mux.HandleFunc("/tags/", srv.tags)
 
-	mux.HandleFunc("/practices/new", srv.newPractice)
-	mux.HandleFunc("/practices/", srv.practice)
+	mux.HandleFunc("/practices/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/practices/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = practices.Index()
+		case method == "GET" && path == "new":
+			handler = practices.New(srv.Database, srv.URLBuilder)
+		case method == "GET":
+			handler = practices.Show(srv.Database, srv.URLBuilder, path)
+		case method == "POST" && path == "":
+			handler = practices.Create(srv.Database, srv.URLBuilder)
+		}
+
+		if handler == nil {
+			srv.renderNotFound(w)
+			return
+		}
+
+		res := handler(w, r)
+		page, err := res.Respond(w, r)
+
+		if page != nil {
+			srv.render(w, *page)
+			return
+		}
+
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+	})
+
+	//mux.HandleFunc("/rounds/new", srv.newRound)
+	//mux.HandleFunc("/rounds/", srv.round)
 
 	mux.HandleFunc("/", srv.index)
 

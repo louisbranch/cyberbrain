@@ -27,6 +27,9 @@ type Practice struct {
 	TagID  *ID          `db:"tag_id"`
 	Rounds int          `db:"rounds"`
 	Done   bool         `db:"done"`
+
+	Deck           *Deck
+	PracticeRounds []PracticeRound
 }
 
 func (p Practice) ID() ID {

@@ -1,36 +1,23 @@
 {{ define "content" }}
-  <nav class="breadcrumb" aria-label="breadcrumbs">
-		<ul>
-			<li><a href="/">Home</a></li>
-			<li><a href="/decks/">Decks</a></li>
-      <li><a href="/decks/{{ .Deck.Slug }}">{{ .Deck.Name }}</a></li>
-			<li class="is-active"><a href="#" aria-current="page">Practice</a></li>
-		</ul>
-	</nav>
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Deck.Path }}">{{ .Deck.Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">Practice</a></li>
+  </ul>
+</nav>
 
-  <section class="section">
-    <div class="columns">
-      <div class="column is-8">
-        <h1 class="title">Practice #{{ .Practice.ID }}</h1>
+<section class="section">
+  <div class="columns">
+    <div class="column is-8">
+      <h1 class="title">Practice {{ .State }}</h1>
+      <div class="content">
+        {{ if .ContinuePath }}
+          <a class="button is-primary" href="{{ .ContinuePath }}">Continue</a>
+        {{ end }}
       </div>
     </div>
-  </section>
-
-
-  {{ if .Card }}
-    <section class="section">
-      <div class="columns">
-        <div class="column is-4">
-          <div class="card">
-            <div class="card-image">
-              <figure class="image is-4by3">
-                <img src="{{ .Card.ImageURL }}">
-              </figure>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  {{ end }}
-
+  </div>
+</section>
 {{ end }}
