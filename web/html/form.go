@@ -5,8 +5,11 @@ import (
 	"strconv"
 
 	"github.com/luizbranco/srs"
+	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
 )
+
+const CHECKED = "on"
 
 func NewDeckFromForm(form url.Values) (*srs.Deck, error) {
 	d := &srs.Deck{}
@@ -43,9 +46,9 @@ func NewCardFromForm(deck srs.Deck, form url.Values) (*srs.Card, error) {
 		}
 	}
 
-	for _, f := range form["audio_urls"] {
+	for _, f := range form["sound_urls"] {
 		if f != "" {
-			c.AudioURLs = append(c.AudioURLs, f)
+			c.SoundURLs = append(c.SoundURLs, f)
 		}
 	}
 
@@ -66,15 +69,15 @@ func NewCardFromForm(deck srs.Deck, form url.Values) (*srs.Card, error) {
 	return c, nil
 }
 
-func NewTagFromForm(deckID srs.ID, form url.Values) (*srs.Tag, error) {
+func NewTagFromForm(deck srs.Deck, form url.Values) (*srs.Tag, error) {
 	t := &srs.Tag{
-		DeckID: deckID,
+		DeckID: deck.ID(),
 		Name:   form.Get("name"),
 	}
 	return t, nil
 }
 
-func NewPracticeFromForm(deckID srs.ID, form url.Values) (*srs.Practice, error) {
+func NewPracticeFromForm(deck srs.Deck, form url.Values, ub web.URLBuilder) (*srs.Practice, error) {
 	rounds := form.Get("rounds")
 	n, err := strconv.Atoi(rounds)
 	if err != nil {
@@ -82,9 +85,49 @@ func NewPracticeFromForm(deckID srs.ID, form url.Values) (*srs.Practice, error) 
 	}
 
 	p := &srs.Practice{
-		DeckID: deckID,
+		DeckID: deck.ID(),
 		Rounds: n,
 	}
+
+	tagID := form.Get("tags")
+
+	if tagID != "" {
+		id, err := ub.ParseID(tagID)
+		if err != nil {
+			errors.Wrap(err, "invalid tag id")
+		}
+
+		found := false
+
+		for _, t := range deck.Tags {
+			if t.ID() == id {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return nil, errors.Errorf("invalid tag id %s", tagID)
+		}
+
+		p.TagID = &id
+	}
+
+	mode := srs.PracticeRandom
+
+	if form.Get("definitions") == CHECKED {
+		mode |= srs.PracticeDefinitions
+	}
+
+	if form.Get("images") == CHECKED {
+		mode |= srs.PracticeImages
+	}
+
+	if form.Get("sounds") == CHECKED {
+		mode |= srs.PracticeSounds
+	}
+
+	p.Mode = mode
 
 	return p, nil
 }

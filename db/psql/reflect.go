@@ -49,6 +49,16 @@ func QueryFromRecord(r srs.Record, ignored ...string) (*Query, error) {
 				slice := field.Interface().([]string)
 				sa := pq.StringArray(slice)
 				addr = &sa
+			case reflect.Int:
+				ids := field.Interface().([]srs.ID)
+				slice := make([]int64, len(ids))
+
+				for i, id := range ids {
+					slice[i] = int64(id)
+				}
+
+				sa := pq.Int64Array(slice)
+				addr = &sa
 			default:
 				return nil, errors.Errorf("slice type %v not supported", e)
 			}
@@ -104,6 +114,16 @@ func (q *Query) Scan(row Scannable) error {
 			ss := []string(*slice)
 			f := q.fields[i].(*[]string)
 			*f = ss
+		case *pq.Int64Array:
+			slice := addr.(*pq.Int64Array)
+			f := q.fields[i].(*[]srs.ID)
+
+			sids := make([]srs.ID, len(*slice))
+			for i, id := range *slice {
+				sids[i] = srs.ID(id)
+			}
+
+			*f = sids
 		}
 	}
 

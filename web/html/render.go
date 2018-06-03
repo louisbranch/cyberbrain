@@ -105,7 +105,7 @@ func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
 	cr := &Card{
 		ImageURLs:   c.ImageURLs,
-		AudioURLs:   c.AudioURLs,
+		AudioURLs:   c.SoundURLs,
 		Definitions: c.Definitions,
 	}
 

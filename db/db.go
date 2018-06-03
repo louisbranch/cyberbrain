@@ -93,7 +93,7 @@ func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
 	return castTags(rs)
 }
 
-func FindTagsByDeckID(db srs.Database, id srs.ID) ([]srs.Tag, error) {
+func FindTags(db srs.Database, id srs.ID) ([]srs.Tag, error) {
 	q := newTagQuery()
 	q.where["deck_id"] = id
 

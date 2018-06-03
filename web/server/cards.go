@@ -111,7 +111,7 @@ func (srv *Server) newCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := db.FindTagsByDeckID(srv.Database, deck.MetaID)
+	tags, err := db.FindTags(srv.Database, deck.MetaID)
 	if err != nil {
 		// FIXME bad request
 		srv.renderError(w, err)

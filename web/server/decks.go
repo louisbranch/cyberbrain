@@ -45,7 +45,13 @@ func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/decks", http.StatusFound)
+		path, err := srv.URLBuilder.Path("SHOW", deck)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, path, http.StatusFound)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -108,7 +114,7 @@ func (srv *Server) deckShow(id srs.ID, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := db.FindTagsByDeckID(srv.Database, deck.MetaID)
+	tags, err := db.FindTags(srv.Database, deck.MetaID)
 	if err != nil {
 		srv.renderError(w, err)
 		return

@@ -7,10 +7,10 @@ import (
 type PracticeMode int
 
 const (
-	PracticeRandom      PracticeMode = iota
-	PracticeDefinitions              = 1 << (10 * iota)
-	PracticeImages
-	PracticeAudios
+	PracticeRandom PracticeMode = 0
+	PracticeImages PracticeMode = 1 << (1 * iota)
+	PracticeSounds
+	PracticeDefinitions
 )
 
 type Practice struct {

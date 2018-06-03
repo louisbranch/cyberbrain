@@ -12,7 +12,7 @@ type Card struct {
 
 	DeckID      ID       `db:"deck_id"`
 	ImageURLs   []string `db:"image_urls"`
-	AudioURLs   []string `db:"audio_urls"`
+	SoundURLs   []string `db:"sound_urls"`
 	Definitions []string `db:"definitions"`
 	Tags        []Tag
 }

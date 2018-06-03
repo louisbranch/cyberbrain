@@ -44,7 +44,15 @@ func (srv *Server) practice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		p, err := html.NewPracticeFromForm(deck.MetaID, r.Form)
+		tags, err := db.FindTags(srv.Database, id)
+		if err != nil {
+			srv.renderError(w, err)
+			return
+		}
+
+		deck.Tags = tags
+
+		p, err := html.NewPracticeFromForm(*deck, r.Form, srv.URLBuilder)
 		if err != nil {
 			srv.renderError(w, err)
 			return
@@ -88,6 +96,14 @@ func (srv *Server) newPractice(w http.ResponseWriter, r *http.Request) {
 		srv.renderError(w, err)
 		return
 	}
+
+	tags, err := db.FindTags(srv.Database, id)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	deck.Tags = tags
 
 	content, err := html.RenderDeck(*deck, srv.URLBuilder)
 	if err != nil {
