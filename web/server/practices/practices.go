@@ -79,7 +79,7 @@ func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 
 		id, err := ub.ParseID(hash)
 		if err != nil {
-			return response.NewError(err, http.StatusBadRequest, "invalid practice id")
+			return response.NewError(err, http.StatusNotFound, "invalid practice id")
 		}
 
 		p, err := db.FindPractice(conn, id)

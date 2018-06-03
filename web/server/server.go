@@ -49,23 +49,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = practices.Create(srv.Database, srv.URLBuilder)
 		}
 
-		if handler == nil {
-			srv.renderNotFound(w)
-			return
-		}
-
-		res := handler(w, r)
-		page, err := res.Respond(w, r)
-
-		if page != nil {
-			srv.render(w, *page)
-			return
-		}
-
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
+		srv.handle(handler, w, r)
 	})
 
 	//mux.HandleFunc("/rounds/new", srv.newRound)
@@ -74,6 +58,26 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	mux.HandleFunc("/", srv.index)
 
 	return mux
+}
+
+func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *http.Request) {
+	if handler == nil {
+		srv.renderNotFound(w)
+		return
+	}
+
+	res := handler(w, r)
+	page, err := res.Respond(w, r)
+
+	if page != nil {
+		srv.render(w, *page)
+		return
+	}
+
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
 }
 
 func (srv *Server) render(w http.ResponseWriter, page web.Page) {

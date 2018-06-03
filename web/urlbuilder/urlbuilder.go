@@ -72,9 +72,9 @@ func (ub *URLBuilder) EncodeID(id srs.ID) (string, error) {
 }
 
 func (ub *URLBuilder) ParseID(hash string) (srs.ID, error) {
-	ids := ub.hashid.Decode(hash)
-	if len(ids) == 0 {
-		return 0, errors.Errorf("invalid id for %s", hash)
+	ids, err := ub.hashid.DecodeWithError(hash)
+	if err != nil {
+		return 0, errors.Wrapf(err, "invalid id for %s", hash)
 	}
 
 	id := ids[0]
