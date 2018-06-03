@@ -133,7 +133,7 @@ func (srv *Server) practiceShow(id srs.ID, w http.ResponseWriter, r *http.Reques
 		Content:  content,
 	}
 
-	if p.Finished() {
+	if p.Done {
 		srv.render(w, page)
 		return
 	}

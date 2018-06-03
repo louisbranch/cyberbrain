@@ -4,9 +4,13 @@ import (
 	"time"
 )
 
+type PracticeMode int
+
 const (
-	PracticeStateInProgress = "in_progress"
-	PracticeStateFinished   = "finished"
+	PracticeRandom      PracticeMode = iota
+	PracticeDefinitions              = 1 << (10 * iota)
+	PracticeImages
+	PracticeAudios
 )
 
 type Practice struct {
@@ -15,10 +19,12 @@ type Practice struct {
 	MetaCreatedAt time.Time `db:"created_at"`
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
-	DeckID ID     `db:"deck_id"`
-	Mode   string `db:"mode"`
-	Rounds int    `db:"rounds"`
-	State  string `db:"state"`
+	DeckID ID           `db:"deck_id"`
+	Mode   PracticeMode `db:"mode"`
+	Field  int          `db:"field"`
+	TagID  *ID          `db:"tag_id"`
+	Rounds int          `db:"rounds"`
+	Done   bool         `db:"done"`
 }
 
 func (p Practice) ID() ID {
@@ -27,10 +33,6 @@ func (p Practice) ID() ID {
 
 func (p Practice) Type() string {
 	return "practice"
-}
-
-func (p Practice) Finished() bool {
-	return p.State == PracticeStateFinished
 }
 
 func (p *Practice) SetID(id ID) {
@@ -55,12 +57,13 @@ type PracticeRound struct {
 	MetaCreatedAt time.Time `db:"created_at"`
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
-	PracticeID ID       `db:"practice_id"`
-	Mode       string   `db:"mode"`
-	CardIDs    []ID     `db:"card_ids"`
-	Options    []string `db:"options"`
-	Answer     string   `db:"answer"`
-	Correct    bool     `db:"correct"`
+	PracticeID ID           `db:"practice_id"`
+	Mode       PracticeMode `db:"mode"`
+	CardIDs    []ID         `db:"card_ids"`
+	Options    []string     `db:"options"`
+	Answer     string       `db:"answer"`
+	Correct    bool         `db:"correct"`
+	Done       bool         `db:"done"`
 }
 
 func (pr PracticeRound) ID() ID {

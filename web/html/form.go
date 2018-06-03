@@ -15,18 +15,26 @@ func NewDeckFromForm(form url.Values) (*srs.Deck, error) {
 	d.Description = form.Get("description")
 	d.ImageURL = form.Get("image_url")
 
-	for _, cf := range form["card_fields"] {
+	for _, cf := range form["fields"] {
 		if cf != "" {
-			d.CardFields = append(d.CardFields, cf)
+			d.Fields = append(d.Fields, cf)
 		}
+	}
+
+	if d.Name == "" {
+		return nil, errors.New("deck name cannot be empty")
+	}
+
+	if len(d.Fields) == 0 {
+		return nil, errors.New("deck fields cannot be empty")
 	}
 
 	return d, nil
 }
 
-func NewCardFromForm(deckID srs.ID, form url.Values) (*srs.Card, error) {
+func NewCardFromForm(deck srs.Deck, form url.Values) (*srs.Card, error) {
 	c := &srs.Card{
-		DeckID: deckID,
+		DeckID: deck.ID(),
 	}
 
 	for _, f := range form["image_urls"] {
@@ -45,6 +53,14 @@ func NewCardFromForm(deckID srs.ID, form url.Values) (*srs.Card, error) {
 		if f != "" {
 			c.Definitions = append(c.Definitions, f)
 		}
+	}
+
+	if len(c.ImageURLs) == 0 {
+		return nil, errors.New("card image cannot be empty")
+	}
+
+	if len(c.Definitions) != len(deck.Fields) {
+		return nil, errors.New("card definition numbers must be the same as deck field definitions")
 	}
 
 	return c, nil
@@ -68,7 +84,6 @@ func NewPracticeFromForm(deckID srs.ID, form url.Values) (*srs.Practice, error) 
 	p := &srs.Practice{
 		DeckID: deckID,
 		Rounds: n,
-		State:  srs.PracticeStateInProgress,
 	}
 
 	return p, nil

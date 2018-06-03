@@ -45,7 +45,7 @@ func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		card, err := html.NewCardFromForm(deck.ID(), r.Form)
+		card, err := html.NewCardFromForm(*deck, r.Form)
 		if err != nil {
 			srv.renderError(w, err)
 			return

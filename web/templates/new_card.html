@@ -5,7 +5,7 @@
     <div class="columns">
       <div class="column is-4">
         <div class="field">
-          <label class="label">Image URLs</label>
+          <label class="label">Image URLs *</label>
           <div class="control">
             <input class="input" type="text" name="image_urls" minlength="2" />
           </div>
@@ -16,14 +16,17 @@
             <input class="input" type="text" name="audio_urls" />
           </div>
         </div>
-        {{ range .CardFields }}
+        {{ range .Fields }}
           <div class="field">
-            <label class="label">{{ . }}</label>
+            <label class="label">{{ . }} *</label>
             <div class="control">
               <input class="input" type="text" name="definitions" minlength="1" />
             </div>
           </div>
         {{ end }}
+        <div class="content">
+          <small>* required fields</small>
+        </div>
         <div class="field is-grouped">
           <div class="control">
             <input class="button is-primary" type="submit" value="Submit" />

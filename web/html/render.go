@@ -11,7 +11,7 @@ type Deck struct {
 	Name        string
 	Description string
 	ImageURL    string
-	CardFields  []string
+	Fields      []string
 	Tags        []*Tag
 	Cards       []*Card
 
@@ -43,7 +43,7 @@ func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 		Name:        d.Name,
 		Description: d.Description,
 		ImageURL:    d.ImageURL,
-		CardFields:  d.CardFields,
+		Fields:      d.Fields,
 	}
 
 	id, err := ub.EncodeID(d.ID())

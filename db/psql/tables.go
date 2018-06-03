@@ -11,7 +11,7 @@ var tableQueries = []string{
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
 			image_url TEXT,
-			card_fields TEXT[]
+			fields TEXT[] NOT NULL CHECK (cardinality(fields) > 0)
 		);
 		`,
 	`
@@ -22,7 +22,7 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			definitions TEXT[],
+			definitions TEXT[] NOT NULL CHECK (cardinality(definitions) > 0),
 			image_urls TEXT[],
 			audio_urls TEXT[]
 		);
@@ -58,9 +58,11 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			state TEXT NOT NULL CHECK(state <> ''),
-			mode TEXT NOT NULL CHECK(mode <> ''),
-			rounds INTEGER NOT NULL CHECK(rounds > 0)
+			mode INTEGER NOT NULL DEFAULT 0,
+			field INTEGER NOT NULL DEFAULT 0,
+			tag_id INTEGER,
+			rounds INTEGER NOT NULL CHECK(rounds > 0),
+			done BOOLEAN NOT NULL DEFAULT FALSE
 		);
 		`,
 	`
@@ -71,11 +73,12 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE RESTRICT,
-			mode TEXT NOT NULL CHECK(mode <> ''),
-			card_ids INTEGER[],
-			options TEXT[],
+			mode INTEGER NOT NULL DEFAULT 0,
+			card_ids INTEGER[] NOT NULL CHECK (cardinality(card_ids) > 0),
+			options TEXT[] NOT NULL CHECK (cardinality(options) > 0),
 			answer TEXT,
-			correct BOOLEAN
+			correct BOOLEAN NOT NULL DEFAULT FALSE,
+			done BOOLEAN NOT NULL DEFAULT FALSE
 		);
 		`,
 }

@@ -32,7 +32,7 @@
               <dl>
                 {{ $deck := .Deck }}
                 {{ range $i, $d := .Card.Definitions }}
-                  <dt>{{ index $deck.CardFields $i }}</dt>
+                  <dt>{{ index $deck.Fields $i }}</dt>
                   <dd>{{ $d }}</dd>
                 {{ end }}
               </dl>

@@ -13,7 +13,7 @@ type Deck struct {
 	Name        string   `db:"name"`
 	Description string   `db:"description"`
 	ImageURL    string   `db:"image_url"`
-	CardFields  []string `db:"card_fields"`
+	Fields      []string `db:"fields"`
 	Cards       []Card
 	Tags        []Tag
 }
