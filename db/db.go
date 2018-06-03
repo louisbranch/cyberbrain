@@ -141,7 +141,7 @@ func FindPractice(db srs.Database, id srs.ID) (*srs.Practice, error) {
 
 func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
 	q := newRoundQuery()
-	q.where["id"] = pid
+	q.where["id"] = id
 
 	r, err := db.Get(q)
 	if err != nil {

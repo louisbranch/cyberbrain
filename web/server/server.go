@@ -41,13 +41,13 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 		switch {
 		case method == "GET" && path == "":
-			handler = rounds.Index()
+			handler = practices.Index()
 		case method == "GET" && path == "new":
-			handler = rounds.New(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
+			handler = practices.New(srv.Database, srv.URLBuilder)
 		case method == "GET":
-			handler = rounds.Show(srv.Database, srv.URLBuilder, path)
+			handler = practices.Show(srv.Database, srv.URLBuilder, path)
 		case method == "POST" && path == "":
-			handler = rounds.Create(srv.Database, srv.URLBuilder)
+			handler = practices.Create(srv.Database, srv.URLBuilder)
 		}
 
 		srv.handle(handler, w, r)
@@ -61,13 +61,13 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 		switch {
 		case method == "GET" && path == "":
-			handler = practices.Index()
+			handler = rounds.Index()
 		case method == "GET" && path == "new":
-			handler = practices.New(srv.Database, srv.URLBuilder)
+			handler = rounds.New(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
 		case method == "GET":
-			handler = practices.Show(srv.Database, srv.URLBuilder, path)
+			handler = rounds.Show(srv.Database, srv.URLBuilder, path)
 		case method == "POST" && path == "":
-			handler = practices.Create(srv.Database, srv.URLBuilder)
+			handler = rounds.Create(srv.Database, srv.URLBuilder)
 		}
 
 		srv.handle(handler, w, r)
