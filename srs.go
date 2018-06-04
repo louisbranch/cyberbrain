@@ -32,6 +32,7 @@ type Query interface {
 	NewRecord() Record
 	Where() map[string]interface{}
 	Raw() string
+	SortBy() map[string]string
 }
 
 type PracticeGenerator interface {

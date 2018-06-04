@@ -6,6 +6,7 @@ type query struct {
 	record func() srs.Record
 	where  map[string]interface{}
 	raw    string
+	sortBy map[string]string
 }
 
 func (q *query) NewRecord() srs.Record {
@@ -18,6 +19,10 @@ func (q *query) Where() map[string]interface{} {
 
 func (q *query) Raw() string {
 	return q.raw
+}
+
+func (q *query) SortBy() map[string]string {
+	return q.sortBy
 }
 
 func newDeckQuery() *query {
@@ -39,6 +44,7 @@ func newCardQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }
 

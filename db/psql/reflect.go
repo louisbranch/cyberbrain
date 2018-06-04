@@ -150,5 +150,19 @@ func where(cond srs.Query) string {
 		}
 	}
 
-	return "WHERE " + strings.Join(clause, " AND ")
+	q := "WHERE " + strings.Join(clause, " AND ")
+
+	sortBy := cond.SortBy()
+
+	if len(sortBy) == 0 {
+		return q
+	}
+
+	var sort []string
+
+	for k, v := range sortBy {
+		sort = append(sort, fmt.Sprintf("%s %s", k, v))
+	}
+
+	return q + "ORDER BY " + strings.Join(sort, " AND ")
 }

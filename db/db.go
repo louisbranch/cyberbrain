@@ -66,6 +66,7 @@ func FindCard(db srs.Database, id srs.ID) (*srs.Card, error) {
 func FindCardsByDeck(db srs.Database, deckID srs.ID) ([]srs.Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
+	q.sortBy["updated_at"] = "DESC"
 
 	rs, err := db.Query(q)
 	if err != nil {
