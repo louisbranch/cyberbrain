@@ -113,21 +113,8 @@ func NewPracticeFromForm(deck srs.Deck, form url.Values, ub web.URLBuilder) (*sr
 		p.TagID = &id
 	}
 
-	mode := srs.PracticeRandom
-
-	if form.Get("definitions") == CHECKED {
-		mode |= srs.PracticeDefinitions
-	}
-
-	if form.Get("images") == CHECKED {
-		mode |= srs.PracticeImages
-	}
-
-	if form.Get("sounds") == CHECKED {
-		mode |= srs.PracticeSounds
-	}
-
-	p.Mode = mode
+	p.PromptMode = srs.PracticeImages
+	p.GuessMode = srs.PracticeDefinitions
 
 	return p, nil
 }

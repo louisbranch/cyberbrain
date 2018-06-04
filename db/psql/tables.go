@@ -58,7 +58,8 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			mode INTEGER NOT NULL DEFAULT 0,
+			prompt_mode INTEGER NOT NULL DEFAULT 0,
+			guess_mode INTEGER NOT NULL DEFAULT 0,
 			field INTEGER NOT NULL DEFAULT 0,
 			tag_id INTEGER,
 			total_rounds INTEGER NOT NULL CHECK(total_rounds > 0),
@@ -73,10 +74,13 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE RESTRICT,
-			mode INTEGER NOT NULL DEFAULT 0,
 			card_ids INTEGER[] NOT NULL CHECK (cardinality(card_ids) > 0),
-			options TEXT[] NOT NULL CHECK (cardinality(options) > 0),
+			prompt_mode INTEGER NOT NULL DEFAULT 0,
+			guess_mode INTEGER NOT NULL DEFAULT 0,
+			options TEXT[],
+			prompt TEXT NOT NULL CHECK(prompt <> ''),
 			guess TEXT,
+			answer TEXT NOT NULL CHECK(answer <> ''),
 			correct BOOLEAN NOT NULL DEFAULT FALSE,
 			done BOOLEAN NOT NULL DEFAULT FALSE
 		);

@@ -22,7 +22,8 @@ type Practice struct {
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
 	DeckID      ID           `db:"deck_id"`
-	Mode        PracticeMode `db:"mode"`
+	PromptMode  PracticeMode `db:"prompt_mode"`
+	GuessMode   PracticeMode `db:"guess_mode"`
 	Field       int          `db:"field"`
 	TagID       *ID          `db:"tag_id"`
 	TotalRounds int          `db:"total_rounds"`

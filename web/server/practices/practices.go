@@ -67,7 +67,7 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 
 		path, err := ub.Path("SHOW", p)
 		if err != nil {
-			return response.NewError(err, http.StatusInternalServerError, "failed to generate practice, path")
+			return response.NewError(err, http.StatusInternalServerError, "failed to generate practice path")
 		}
 
 		return response.Redirect{Path: path, Code: http.StatusFound}

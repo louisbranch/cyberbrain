@@ -62,6 +62,27 @@ func (db *Database) Create(r srs.Record) error {
 	return nil
 }
 
+func (db *Database) Update(r srs.Record) error {
+	now := time.Now()
+
+	r.SetUpdatedAt(now)
+
+	q, err := QueryFromRecord(r, "id")
+	if err != nil {
+		return errors.Wrapf(err, "failed to get record fields %v", r)
+	}
+
+	query := fmt.Sprintf("UPDATE %s SET (%s) = (%s) WHERE id = %d;", q.Table(), q.Columns(),
+		q.Placeholders(), r.ID())
+
+	_, err = db.Exec(query, q.addrs...)
+	if err != nil {
+		return errors.Wrapf(err, "failed to update db record %q", query)
+	}
+
+	return nil
+}
+
 func (db *Database) Query(wq srs.Query) ([]srs.Record, error) {
 	q, err := QueryFromRecord(wq.NewRecord())
 	if err != nil {

@@ -9,12 +9,17 @@ type Round struct {
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
 	PracticeID ID           `db:"practice_id"`
-	Mode       PracticeMode `db:"mode"`
 	CardIDs    []ID         `db:"card_ids"`
-	Options    []string     `db:"options"`
+	PromptMode PracticeMode `db:"prompt_mode"`
+	GuessMode  PracticeMode `db:"guess_mode"`
+	Prompt     string       `db:"prompt"`
 	Guess      string       `db:"guess"`
+	Options    []string     `db:"options"`
+	Answer     string       `db:"answer"`
 	Correct    bool         `db:"correct"`
 	Done       bool         `db:"done"`
+
+	Practice *Practice
 }
 
 func (r Round) ID() ID {
@@ -39,4 +44,10 @@ func (r *Round) SetCreatedAt(t time.Time) {
 
 func (r *Round) SetUpdatedAt(t time.Time) {
 	r.MetaUpdatedAt = t
+}
+
+func (r *Round) GuessAnswer(answer string) {
+	r.Guess = answer
+	r.Correct = r.Answer == answer
+	r.Done = true
 }

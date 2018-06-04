@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/luizbranco/srs"
@@ -9,6 +10,7 @@ import (
 	"github.com/luizbranco/srs/web/server/practices"
 	"github.com/luizbranco/srs/web/server/response"
 	"github.com/luizbranco/srs/web/server/rounds"
+	"github.com/pkg/errors"
 )
 
 type Server struct {
@@ -67,7 +69,9 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		case method == "GET":
 			handler = rounds.Show(srv.Database, srv.URLBuilder, path)
 		case method == "POST" && path == "":
-			handler = rounds.Create(srv.Database, srv.URLBuilder)
+			handler = rounds.Create(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
+		case method == "POST":
+			handler = rounds.Update(srv.Database, srv.URLBuilder, path)
 		}
 
 		srv.handle(handler, w, r)
@@ -117,6 +121,9 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 		Content:  err,
 		Partials: []string{"500"},
 	}
+
+	log.Println(err, errors.Cause(err))
+
 	srv.render(w, page)
 }
 

@@ -93,9 +93,9 @@ func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
 	return castTags(rs)
 }
 
-func FindTags(db srs.Database, id srs.ID) ([]srs.Tag, error) {
+func FindTags(db srs.Database, deckID srs.ID) ([]srs.Tag, error) {
 	q := newTagQuery()
-	q.where["deck_id"] = id
+	q.where["deck_id"] = deckID
 
 	rs, err := db.Query(q)
 	if err != nil {
@@ -156,6 +156,18 @@ func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
 	return p, nil
 }
 
+func FindRounds(db srs.Database, practiceID srs.ID) ([]srs.Round, error) {
+	q := newRoundQuery()
+	q.where["practice_id"] = practiceID
+
+	rs, err := db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+
+	return castRounds(rs)
+}
+
 func CountRounds(db srs.Database, practiceID srs.ID) (int, error) {
 	q := newRoundQuery()
 	q.where["practice_id"] = practiceID
@@ -163,7 +175,7 @@ func CountRounds(db srs.Database, practiceID srs.ID) (int, error) {
 	return db.Count(q)
 }
 
-func FindRandomCard(db srs.Database, deckID srs.ID) (*srs.Card, error) {
+func RandomCard(db srs.Database, deckID srs.ID) (*srs.Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
 
@@ -198,4 +210,20 @@ func castCards(rs []srs.Record) ([]srs.Card, error) {
 	}
 
 	return cards, nil
+}
+
+func castRounds(rs []srs.Record) ([]srs.Round, error) {
+	var rounds []srs.Round
+
+	for _, r := range rs {
+		round, ok := r.(*srs.Round)
+
+		if !ok {
+			return nil, errors.Errorf("invalid record type %T", r)
+		}
+
+		rounds = append(rounds, *round)
+	}
+
+	return rounds, nil
 }

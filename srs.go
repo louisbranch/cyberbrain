@@ -11,6 +11,7 @@ type Identifiable interface {
 
 type Database interface {
 	Create(Record) error
+	Update(Record) error
 	Query(Query) ([]Record, error)
 	QueryRaw(Query) ([]Record, error)
 	Get(Query) (Record, error)
@@ -34,5 +35,5 @@ type Query interface {
 }
 
 type PracticeGenerator interface {
-	NewRound(Database, Practice) (Round, error)
+	NewRound(Database, Practice) (*Round, error)
 }

@@ -49,6 +49,15 @@ type Practice struct {
 }
 
 type Round struct {
+	PromptImage string
+	Answer      string
+	Guess       string
+	Done        bool
+	Correct     bool
+
+	Practice *Practice
+
+	Path string
 }
 
 func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
@@ -198,8 +207,29 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 	return pr, nil
 }
 
-func RenderRound(pr srs.Round, ub web.URLBuilder) (*Round, error) {
-	rr := &Round{}
+func RenderRound(r srs.Round, ub web.URLBuilder) (*Round, error) {
+	rr := &Round{
+		Answer:      r.Answer,
+		Guess:       r.Guess,
+		Done:        r.Done,
+		Correct:     r.Correct,
+		PromptImage: r.Prompt,
+	}
+
+	if r.Practice != nil {
+		p, err := RenderPractice(*r.Practice, ub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to render round practice")
+		}
+		rr.Practice = p
+	}
+
+	p, err := ub.Path("SHOW", r)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build round path")
+	}
+
+	rr.Path = p
 
 	return rr, nil
 }

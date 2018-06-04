@@ -42,8 +42,11 @@ func (e Error) Error() string {
 	return e.msg
 }
 
+func (e Error) Cause() error {
+	return e.err
+}
+
 func (e Error) Respond(w http.ResponseWriter, r *http.Request) (*web.Page, error) {
-	// TODO
 	return nil, e
 }
 

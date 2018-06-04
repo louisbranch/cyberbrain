@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/luizbranco/srs/db/psql"
+	"github.com/luizbranco/srs/generator"
 	"github.com/luizbranco/srs/web/html"
 	"github.com/luizbranco/srs/web/server"
 	"github.com/luizbranco/srs/web/urlbuilder"
@@ -22,12 +23,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	gen := generator.Generator{}
 	tpl := html.New("web/templates")
 
 	srv := &server.Server{
-		Template:   tpl,
-		Database:   db,
-		URLBuilder: ub,
+		Template:          tpl,
+		Database:          db,
+		URLBuilder:        ub,
+		PracticeGenerator: gen,
 	}
 
 	mux := srv.NewServeMux()
