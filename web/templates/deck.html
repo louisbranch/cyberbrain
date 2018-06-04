@@ -31,7 +31,7 @@
     <a class="button is-primary" href="{{ .NewCardPath }}">Add Card</a>
     <a class="button" href="{{ .NewPracticePath }}">Practice</a>
   </div>
-  <div class="columns">
+  <div class="columns is-multiline">
     {{ $deck := . }}
     {{ range .Cards }}
     <div class="column is-4">
@@ -45,7 +45,9 @@
         </div>
         <div class="card-content">
           <div class="content">
-            <strong>{{ first $deck.Fields }}</strong>: {{ first .Definitions }}
+            <p class="is-size-3 has-text-centered">
+              {{ first .Definitions }}
+            </p>
           </div>
         </div>
       </div>

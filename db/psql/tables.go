@@ -27,6 +27,7 @@ var tableQueries = []string{
 			sound_urls TEXT[]
 		);
 		`,
+	// tag name must be unique per deck only
 	`
 		CREATE TABLE IF NOT EXISTS tags(
 			id SERIAL PRIMARY KEY,
