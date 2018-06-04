@@ -71,6 +71,16 @@ func Create(conn srs.Database, ub web.URLBuilder, gen srs.PracticeGenerator) res
 			return err.(response.Error)
 		}
 
+		// if practice is done, redirect back to its page
+		if practice.Done {
+			path, err := ub.Path("SHOW", practice)
+			if err != nil {
+				return response.NewError(err, http.StatusInternalServerError, "failed to generate practice path")
+			}
+
+			return response.Redirect{Path: path, Code: http.StatusFound}
+		}
+
 		round, err := gen.NewRound(conn, *practice)
 		if err != nil {
 			return response.NewError(err, http.StatusInternalServerError, "failed to generate new round")
@@ -153,6 +163,24 @@ func Update(conn srs.Database, ub web.URLBuilder, hash string) response.Handler 
 		err = conn.Update(round)
 		if err != nil {
 			return response.NewError(err, http.StatusInternalServerError, "failed to update round")
+		}
+
+		practice, err := db.FindPractice(conn, round.PracticeID)
+		if err != nil {
+			return response.NewError(err, http.StatusInternalServerError, "invalid practice id")
+		}
+
+		rounds, err := db.CountRounds(conn, practice.ID())
+		if err != nil {
+			return response.NewError(err, http.StatusInternalServerError, "invalid rounds number")
+		}
+
+		if rounds >= practice.TotalRounds {
+			practice.Done = true
+			err = conn.Update(practice)
+			if err != nil {
+				return response.NewError(err, http.StatusInternalServerError, "failed to update practice")
+			}
 		}
 
 		path, err := ub.Path("SHOW", round)

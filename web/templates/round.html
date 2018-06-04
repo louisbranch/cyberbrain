@@ -30,8 +30,10 @@
                   <strong>Correct Answer:</strong> {{ .Answer }}
                 {{ end }}
               </div>
-              {{ if .Practice.ContinuePath }}
-                <a class="button is-primary" href="{{ .Practice.ContinuePath }}">Continue</a>
+              {{ if .Practice.Done }}
+                <a class="button is-primary" href="{{ .Practice.Path }}">See Results</a>
+              {{ else}}
+                <a class="button is-primary" href="{{ .Practice.NewRoundPath }}">Continue</a>
               {{ end }}
             </div>
           {{ else }}
@@ -40,7 +42,7 @@
                 <div class="field">
                   <label class="label">Answer</label>
                   <div class="control">
-                    <input class="input" type="text" name="guess" required minlength="1"/>
+                    <input class="input" type="text" name="guess" required autocomplete="off"/>
                   </div>
                 </div>
                 <div class="field is-grouped">

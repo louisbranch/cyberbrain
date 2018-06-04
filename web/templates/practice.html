@@ -13,8 +13,9 @@
     <div class="column is-8">
       <h1 class="title">Practice {{ .State }}</h1>
       <div class="content">
-        {{ if .ContinuePath }}
-          <a class="button is-primary" href="{{ .ContinuePath }}">Continue</a>
+        {{ if .Done }}
+        {{ else }}
+          <a class="button is-primary" href="{{ .NewRoundPath }}">Start</a>
         {{ end }}
       </div>
     </div>

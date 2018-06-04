@@ -10,6 +10,7 @@ type Deck struct {
 	MetaCreatedAt time.Time `db:"created_at"`
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
+	UserID      ID       `db:"user_id"`
 	Name        string   `db:"name"`
 	Description string   `db:"description"`
 	ImageURL    string   `db:"image_url"`

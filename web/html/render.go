@@ -40,8 +40,10 @@ type Tag struct {
 
 type Practice struct {
 	State string
+	Done  bool
 
-	ContinuePath string
+	Path         string
+	NewRoundPath string
 
 	// TODO progress
 
@@ -180,7 +182,9 @@ func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
 }
 
 func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
-	pr := &Practice{}
+	pr := &Practice{
+		Done: p.Done,
+	}
 
 	if p.Deck != nil {
 		dr, err := RenderDeck(*p.Deck, ub)
@@ -192,17 +196,23 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 
 	if p.Done {
 		pr.State = "Finished"
-		return pr, nil
+	} else {
+		pr.State = "In Progress"
 	}
 
-	pr.State = "In Progress"
+	path, err := ub.Path("SHOW", p)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build practice path")
+	}
 
-	path, err := ub.Path("NEW", &srs.Round{}, p)
+	pr.Path = path
+
+	rp, err := ub.Path("NEW", &srs.Round{}, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build continue practice path")
 	}
 
-	pr.ContinuePath = path
+	pr.NewRoundPath = rp
 
 	return pr, nil
 }

@@ -2,12 +2,26 @@ package psql
 
 var tableQueries = []string{
 	`
+		CREATE TABLE IF NOT EXISTS users(
+			id SERIAL PRIMARY KEY,
+			version INTEGER NOT NULL DEFAULT 1,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+			name TEXT NOT NULL CHECK(name <> ''),
+			email TEXT NOT NULL UNIQUE CHECK(email <> ''),
+			password_hash TEXT NOT NULL CHECK(password_hash <> ''),
+			image_url TEXT
+		);
+		`,
+	`
 		CREATE TABLE IF NOT EXISTS decks(
 			id SERIAL PRIMARY KEY,
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
+			user_id INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
 			image_url TEXT,
@@ -27,7 +41,6 @@ var tableQueries = []string{
 			sound_urls TEXT[]
 		);
 		`,
-	// tag name must be unique per deck only
 	`
 		CREATE TABLE IF NOT EXISTS tags(
 			id SERIAL PRIMARY KEY,
@@ -36,7 +49,8 @@ var tableQueries = []string{
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			name TEXT NOT NULL UNIQUE CHECK(name <> '')
+			name TEXT NOT NULL CHECK(name <> ''),
+			UNIQUE (deck_id, name)
 		);
 		`,
 	`
