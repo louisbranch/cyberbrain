@@ -3,9 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/luizbranco/srs/db"
-	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/html"
+	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/html"
 )
 
 func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {

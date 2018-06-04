@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/web"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/web"
 )
 
 const CHECKED = "on"

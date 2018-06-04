@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/luizbranco/srs/db/psql"
-	"github.com/luizbranco/srs/generator"
-	"github.com/luizbranco/srs/web/html"
-	"github.com/luizbranco/srs/web/server"
-	"github.com/luizbranco/srs/web/urlbuilder"
+	"gitlab.com/luizbranco/srs/db/psql"
+	"gitlab.com/luizbranco/srs/generator"
+	"gitlab.com/luizbranco/srs/web/html"
+	"gitlab.com/luizbranco/srs/web/server"
+	"gitlab.com/luizbranco/srs/web/urlbuilder"
 )
 
 func main() {

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/lib/pq"
-	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
 )
 
 type Query struct {

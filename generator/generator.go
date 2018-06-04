@@ -4,9 +4,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/db"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/db"
 )
 
 type Generator struct{}

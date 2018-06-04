@@ -3,11 +3,11 @@ package server
 import (
 	"net/http"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/db"
-	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/html"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/html"
 )
 
 func (srv *Server) cards(w http.ResponseWriter, r *http.Request) {

@@ -3,7 +3,7 @@ package web
 import (
 	"io"
 
-	"github.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs"
 )
 
 type Page struct {

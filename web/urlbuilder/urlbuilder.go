@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
 	"github.com/speps/go-hashids"
+	"gitlab.com/luizbranco/srs"
 )
 
 type URLBuilder struct {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
 )
 
 const version = 1

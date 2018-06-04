@@ -3,11 +3,11 @@ package practices
 import (
 	"net/http"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/db"
-	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/html"
-	"github.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/html"
+	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
 func Index() response.Handler {

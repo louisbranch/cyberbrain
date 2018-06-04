@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/db"
-	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/html"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/html"
 )
 
 func (srv *Server) decks(w http.ResponseWriter, r *http.Request) {

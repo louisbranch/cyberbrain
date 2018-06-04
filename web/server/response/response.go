@@ -3,7 +3,7 @@ package response
 import (
 	"net/http"
 
-	"github.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web"
 )
 
 type Handler func(http.ResponseWriter, *http.Request) Responder

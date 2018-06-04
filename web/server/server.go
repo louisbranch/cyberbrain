@@ -5,12 +5,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/luizbranco/srs"
-	"github.com/luizbranco/srs/web"
-	"github.com/luizbranco/srs/web/server/practices"
-	"github.com/luizbranco/srs/web/server/response"
-	"github.com/luizbranco/srs/web/server/rounds"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/server/practices"
+	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/srs/web/server/rounds"
 )
 
 type Server struct {

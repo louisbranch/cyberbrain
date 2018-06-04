@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web"
 )
 
 type HTML struct {

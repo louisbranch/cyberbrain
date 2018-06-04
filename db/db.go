@@ -3,8 +3,8 @@ package db
 import (
 	"strconv"
 
-	"github.com/luizbranco/srs"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/srs"
 )
 
 func FindDecks(db srs.Database) ([]srs.Deck, error) {

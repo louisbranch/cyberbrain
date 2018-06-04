@@ -1,6 +1,6 @@
 package db
 
-import "github.com/luizbranco/srs"
+import "gitlab.com/luizbranco/srs"
 
 type query struct {
 	record func() srs.Record
