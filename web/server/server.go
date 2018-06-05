@@ -12,6 +12,7 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
+	"gitlab.com/luizbranco/srs/web/server/tags"
 )
 
 type Server struct {
@@ -52,8 +53,27 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		srv.handle(handler, w, r)
 	})
 
-	mux.HandleFunc("/tags/new", srv.newTag)
-	mux.HandleFunc("/tags/", srv.tags)
+	mux.HandleFunc("/tags/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/tags/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = tags.Index()
+		case method == "GET" && path == "new":
+			handler = tags.New(srv.Database, srv.URLBuilder)
+		case method == "GET":
+			handler = tags.Show(srv.Database, srv.URLBuilder, path)
+		case method == "POST" && path == "":
+			handler = tags.Create(srv.Database, srv.URLBuilder)
+		case method == "POST":
+			handler = tags.Update(srv.Database, srv.URLBuilder, path)
+		}
+
+		srv.handle(handler, w, r)
+	})
 
 	mux.HandleFunc("/practices/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[len("/practices/"):]

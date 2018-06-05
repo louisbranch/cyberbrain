@@ -17,7 +17,7 @@
       <h3 class="title is-4">Tags</h3>
       <div class="content">
         {{ range .Tags }}
-        <span class="tag">{{ .Name }}</span>
+        <span class="tag"><a href="{{ .Path }}" target="">{{ .Name }}</a></span>
         {{ end }}
       </div>
       <a class="button" href="{{ .NewTagPath }}">Add Tag</a>
@@ -32,7 +32,6 @@
     <a class="button" href="{{ .NewPracticePath }}">Practice</a>
   </div>
   <div class="columns is-multiline">
-    {{ $deck := . }}
     {{ range .Cards }}
     <div class="column is-3">
       <div class="card">

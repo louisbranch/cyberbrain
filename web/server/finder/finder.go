@@ -12,7 +12,15 @@ import (
 
 type identifier interface{}
 
-func DeckWithTags(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Deck, error) {
+type option int
+
+const (
+	NoOption option = 0
+	WithTags        = 1 << iota
+	WithCards
+)
+
+func Deck(conn srs.Database, ub web.URLBuilder, i identifier, opt option) (*srs.Deck, error) {
 	id, err := parseID(ub, i)
 	if err != nil {
 		return nil, err
@@ -23,12 +31,14 @@ func DeckWithTags(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Deck
 		return nil, response.WrapError(err, http.StatusBadRequest, "wrong deck id")
 	}
 
-	tags, err := db.FindTags(conn, id)
-	if err != nil {
-		return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
-	}
+	if opt&WithTags > 0 {
+		tags, err := db.FindTags(conn, id)
+		if err != nil {
+			return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
+		}
 
-	deck.Tags = tags
+		deck.Tags = tags
+	}
 
 	return deck, nil
 }
@@ -72,6 +82,33 @@ func Card(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Card, error)
 	card.Tags = tags
 
 	return card, nil
+}
+
+func Tag(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Tag, error) {
+	id, err := parseID(ub, i)
+	if err != nil {
+		return nil, err
+	}
+
+	tag, err := db.FindTag(conn, id)
+	if err != nil {
+		return nil, response.WrapError(err, http.StatusBadRequest, "wrong tag id")
+	}
+
+	deck, err := db.FindDeck(conn, tag.DeckID)
+	if err != nil {
+		return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find tag deck")
+	}
+
+	cards, err := db.FindCardsByTag(conn, tag.ID())
+	if err != nil {
+		return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find tag cards")
+	}
+
+	tag.Deck = deck
+	tag.Cards = cards
+
+	return tag, nil
 }
 
 func parseID(ub web.URLBuilder, i identifier) (srs.ID, error) {

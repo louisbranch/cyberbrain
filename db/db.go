@@ -76,6 +76,24 @@ func FindCardsByDeck(db srs.Database, deckID srs.ID) ([]srs.Card, error) {
 	return castCards(rs)
 }
 
+func FindCardsByTag(db srs.Database, tagID srs.ID) ([]srs.Card, error) {
+	id := strconv.Itoa(int(tagID))
+
+	raw := `SELECT c.* FROM cards c
+	LEFT JOIN card_tags ct ON c.id = ct.card_id
+	WHERE ct.tag_id = ` + id + " ORDER BY c.updated_at DESC;"
+
+	q := newCardQuery()
+	q.raw = raw
+
+	rs, err := db.QueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+
+	return castCards(rs)
+}
+
 func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
 	id := strconv.Itoa(int(cardID))
 
@@ -92,6 +110,23 @@ func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
 	}
 
 	return castTags(rs)
+}
+
+func FindTag(db srs.Database, id srs.ID) (*srs.Tag, error) {
+	q := newTagQuery()
+	q.where["id"] = id
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	tag, ok := r.(*srs.Tag)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return tag, nil
 }
 
 func FindTags(db srs.Database, deckID srs.ID) ([]srs.Tag, error) {

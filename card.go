@@ -11,9 +11,9 @@ type Card struct {
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
 	DeckID      ID       `db:"deck_id"`
+	Definitions []string `db:"definitions"`
 	ImageURLs   []string `db:"image_urls"`
 	SoundURLs   []string `db:"sound_urls"`
-	Definitions []string `db:"definitions"`
 
 	Deck *Deck
 	Tags []Tag

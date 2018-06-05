@@ -26,11 +26,11 @@ type Card struct {
 	ImageURLs   []string
 	SoundURLs   []string
 	Definitions []string
-	Tags        []*Tag
 
 	Path string
 
 	Deck *Deck
+	Tags []*Tag
 }
 
 type Tag struct {
@@ -38,6 +38,9 @@ type Tag struct {
 	Name string
 
 	Path string
+
+	Deck  *Deck
+	Cards []*Card
 }
 
 type Practice struct {
@@ -187,6 +190,23 @@ func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
 	}
 
 	tr.Path = p
+
+	for _, c := range t.Cards {
+		cr, err := RenderCard(c, ub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to render tag card")
+		}
+
+		tr.Cards = append(tr.Cards, cr)
+	}
+
+	if t.Deck != nil {
+		dr, err := RenderDeck(*t.Deck, ub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to render tag deck")
+		}
+		tr.Deck = dr
+	}
 
 	return tr, nil
 }

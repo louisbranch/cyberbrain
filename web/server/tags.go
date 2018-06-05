@@ -10,46 +10,7 @@ import (
 
 func (srv *Server) tags(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "GET":
-		http.Redirect(w, r, "/decks", http.StatusFound)
 	case "POST":
-		if err := r.ParseForm(); err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		id, err := srv.URLBuilder.ParseID(r.Form.Get("deck"))
-		if err != nil {
-			// FIXME bad request
-			srv.renderNotFound(w)
-			return
-		}
-
-		deck, err := db.FindDeck(srv.Database, id)
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		tag, err := html.NewTagFromForm(*deck, r.Form)
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		err = srv.Database.Create(tag)
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		path, err := srv.URLBuilder.Path("SHOW", deck)
-		if err != nil {
-			srv.renderError(w, err)
-			return
-		}
-
-		http.Redirect(w, r, path, http.StatusFound)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

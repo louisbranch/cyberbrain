@@ -1,7 +1,6 @@
-package cards
+package tags
 
 import (
-	"fmt"
 	"net/http"
 
 	"gitlab.com/luizbranco/srs"
@@ -24,7 +23,7 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 		query := r.URL.Query()
 		hash := query.Get("deck")
 
-		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
+		deck, err := finder.Deck(conn, ub, hash, finder.NoOption)
 		if err != nil {
 			return err.(response.Error)
 		}
@@ -35,8 +34,8 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 		}
 
 		page := web.Page{
-			Title:    "New Card",
-			Partials: []string{"new_card"},
+			Title:    "New Tag",
+			Partials: []string{"new_tag"},
 			Content:  content,
 		}
 
@@ -58,34 +57,14 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 			return err.(response.Error)
 		}
 
-		card, err := html.NewCardFromForm(*deck, r.Form)
+		tag, err := html.NewTagFromForm(*deck, r.Form)
 		if err != nil {
-			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
+			return response.WrapError(err, http.StatusBadRequest, "invalid tag form")
 		}
 
-		err = conn.Create(card)
+		err = conn.Create(tag)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to create card")
-		}
-
-		tags := r.Form["tags"]
-
-		for _, tag := range tags {
-			id, err := ub.ParseID(tag)
-			if err != nil {
-				msg := fmt.Sprintf("invalid tag id %s", tag)
-				return response.WrapError(err, http.StatusBadRequest, msg)
-			}
-
-			ct := srs.CardTag{
-				CardID: card.MetaID,
-				TagID:  id,
-			}
-
-			err = conn.Create(&ct)
-			if err != nil {
-				return response.WrapError(err, http.StatusInternalServerError, "failed to create card tag")
-			}
+			return response.WrapError(err, http.StatusInternalServerError, "failed to create tag")
 		}
 
 		path, err := ub.Path("SHOW", deck)
@@ -100,19 +79,19 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
-		card, err := finder.Card(conn, ub, hash)
+		tag, err := finder.Tag(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderCard(*card, ub)
+		content, err := html.RenderTag(*tag, ub)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to render card")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to render tag")
 		}
 
 		page := web.Page{
-			Title:    "Card",
-			Partials: []string{"card"},
+			Title:    "Tag",
+			Partials: []string{"tag"},
 			Content:  content,
 		}
 
@@ -127,30 +106,26 @@ func Update(conn srs.Database, ub web.URLBuilder, hash string) response.Handler 
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		card, err := finder.Card(conn, ub, hash)
+		tag, err := finder.Tag(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		deck, err := db.FindDeck(conn, card.DeckID)
+		deck, err := db.FindDeck(conn, tag.DeckID)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "invalid card deck")
+			return response.WrapError(err, http.StatusInternalServerError, "invalid tag deck")
 		}
 
-		newCard, err := html.NewCardFromForm(*deck, r.Form)
+		newTag, err := html.NewTagFromForm(*deck, r.Form)
 		if err != nil {
-			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
+			return response.WrapError(err, http.StatusBadRequest, "invalid tag form")
 		}
 
-		card.ImageURLs = newCard.ImageURLs
-		card.SoundURLs = newCard.SoundURLs
-		card.Definitions = newCard.Definitions
+		tag.Name = newTag.Name
 
-		// TODO reassign card tags
-
-		err = conn.Update(card)
+		err = conn.Update(tag)
 		if err != nil {
-			return response.WrapError(err, http.StatusBadRequest, "failed to update card")
+			return response.WrapError(err, http.StatusBadRequest, "failed to update tag")
 		}
 
 		path, err := ub.Path("SHOW", deck)

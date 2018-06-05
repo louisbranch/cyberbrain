@@ -23,7 +23,7 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 		query := r.URL.Query()
 		hash := query.Get("deck")
 
-		deck, err := finder.DeckWithTags(conn, ub, hash)
+		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
 		if err != nil {
 			return err.(response.Error)
 		}
@@ -51,7 +51,7 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 
 		hash := r.Form.Get("deck")
 
-		deck, err := finder.DeckWithTags(conn, ub, hash)
+		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
 		if err != nil {
 			return err.(response.Error)
 		}
