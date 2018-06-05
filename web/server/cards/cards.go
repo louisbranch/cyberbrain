@@ -88,9 +88,9 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 			}
 		}
 
-		path, err := ub.Path("SHOW", card)
+		path, err := ub.Path("SHOW", deck)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to build card path")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to generate deck path")
 		}
 
 		return response.Redirect{Path: path, Code: http.StatusFound}
