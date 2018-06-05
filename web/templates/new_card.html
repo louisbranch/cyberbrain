@@ -7,7 +7,7 @@
         <div class="field">
           <label class="label">Image URL *</label>
           <div class="control">
-            <input class="input" type="text" name="image_urls" required minlength="2" />
+            <input class="input" type="text" name="image_urls" required minlength="2" autocomplete="off" />
           </div>
         </div>
         <div class="field">
@@ -20,7 +20,7 @@
           <div class="field">
             <label class="label">{{ . }} *</label>
             <div class="control">
-              <input class="input" type="text" name="definitions" required minlength="1" />
+              <input class="input" type="text" name="definitions" required autocomplete="off" />
             </div>
           </div>
         {{ end }}

@@ -1,10 +1,10 @@
-package practices
+package cards
 
 import (
+	"fmt"
 	"net/http"
 
 	"gitlab.com/luizbranco/srs"
-	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
@@ -13,7 +13,7 @@ import (
 
 func Index() response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
-		return response.Redirect{Path: "decks", Code: http.StatusFound}
+		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
 	}
 }
 
@@ -34,8 +34,8 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 		}
 
 		page := web.Page{
-			Title:    "New Practice",
-			Partials: []string{"new_practice"},
+			Title:    "New Card",
+			Partials: []string{"new_card"},
 			Content:  content,
 		}
 
@@ -45,6 +45,7 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 
 func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
@@ -56,19 +57,39 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 			return err.(response.Error)
 		}
 
-		p, err := html.NewPracticeFromForm(*deck, r.Form, ub)
+		card, err := html.NewCardFromForm(*deck, r.Form)
 		if err != nil {
-			return response.WrapError(err, http.StatusBadRequest, "invalid practice values")
+			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
 		}
 
-		err = conn.Create(p)
+		err = conn.Create(card)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to create practice")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to create cards")
 		}
 
-		path, err := ub.Path("SHOW", p)
+		tags := r.Form["tags"]
+
+		for _, tag := range tags {
+			id, err := ub.ParseID(tag)
+			if err != nil {
+				msg := fmt.Sprintf("invalid tag id %s", tag)
+				return response.WrapError(err, http.StatusBadRequest, msg)
+			}
+
+			ct := srs.CardTag{
+				CardID: card.MetaID,
+				TagID:  id,
+			}
+
+			err = conn.Create(&ct)
+			if err != nil {
+				return response.WrapError(err, http.StatusInternalServerError, "failed to create card tag")
+			}
+		}
+
+		path, err := ub.Path("SHOW", card)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to generate practice path")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to build card path")
 		}
 
 		return response.Redirect{Path: path, Code: http.StatusFound}
@@ -78,34 +99,29 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
-		id, err := ub.ParseID(hash)
+		card, err := finder.Card(conn, ub, hash)
 		if err != nil {
-			return response.WrapError(err, http.StatusNotFound, "invalid practice id")
+			return err.(response.Error)
 		}
 
-		p, err := db.FindPractice(conn, id)
+		content, err := html.RenderCard(*card, ub)
 		if err != nil {
-			return response.WrapError(err, http.StatusNotFound, "wrong practice id")
-		}
-
-		deck, err := db.FindDeck(conn, p.DeckID)
-		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "invalid deck id")
-		}
-
-		p.Deck = deck
-
-		content, err := html.RenderPractice(*p, ub)
-		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to render practice")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to render card")
 		}
 
 		page := web.Page{
-			Title:    "Practice",
-			Partials: []string{"practice"},
+			Title:    "Card",
+			Partials: []string{"card"},
 			Content:  content,
 		}
 
 		return response.NewContent(page)
+	}
+}
+
+func Update(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
+	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+
+		return response.NewError(http.StatusInternalServerError, "not implemented")
 	}
 }

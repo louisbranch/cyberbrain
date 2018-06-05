@@ -15,6 +15,7 @@ type Card struct {
 	SoundURLs   []string `db:"sound_urls"`
 	Definitions []string `db:"definitions"`
 
+	Deck *Deck
 	Tags []Tag
 }
 

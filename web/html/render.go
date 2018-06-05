@@ -29,6 +29,8 @@ type Card struct {
 	Tags        []*Tag
 
 	Path string
+
+	Deck *Deck
 }
 
 type Tag struct {
@@ -156,6 +158,14 @@ func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
 		cr.Tags = append(cr.Tags, tr)
 	}
 
+	if c.Deck != nil {
+		dr, err := RenderDeck(*c.Deck, ub)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to render card deck")
+		}
+		cr.Deck = dr
+	}
+
 	return cr, nil
 }
 
@@ -189,7 +199,7 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 	if p.Deck != nil {
 		dr, err := RenderDeck(*p.Deck, ub)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to render deck practice")
+			return nil, errors.Wrap(err, "failed to render practice deck")
 		}
 		pr.Deck = dr
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/server/cards"
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
@@ -29,8 +30,25 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	mux.HandleFunc("/decks/new/", srv.newDeck)
 	mux.HandleFunc("/decks/", srv.decks)
 
-	mux.HandleFunc("/cards/new", srv.newCard)
-	mux.HandleFunc("/cards/", srv.cards)
+	mux.HandleFunc("/cards/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/cards/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = cards.Index()
+		case method == "GET" && path == "new":
+			handler = cards.New(srv.Database, srv.URLBuilder)
+		case method == "GET":
+			handler = cards.Show(srv.Database, srv.URLBuilder, path)
+		case method == "POST" && path == "":
+			handler = cards.Create(srv.Database, srv.URLBuilder)
+		}
+
+		srv.handle(handler, w, r)
+	})
 
 	mux.HandleFunc("/tags/new", srv.newTag)
 	mux.HandleFunc("/tags/", srv.tags)

@@ -30,9 +30,16 @@ type Error struct {
 	msg  string
 }
 
-func NewError(err error, code int, msg string) Error {
+func WrapError(err error, code int, msg string) Error {
 	return Error{
 		err:  err,
+		code: code,
+		msg:  msg,
+	}
+}
+
+func NewError(code int, msg string) Error {
+	return Error{
 		code: code,
 		msg:  msg,
 	}

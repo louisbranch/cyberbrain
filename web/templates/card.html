@@ -1,50 +1,50 @@
 {{ define "content" }}
-  <nav class="breadcrumb" aria-label="breadcrumbs">
-		<ul>
-			<li><a href="/">Home</a></li>
-			<li><a href="/decks/">Decks</a></li>
-      <li><a href="{{ .Deck.Path }}">{{ .Deck.Name }}</a></li>
-			<li class="is-active"><a href="#" aria-current="page">Card</a></li>
-		</ul>
-	</nav>
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Deck.Path }}">{{ .Deck.Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">Card</a></li>
+  </ul>
+</nav>
 
-  <section class="section">
-    <div class="columns">
-      <div class="column is-8">
-        <h1 class="title">Card</h1>
-      </div>
+<section class="section">
+  <div class="columns">
+    <div class="column is-8">
+      <h1 class="title">Card</h1>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section">
-    <div class="columns">
-      <div class="column is-4">
-        <div class="card">
-          {{ range .Card.ImageURLs }}
-            <div class="card-image">
-              <figure class="image is-4by3">
-                <img src="{{ . }}">
-              </figure>
-            </div>
-          {{ end }}
-          <div class="card-content">
-            <div class="content">
-              <dl>
-                {{ $deck := .Deck }}
-                {{ range $i, $d := .Card.Definitions }}
-                  <dt>{{ index $deck.Fields $i }}</dt>
-                  <dd>{{ $d }}</dd>
-                {{ end }}
-              </dl>
-              <div>
-                {{ range .Card.Tags }}
-                  <span class="tag">{{ .Name }}</span>
-                {{ end }}
-              </div>
+<section class="section">
+  <div class="columns">
+    <div class="column is-4">
+      <div class="card">
+          {{ range .ImageURLs }}
+        <div class="card-image">
+          <figure class="image is-4by3">
+            <img src="{{ . }}">
+          </figure>
+        </div>
+        {{ end }}
+        <div class="card-content">
+          <div class="content">
+            <dl>
+              {{ $deck := .Deck }}
+              {{ range $i, $d := .Definitions }}
+                <dt>{{ index $deck.Fields $i }}</dt>
+                <dd>{{ $d }}</dd>
+              {{ end }}
+            </dl>
+            <div>
+              {{ range .Tags }}
+                <span class="tag">{{ .Name }}</span>
+              {{ end }}
             </div>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 {{ end }}
