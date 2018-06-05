@@ -24,7 +24,7 @@ type Deck struct {
 type Card struct {
 	ID          string
 	ImageURLs   []string
-	AudioURLs   []string
+	SoundURLs   []string
 	Definitions []string
 	Tags        []*Tag
 
@@ -131,7 +131,7 @@ func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
 	cr := &Card{
 		ImageURLs:   c.ImageURLs,
-		AudioURLs:   c.SoundURLs,
+		SoundURLs:   c.SoundURLs,
 		Definitions: c.Definitions,
 	}
 

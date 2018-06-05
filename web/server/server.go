@@ -45,6 +45,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = cards.Show(srv.Database, srv.URLBuilder, path)
 		case method == "POST" && path == "":
 			handler = cards.Create(srv.Database, srv.URLBuilder)
+		case method == "POST":
+			handler = cards.Update(srv.Database, srv.URLBuilder, path)
 		}
 
 		srv.handle(handler, w, r)

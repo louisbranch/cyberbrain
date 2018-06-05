@@ -18,6 +18,61 @@
 
 <section class="section">
   <div class="columns">
+    <div class="column is-8">
+      <form action="{{ .Path }}" method="post" accept-charset="utf-8">
+        <h1 class="title">Edit Card</h1>
+        <div class="columns">
+          <div class="column is-6">
+            <div class="field">
+              <label class="label">Image URL *</label>
+              <div class="control">
+                <input class="input" type="text" name="image_urls" required minlength="2" autocomplete="off" value="{{ first .ImageURLs }}" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Sound URL</label>
+              <div class="control">
+                <input class="input" type="text" name="sound_urls" autocomplete="off" value="{{ first .SoundURLs }}" />
+              </div>
+            </div>
+            {{ $deck := .Deck }}
+            {{ range $i, $d := .Definitions }}
+              <div class="field">
+                <label class="label">{{ index $deck.Fields $i }} *</label>
+                <div class="control">
+                  <input class="input" type="text" name="definitions" required autocomplete="off" value="{{ $d }}" />
+                </div>
+              </div>
+            {{ end }}
+            <div class="content">
+              <small>* required fields</small>
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <input class="button is-primary" type="submit" value="Update" />
+              </div>
+              <div class="control">
+                <a class="button is-text" href="{{ .Deck.Path }}">Cancel</a>
+              </div>
+            </div>
+          </div>
+          <div class="column is-6">
+            <div class="field">
+              <label class="label">Tags</label>
+              <div class="control">
+                <div class="select is-multiple">
+                  <select name="tags" multiple size="10">
+                    {{ range .Tags }}
+                      <option value="{{ .ID }}">{{ .Name }}</option>
+                    {{ end }}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
     <div class="column is-4">
       <div class="card">
           {{ range .ImageURLs }}

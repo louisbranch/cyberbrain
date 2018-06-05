@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
@@ -122,6 +123,41 @@ func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 func Update(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
-		return response.NewError(http.StatusInternalServerError, "not implemented")
+		if err := r.ParseForm(); err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "invalid form")
+		}
+
+		card, err := finder.Card(conn, ub, hash)
+		if err != nil {
+			return err.(response.Error)
+		}
+
+		deck, err := db.FindDeck(conn, card.DeckID)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "invalid card deck")
+		}
+
+		newCard, err := html.NewCardFromForm(*deck, r.Form)
+		if err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
+		}
+
+		card.ImageURLs = newCard.ImageURLs
+		card.SoundURLs = newCard.SoundURLs
+		card.Definitions = newCard.Definitions
+
+		// TODO reassign card tags
+
+		err = conn.Update(card)
+		if err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "failed to update card")
+		}
+
+		path, err := ub.Path("SHOW", deck)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to generate deck path")
+		}
+
+		return response.Redirect{Path: path, Code: http.StatusFound}
 	}
 }
