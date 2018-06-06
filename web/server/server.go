@@ -9,6 +9,7 @@ import (
 	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/cards"
+	"gitlab.com/luizbranco/srs/web/server/decks"
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
@@ -28,8 +29,25 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	fs := http.FileServer(http.Dir("web/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	mux.HandleFunc("/decks/new/", srv.newDeck)
-	mux.HandleFunc("/decks/", srv.decks)
+	mux.HandleFunc("/decks/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/decks/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = decks.Index(srv.Database, srv.URLBuilder)
+		case method == "GET" && path == "new":
+			handler = decks.New(srv.Database, srv.URLBuilder)
+		case method == "GET":
+			handler = decks.Show(srv.Database, srv.URLBuilder, path)
+		case method == "POST" && path == "":
+			handler = decks.Create(srv.Database, srv.URLBuilder)
+		}
+
+		srv.handle(handler, w, r)
+	})
 
 	mux.HandleFunc("/cards/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[len("/cards/"):]

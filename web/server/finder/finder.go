@@ -3,6 +3,7 @@ package finder
 import (
 	"fmt"
 	"net/http"
+	"sort"
 
 	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/db"
@@ -31,11 +32,24 @@ func Deck(conn srs.Database, ub web.URLBuilder, i identifier, opt option) (*srs.
 		return nil, response.WrapError(err, http.StatusBadRequest, "wrong deck id")
 	}
 
+	if opt&WithCards > 0 {
+		cards, err := db.FindCardsByDeck(conn, id)
+		if err != nil {
+			return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find deck cards")
+		}
+
+		deck.Cards = cards
+	}
+
 	if opt&WithTags > 0 {
 		tags, err := db.FindTags(conn, id)
 		if err != nil {
 			return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
 		}
+
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].Name < tags[j].Name
+		})
 
 		deck.Tags = tags
 	}
@@ -77,6 +91,10 @@ func Card(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Card, error)
 	if err != nil {
 		return nil, response.WrapError(err, http.StatusInternalServerError, "failed to find card tags")
 	}
+
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].Name < tags[j].Name
+	})
 
 	card.Deck = deck
 	card.Tags = tags
