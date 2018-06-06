@@ -1,0 +1,7 @@
+{{ define "content" }}
+  <div class="title">Bad Request</div>
+  <pre>
+    <code>{{ . | printf "%+v\n" }}</code>
+  </pre>
+  <a class="button" href="/">Back to Home</a>
+{{ end }}
