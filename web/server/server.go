@@ -142,7 +142,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *http.Request) {
 	if handler == nil {
-		srv.renderNotFound(w)
+		err := response.NewError(http.StatusNotFound, r.URL.Path+" not found")
+		srv.renderError(w, err)
 		return
 	}
 
@@ -173,24 +174,40 @@ func (srv *Server) render(w http.ResponseWriter, page web.Page) {
 }
 
 func (srv *Server) renderError(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusInternalServerError)
-	page := web.Page{
-		Title:    "500",
-		Content:  err,
-		Partials: []string{"500"},
+	code := http.StatusInternalServerError
+
+	res, ok := err.(response.Error)
+
+	if ok {
+		code = res.Code()
+	}
+
+	var page web.Page
+
+	switch code {
+	case http.StatusNotFound:
+		page = web.Page{
+			Title:    "Not Found",
+			Partials: []string{"404"},
+		}
+	case http.StatusBadRequest:
+		page = web.Page{
+			Title:    "Bad Request",
+			Partials: []string{"400"},
+		}
+	default:
+		code = http.StatusInternalServerError
+		page = web.Page{
+			Title:    "500",
+			Content:  err,
+			Partials: []string{"500"},
+		}
 	}
 
 	log.Println(err, errors.Cause(err))
 
-	srv.render(w, page)
-}
+	w.WriteHeader(code)
 
-func (srv *Server) renderNotFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
-	page := web.Page{
-		Title:    "Not Found",
-		Partials: []string{"404"},
-	}
 	srv.render(w, page)
 }
 
@@ -201,7 +218,8 @@ func (srv *Server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path != "/" {
-		srv.renderNotFound(w)
+		err := response.NewError(http.StatusNotFound, r.URL.Path+" not found")
+		srv.renderError(w, err)
 		return
 	}
 

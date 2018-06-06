@@ -53,6 +53,10 @@ func (e Error) Cause() error {
 	return e.err
 }
 
+func (e Error) Code() int {
+	return e.code
+}
+
 func (e Error) Respond(w http.ResponseWriter, r *http.Request) (*web.Page, error) {
 	return nil, e
 }
