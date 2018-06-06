@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/speps/go-hashids"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
 type URLBuilder struct {
@@ -28,7 +28,7 @@ func New() (*URLBuilder, error) {
 	return &URLBuilder{hashid: h}, nil
 }
 
-func (ub *URLBuilder) Path(method string, r srs.Identifiable, params ...srs.Identifiable) (string, error) {
+func (ub *URLBuilder) Path(method string, r primitives.Identifiable, params ...primitives.Identifiable) (string, error) {
 	var qs []string
 
 	var id string
@@ -66,12 +66,12 @@ func (ub *URLBuilder) Path(method string, r srs.Identifiable, params ...srs.Iden
 	}
 }
 
-func (ub *URLBuilder) EncodeID(id srs.ID) (string, error) {
+func (ub *URLBuilder) EncodeID(id primitives.ID) (string, error) {
 	i := int(id)
 	return ub.hashid.Encode([]int{i})
 }
 
-func (ub *URLBuilder) ParseID(hash string) (srs.ID, error) {
+func (ub *URLBuilder) ParseID(hash string) (primitives.ID, error) {
 	ids, err := ub.hashid.DecodeWithError(hash)
 	if err != nil || len(ids) == 0 {
 		return 0, errors.Wrapf(err, "invalid id for %s", hash)
@@ -79,5 +79,5 @@ func (ub *URLBuilder) ParseID(hash string) (srs.ID, error) {
 
 	id := ids[0]
 
-	return srs.ID(id), nil
+	return primitives.ID(id), nil
 }

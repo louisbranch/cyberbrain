@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 )
 
 const CHECKED = "on"
 
-func NewDeckFromForm(form url.Values) (*srs.Deck, error) {
-	d := &srs.Deck{}
+func NewDeckFromForm(form url.Values) (*primitives.Deck, error) {
+	d := &primitives.Deck{}
 
 	d.UserID = 1 // FIXME
 	d.Name = form.Get("name")
@@ -36,8 +36,8 @@ func NewDeckFromForm(form url.Values) (*srs.Deck, error) {
 	return d, nil
 }
 
-func NewCardFromForm(deck srs.Deck, form url.Values) (*srs.Card, error) {
-	c := &srs.Card{
+func NewCardFromForm(deck primitives.Deck, form url.Values) (*primitives.Card, error) {
+	c := &primitives.Card{
 		DeckID: deck.ID(),
 	}
 
@@ -70,22 +70,22 @@ func NewCardFromForm(deck srs.Deck, form url.Values) (*srs.Card, error) {
 	return c, nil
 }
 
-func NewTagFromForm(deck srs.Deck, form url.Values) (*srs.Tag, error) {
-	t := &srs.Tag{
+func NewTagFromForm(deck primitives.Deck, form url.Values) (*primitives.Tag, error) {
+	t := &primitives.Tag{
 		DeckID: deck.ID(),
 		Name:   form.Get("name"),
 	}
 	return t, nil
 }
 
-func NewPracticeFromForm(deck srs.Deck, form url.Values, ub web.URLBuilder) (*srs.Practice, error) {
+func NewPracticeFromForm(deck primitives.Deck, form url.Values, ub web.URLBuilder) (*primitives.Practice, error) {
 	rounds := form.Get("rounds")
 	n, err := strconv.Atoi(rounds)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid number of rounds")
 	}
 
-	p := &srs.Practice{
+	p := &primitives.Practice{
 		DeckID:      deck.ID(),
 		TotalRounds: n,
 	}
@@ -114,8 +114,8 @@ func NewPracticeFromForm(deck srs.Deck, form url.Values, ub web.URLBuilder) (*sr
 		p.TagID = &id
 	}
 
-	p.PromptMode = srs.PracticeImages
-	p.GuessMode = srs.PracticeDefinitions
+	p.PromptMode = primitives.PracticeImages
+	p.GuessMode = primitives.PracticeDefinitions
 
 	return p, nil
 }

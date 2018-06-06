@@ -7,7 +7,7 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
 type Query struct {
@@ -17,7 +17,7 @@ type Query struct {
 	addrs   []interface{}
 }
 
-func QueryFromRecord(r srs.Record, ignored ...string) (*Query, error) {
+func QueryFromRecord(r primitives.Record, ignored ...string) (*Query, error) {
 	rv := reflect.ValueOf(r)
 	if rv.Kind() != reflect.Ptr {
 		return nil, errors.Errorf("cannot get database fields for record %v", r)
@@ -50,7 +50,7 @@ func QueryFromRecord(r srs.Record, ignored ...string) (*Query, error) {
 				sa := pq.StringArray(slice)
 				addr = &sa
 			case reflect.Int:
-				ids := field.Interface().([]srs.ID)
+				ids := field.Interface().([]primitives.ID)
 				slice := make([]int64, len(ids))
 
 				for i, id := range ids {
@@ -116,11 +116,11 @@ func (q *Query) Scan(row Scannable) error {
 			*f = ss
 		case *pq.Int64Array:
 			slice := addr.(*pq.Int64Array)
-			f := q.fields[i].(*[]srs.ID)
+			f := q.fields[i].(*[]primitives.ID)
 
-			sids := make([]srs.ID, len(*slice))
+			sids := make([]primitives.ID, len(*slice))
 			for i, id := range *slice {
-				sids[i] = srs.ID(id)
+				sids[i] = primitives.ID(id)
 			}
 
 			*f = sids
@@ -130,7 +130,7 @@ func (q *Query) Scan(row Scannable) error {
 	return nil
 }
 
-func where(cond srs.Query) string {
+func where(cond primitives.Query) string {
 	where := cond.Where()
 
 	if len(where) == 0 {
@@ -142,7 +142,7 @@ func where(cond srs.Query) string {
 		switch t := v.(type) {
 		case string:
 			clause = append(clause, fmt.Sprintf("%s = '%s'", k, v))
-		case int, srs.ID:
+		case int, primitives.ID:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
 		default:
 			err := fmt.Sprintf("invalid type %q for where clause", t)

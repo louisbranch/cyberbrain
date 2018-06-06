@@ -1,4 +1,4 @@
-package srs
+package primitives
 
 import "time"
 

@@ -1,15 +1,15 @@
 package db
 
-import "gitlab.com/luizbranco/srs"
+import "gitlab.com/luizbranco/srs/primitives"
 
 type query struct {
-	record func() srs.Record
+	record func() primitives.Record
 	where  map[string]interface{}
 	raw    string
 	sortBy map[string]string
 }
 
-func (q *query) NewRecord() srs.Record {
+func (q *query) NewRecord() primitives.Record {
 	return q.record()
 }
 
@@ -26,8 +26,8 @@ func (q *query) SortBy() map[string]string {
 }
 
 func newDeckQuery() *query {
-	fn := func() srs.Record {
-		return &srs.Deck{}
+	fn := func() primitives.Record {
+		return &primitives.Deck{}
 	}
 
 	return &query{
@@ -37,8 +37,8 @@ func newDeckQuery() *query {
 }
 
 func newCardQuery() *query {
-	fn := func() srs.Record {
-		return &srs.Card{}
+	fn := func() primitives.Record {
+		return &primitives.Card{}
 	}
 
 	return &query{
@@ -49,8 +49,8 @@ func newCardQuery() *query {
 }
 
 func newTagQuery() *query {
-	fn := func() srs.Record {
-		return &srs.Tag{}
+	fn := func() primitives.Record {
+		return &primitives.Tag{}
 	}
 
 	return &query{
@@ -60,8 +60,8 @@ func newTagQuery() *query {
 }
 
 func newCardTagQuery() *query {
-	fn := func() srs.Record {
-		return &srs.CardTag{}
+	fn := func() primitives.Record {
+		return &primitives.CardTag{}
 	}
 
 	return &query{
@@ -71,8 +71,8 @@ func newCardTagQuery() *query {
 }
 
 func newPracticeQuery() *query {
-	fn := func() srs.Record {
-		return &srs.Practice{}
+	fn := func() primitives.Record {
+		return &primitives.Practice{}
 	}
 
 	return &query{
@@ -82,8 +82,8 @@ func newPracticeQuery() *query {
 }
 
 func newRoundQuery() *query {
-	fn := func() srs.Record {
-		return &srs.Round{}
+	fn := func() primitives.Record {
+		return &primitives.Round{}
 	}
 
 	return &query{

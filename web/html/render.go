@@ -2,7 +2,7 @@ package html
 
 import (
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 )
 
@@ -67,7 +67,7 @@ type Round struct {
 	Path string
 }
 
-func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
+func RenderDeck(d primitives.Deck, ub web.URLBuilder) (*Deck, error) {
 	dr := &Deck{
 		Name:        d.Name,
 		Description: d.Description,
@@ -89,21 +89,21 @@ func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 
 	dr.Path = p
 
-	cp, err := ub.Path("NEW", &srs.Card{}, d)
+	cp, err := ub.Path("NEW", &primitives.Card{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new card path")
 	}
 
 	dr.NewCardPath = cp
 
-	tp, err := ub.Path("NEW", &srs.Tag{}, d)
+	tp, err := ub.Path("NEW", &primitives.Tag{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new tag path")
 	}
 
 	dr.NewTagPath = tp
 
-	pp, err := ub.Path("NEW", &srs.Practice{}, d)
+	pp, err := ub.Path("NEW", &primitives.Practice{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new practice path")
 	}
@@ -131,7 +131,7 @@ func RenderDeck(d srs.Deck, ub web.URLBuilder) (*Deck, error) {
 	return dr, nil
 }
 
-func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
+func RenderCard(c primitives.Card, ub web.URLBuilder) (*Card, error) {
 	cr := &Card{
 		ImageURLs:   c.ImageURLs,
 		SoundURLs:   c.SoundURLs,
@@ -172,7 +172,7 @@ func RenderCard(c srs.Card, ub web.URLBuilder) (*Card, error) {
 	return cr, nil
 }
 
-func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
+func RenderTag(t primitives.Tag, ub web.URLBuilder) (*Tag, error) {
 	tr := &Tag{
 		Name: t.Name,
 	}
@@ -211,7 +211,7 @@ func RenderTag(t srs.Tag, ub web.URLBuilder) (*Tag, error) {
 	return tr, nil
 }
 
-func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
+func RenderPractice(p primitives.Practice, ub web.URLBuilder) (*Practice, error) {
 	pr := &Practice{
 		Done: p.Done,
 	}
@@ -237,7 +237,7 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 
 	pr.Path = path
 
-	rp, err := ub.Path("NEW", &srs.Round{}, p)
+	rp, err := ub.Path("NEW", &primitives.Round{}, p)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build continue practice path")
 	}
@@ -247,7 +247,7 @@ func RenderPractice(p srs.Practice, ub web.URLBuilder) (*Practice, error) {
 	return pr, nil
 }
 
-func RenderRound(r srs.Round, ub web.URLBuilder) (*Round, error) {
+func RenderRound(r primitives.Round, ub web.URLBuilder) (*Round, error) {
 	rr := &Round{
 		Answer:      r.Answer,
 		Guess:       r.Guess,

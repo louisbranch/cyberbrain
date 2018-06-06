@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
 type Generator struct{}
@@ -17,7 +17,7 @@ func init() {
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func (Generator) NewRound(conn srs.Database, p srs.Practice) (*srs.Round, error) {
+func (Generator) NewRound(conn primitives.Database, p primitives.Practice) (*primitives.Round, error) {
 	pid := p.ID()
 
 	// TODO query should find by tags and where field(s) are not null
@@ -27,11 +27,11 @@ func (Generator) NewRound(conn srs.Database, p srs.Practice) (*srs.Round, error)
 	}
 
 	// TODO implement different types of prompt and guess modes
-	r := &srs.Round{
+	r := &primitives.Round{
 		PracticeID: pid,
 		PromptMode: p.PromptMode,
 		GuessMode:  p.GuessMode,
-		CardIDs:    []srs.ID{card.ID()},
+		CardIDs:    []primitives.ID{card.ID()},
 		Prompt:     card.ImageURLs[0],
 		Answer:     card.Definitions[0],
 	}

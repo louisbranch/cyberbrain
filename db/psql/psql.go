@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
 const version = 1
@@ -35,7 +35,7 @@ func New(host, port, dbname, user, pass string) (*Database, error) {
 	return &Database{db}, nil
 }
 
-func (db *Database) Create(r srs.Record) error {
+func (db *Database) Create(r primitives.Record) error {
 	now := time.Now()
 
 	r.SetCreatedAt(now)
@@ -50,7 +50,7 @@ func (db *Database) Create(r srs.Record) error {
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING id;", q.Table(), q.Columns(),
 		q.Placeholders())
 
-	var id srs.ID
+	var id primitives.ID
 
 	err = db.QueryRow(query, q.addrs...).Scan(&id)
 	if err != nil {
@@ -62,7 +62,7 @@ func (db *Database) Create(r srs.Record) error {
 	return nil
 }
 
-func (db *Database) Update(r srs.Record) error {
+func (db *Database) Update(r primitives.Record) error {
 	now := time.Now()
 
 	r.SetUpdatedAt(now)
@@ -83,7 +83,7 @@ func (db *Database) Update(r srs.Record) error {
 	return nil
 }
 
-func (db *Database) Query(wq srs.Query) ([]srs.Record, error) {
+func (db *Database) Query(wq primitives.Query) ([]primitives.Record, error) {
 	q, err := QueryFromRecord(wq.NewRecord())
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
@@ -94,7 +94,7 @@ func (db *Database) Query(wq srs.Query) ([]srs.Record, error) {
 	return db.queryRows(wq, raw)
 }
 
-func (db *Database) Get(wq srs.Query) (srs.Record, error) {
+func (db *Database) Get(wq primitives.Query) (primitives.Record, error) {
 	r := wq.NewRecord()
 
 	q, err := QueryFromRecord(r)
@@ -114,11 +114,11 @@ func (db *Database) Get(wq srs.Query) (srs.Record, error) {
 	return r, nil
 }
 
-func (db *Database) QueryRaw(wq srs.Query) ([]srs.Record, error) {
+func (db *Database) QueryRaw(wq primitives.Query) ([]primitives.Record, error) {
 	return db.queryRows(wq, wq.Raw())
 }
 
-func (db *Database) Count(wq srs.Query) (int, error) {
+func (db *Database) Count(wq primitives.Query) (int, error) {
 	table := wq.NewRecord().Type() + "s"
 
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s %s;", table, where(wq))
@@ -135,7 +135,7 @@ func (db *Database) Count(wq srs.Query) (int, error) {
 	return n, nil
 }
 
-func (db *Database) Random(wq srs.Query, n int) ([]srs.Record, error) {
+func (db *Database) Random(wq primitives.Query, n int) ([]primitives.Record, error) {
 	r := wq.NewRecord()
 	q, err := QueryFromRecord(r)
 	if err != nil {
@@ -148,14 +148,14 @@ func (db *Database) Random(wq srs.Query, n int) ([]srs.Record, error) {
 	return db.queryRows(wq, raw)
 }
 
-func (db *Database) queryRows(wq srs.Query, query string) ([]srs.Record, error) {
+func (db *Database) queryRows(wq primitives.Query, query string) ([]primitives.Record, error) {
 	rows, err := db.DB.Query(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to query records %v", wq)
 	}
 	defer rows.Close()
 
-	var records []srs.Record
+	var records []primitives.Record
 
 	for rows.Next() {
 

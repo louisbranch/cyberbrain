@@ -3,7 +3,7 @@ package web
 import (
 	"io"
 
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
 type Page struct {
@@ -19,8 +19,8 @@ type Template interface {
 }
 
 type URLBuilder interface {
-	ParseID(string) (srs.ID, error)
-	EncodeID(srs.ID) (string, error)
+	ParseID(string) (primitives.ID, error)
+	EncodeID(primitives.ID) (string, error)
 
-	Path(string, srs.Identifiable, ...srs.Identifiable) (string, error)
+	Path(string, primitives.Identifiable, ...primitives.Identifiable) (string, error)
 }

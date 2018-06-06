@@ -4,10 +4,10 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 )
 
-func FindDecks(db srs.Database) ([]srs.Deck, error) {
+func FindDecks(db primitives.Database) ([]primitives.Deck, error) {
 	q := newDeckQuery()
 
 	rs, err := db.Query(q)
@@ -15,10 +15,10 @@ func FindDecks(db srs.Database) ([]srs.Deck, error) {
 		return nil, err
 	}
 
-	var decks []srs.Deck
+	var decks []primitives.Deck
 
 	for _, r := range rs {
-		deck, ok := r.(*srs.Deck)
+		deck, ok := r.(*primitives.Deck)
 		if !ok {
 			return nil, errors.Errorf("invalid record type %T", r)
 		}
@@ -29,7 +29,7 @@ func FindDecks(db srs.Database) ([]srs.Deck, error) {
 	return decks, nil
 }
 
-func FindDeck(db srs.Database, id srs.ID) (*srs.Deck, error) {
+func FindDeck(db primitives.Database, id primitives.ID) (*primitives.Deck, error) {
 	q := newDeckQuery()
 	q.where["id"] = id
 
@@ -38,7 +38,7 @@ func FindDeck(db srs.Database, id srs.ID) (*srs.Deck, error) {
 		return nil, err
 	}
 
-	deck, ok := r.(*srs.Deck)
+	deck, ok := r.(*primitives.Deck)
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
 	}
@@ -46,7 +46,7 @@ func FindDeck(db srs.Database, id srs.ID) (*srs.Deck, error) {
 	return deck, nil
 }
 
-func FindCard(db srs.Database, id srs.ID) (*srs.Card, error) {
+func FindCard(db primitives.Database, id primitives.ID) (*primitives.Card, error) {
 	q := newCardQuery()
 	q.where["id"] = id
 
@@ -55,7 +55,7 @@ func FindCard(db srs.Database, id srs.ID) (*srs.Card, error) {
 		return nil, err
 	}
 
-	card, ok := r.(*srs.Card)
+	card, ok := r.(*primitives.Card)
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
 	}
@@ -63,7 +63,7 @@ func FindCard(db srs.Database, id srs.ID) (*srs.Card, error) {
 	return card, nil
 }
 
-func FindCardsByDeck(db srs.Database, deckID srs.ID) ([]srs.Card, error) {
+func FindCardsByDeck(db primitives.Database, deckID primitives.ID) ([]primitives.Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
 	q.sortBy["updated_at"] = "DESC"
@@ -76,7 +76,7 @@ func FindCardsByDeck(db srs.Database, deckID srs.ID) ([]srs.Card, error) {
 	return castCards(rs)
 }
 
-func FindCardsByTag(db srs.Database, tagID srs.ID) ([]srs.Card, error) {
+func FindCardsByTag(db primitives.Database, tagID primitives.ID) ([]primitives.Card, error) {
 	id := strconv.Itoa(int(tagID))
 
 	raw := `SELECT c.* FROM cards c
@@ -94,7 +94,7 @@ func FindCardsByTag(db srs.Database, tagID srs.ID) ([]srs.Card, error) {
 	return castCards(rs)
 }
 
-func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
+func FindTagsByCard(db primitives.Database, cardID primitives.ID) ([]primitives.Tag, error) {
 	id := strconv.Itoa(int(cardID))
 
 	raw := `SELECT t.* FROM tags t
@@ -112,7 +112,7 @@ func FindTagsByCard(db srs.Database, cardID srs.ID) ([]srs.Tag, error) {
 	return castTags(rs)
 }
 
-func FindTag(db srs.Database, id srs.ID) (*srs.Tag, error) {
+func FindTag(db primitives.Database, id primitives.ID) (*primitives.Tag, error) {
 	q := newTagQuery()
 	q.where["id"] = id
 
@@ -121,7 +121,7 @@ func FindTag(db srs.Database, id srs.ID) (*srs.Tag, error) {
 		return nil, err
 	}
 
-	tag, ok := r.(*srs.Tag)
+	tag, ok := r.(*primitives.Tag)
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
 	}
@@ -129,7 +129,7 @@ func FindTag(db srs.Database, id srs.ID) (*srs.Tag, error) {
 	return tag, nil
 }
 
-func FindTags(db srs.Database, deckID srs.ID) ([]srs.Tag, error) {
+func FindTags(db primitives.Database, deckID primitives.ID) ([]primitives.Tag, error) {
 	q := newTagQuery()
 	q.where["deck_id"] = deckID
 
@@ -141,11 +141,11 @@ func FindTags(db srs.Database, deckID srs.ID) ([]srs.Tag, error) {
 	return castTags(rs)
 }
 
-func castTags(rs []srs.Record) ([]srs.Tag, error) {
-	var tags []srs.Tag
+func castTags(rs []primitives.Record) ([]primitives.Tag, error) {
+	var tags []primitives.Tag
 
 	for _, r := range rs {
-		tag, ok := r.(*srs.Tag)
+		tag, ok := r.(*primitives.Tag)
 
 		if !ok {
 			return nil, errors.Errorf("invalid record type %T", r)
@@ -157,7 +157,7 @@ func castTags(rs []srs.Record) ([]srs.Tag, error) {
 	return tags, nil
 }
 
-func FindPractice(db srs.Database, id srs.ID) (*srs.Practice, error) {
+func FindPractice(db primitives.Database, id primitives.ID) (*primitives.Practice, error) {
 	q := newPracticeQuery()
 	q.where["id"] = id
 
@@ -166,7 +166,7 @@ func FindPractice(db srs.Database, id srs.ID) (*srs.Practice, error) {
 		return nil, err
 	}
 
-	p, ok := r.(*srs.Practice)
+	p, ok := r.(*primitives.Practice)
 
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
@@ -175,7 +175,7 @@ func FindPractice(db srs.Database, id srs.ID) (*srs.Practice, error) {
 	return p, nil
 }
 
-func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
+func FindRound(db primitives.Database, id primitives.ID) (*primitives.Round, error) {
 	q := newRoundQuery()
 	q.where["id"] = id
 
@@ -184,7 +184,7 @@ func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
 		return nil, err
 	}
 
-	p, ok := r.(*srs.Round)
+	p, ok := r.(*primitives.Round)
 	if !ok {
 		return nil, errors.Errorf("invalid record type %T", r)
 	}
@@ -192,7 +192,7 @@ func FindRound(db srs.Database, id srs.ID) (*srs.Round, error) {
 	return p, nil
 }
 
-func FindRounds(db srs.Database, practiceID srs.ID) ([]srs.Round, error) {
+func FindRounds(db primitives.Database, practiceID primitives.ID) ([]primitives.Round, error) {
 	q := newRoundQuery()
 	q.where["practice_id"] = practiceID
 
@@ -204,14 +204,14 @@ func FindRounds(db srs.Database, practiceID srs.ID) ([]srs.Round, error) {
 	return castRounds(rs)
 }
 
-func CountRounds(db srs.Database, practiceID srs.ID) (int, error) {
+func CountRounds(db primitives.Database, practiceID primitives.ID) (int, error) {
 	q := newRoundQuery()
 	q.where["practice_id"] = practiceID
 
 	return db.Count(q)
 }
 
-func RandomCard(db srs.Database, deckID srs.ID) (*srs.Card, error) {
+func RandomCard(db primitives.Database, deckID primitives.ID) (*primitives.Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
 
@@ -232,11 +232,11 @@ func RandomCard(db srs.Database, deckID srs.ID) (*srs.Card, error) {
 	return &cards[0], nil
 }
 
-func castCards(rs []srs.Record) ([]srs.Card, error) {
-	var cards []srs.Card
+func castCards(rs []primitives.Record) ([]primitives.Card, error) {
+	var cards []primitives.Card
 
 	for _, r := range rs {
-		card, ok := r.(*srs.Card)
+		card, ok := r.(*primitives.Card)
 
 		if !ok {
 			return nil, errors.Errorf("invalid record type %T", r)
@@ -248,11 +248,11 @@ func castCards(rs []srs.Record) ([]srs.Card, error) {
 	return cards, nil
 }
 
-func castRounds(rs []srs.Record) ([]srs.Round, error) {
-	var rounds []srs.Round
+func castRounds(rs []primitives.Record) ([]primitives.Round, error) {
+	var rounds []primitives.Round
 
 	for _, r := range rs {
-		round, ok := r.(*srs.Round)
+		round, ok := r.(*primitives.Round)
 
 		if !ok {
 			return nil, errors.Errorf("invalid record type %T", r)

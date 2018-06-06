@@ -3,8 +3,8 @@ package tags
 import (
 	"net/http"
 
-	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
@@ -17,7 +17,7 @@ func Index() response.Handler {
 	}
 }
 
-func New(conn srs.Database, ub web.URLBuilder) response.Handler {
+func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
 		query := r.URL.Query()
@@ -43,7 +43,7 @@ func New(conn srs.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
-func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
+func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
 		if err := r.ParseForm(); err != nil {
@@ -76,7 +76,7 @@ func Create(conn srs.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
-func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
+func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
 		tag, err := finder.Tag(conn, ub, hash)
@@ -99,7 +99,7 @@ func Show(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
 	}
 }
 
-func Update(conn srs.Database, ub web.URLBuilder, hash string) response.Handler {
+func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request) response.Responder {
 
 		if err := r.ParseForm(); err != nil {

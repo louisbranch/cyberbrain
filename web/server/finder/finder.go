@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"sort"
 
-	"gitlab.com/luizbranco/srs"
 	"gitlab.com/luizbranco/srs/db"
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
@@ -21,7 +21,7 @@ const (
 	WithCards
 )
 
-func Deck(conn srs.Database, ub web.URLBuilder, i identifier, opt option) (*srs.Deck, error) {
+func Deck(conn primitives.Database, ub web.URLBuilder, i identifier, opt option) (*primitives.Deck, error) {
 	id, err := parseID(ub, i)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func Deck(conn srs.Database, ub web.URLBuilder, i identifier, opt option) (*srs.
 	return deck, nil
 }
 
-func Practice(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Practice, error) {
+func Practice(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitives.Practice, error) {
 	id, err := parseID(ub, i)
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func Practice(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Practice
 	return practice, nil
 }
 
-func Card(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Card, error) {
+func Card(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitives.Card, error) {
 	id, err := parseID(ub, i)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func Card(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Card, error)
 	return card, nil
 }
 
-func Tag(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Tag, error) {
+func Tag(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitives.Tag, error) {
 	id, err := parseID(ub, i)
 	if err != nil {
 		return nil, err
@@ -129,12 +129,12 @@ func Tag(conn srs.Database, ub web.URLBuilder, i identifier) (*srs.Tag, error) {
 	return tag, nil
 }
 
-func parseID(ub web.URLBuilder, i identifier) (srs.ID, error) {
-	var blank srs.ID
+func parseID(ub web.URLBuilder, i identifier) (primitives.ID, error) {
+	var blank primitives.ID
 
 	switch i.(type) {
-	case srs.ID:
-		return i.(srs.ID), nil
+	case primitives.ID:
+		return i.(primitives.ID), nil
 	case string:
 		hash := i.(string)
 		id, err := ub.ParseID(hash)

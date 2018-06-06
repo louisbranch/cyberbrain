@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs"
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/cards"
 	"gitlab.com/luizbranco/srs/web/server/decks"
@@ -19,8 +19,8 @@ import (
 type Server struct {
 	Template          web.Template
 	URLBuilder        web.URLBuilder
-	Database          srs.Database
-	PracticeGenerator srs.PracticeGenerator
+	Database          primitives.Database
+	PracticeGenerator primitives.PracticeGenerator
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
