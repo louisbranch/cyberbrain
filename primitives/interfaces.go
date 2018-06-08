@@ -38,3 +38,8 @@ type Query interface {
 type PracticeGenerator interface {
 	NewRound(Practice) (*Round, error)
 }
+
+type Authenticator interface {
+	Create(string) (string, error)
+	Verify(string, string) (bool, error)
+}
