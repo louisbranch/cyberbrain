@@ -9,7 +9,9 @@ import (
 	"gitlab.com/luizbranco/srs/primitives"
 )
 
-type Generator struct{}
+type Generator struct {
+	Database primitives.Database
+}
 
 var r *rand.Rand
 
@@ -17,11 +19,12 @@ func init() {
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func (Generator) NewRound(conn primitives.Database, p primitives.Practice) (*primitives.Round, error) {
+func (g Generator) NewRound(p primitives.Practice) (*primitives.Round, error) {
 	pid := p.ID()
 
 	// TODO query should find by tags and where field(s) are not null
-	card, err := db.RandomCard(conn, p.DeckID)
+	// TODO should exclude cards already used in the same practice
+	card, err := db.RandomCard(g.Database, p.DeckID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to find random card for practice %q", pid)
 	}
@@ -36,7 +39,7 @@ func (Generator) NewRound(conn primitives.Database, p primitives.Practice) (*pri
 		Answer:     card.Definitions[0],
 	}
 
-	err = conn.Create(r)
+	err = g.Database.Create(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create round for practice %q, %v", pid, r)
 	}

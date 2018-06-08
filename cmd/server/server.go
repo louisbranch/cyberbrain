@@ -23,7 +23,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	gen := generator.Generator{}
+	gen := generator.Generator{
+		Database: db,
+	}
+
 	tpl := html.New("web/templates")
 
 	srv := &server.Server{

@@ -82,7 +82,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.Practice
 			return response.Redirect{Path: path, Code: http.StatusFound}
 		}
 
-		round, err := gen.NewRound(conn, *practice)
+		round, err := gen.NewRound(*practice)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to generate new round")
 		}
