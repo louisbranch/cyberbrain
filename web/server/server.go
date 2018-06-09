@@ -64,6 +64,20 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		srv.handle(handler, w, r)
 	})
 
+	mux.HandleFunc("/logout/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/logout/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = sessions.Destroy(srv.SessionManager)
+		}
+
+		srv.handle(handler, w, r)
+	})
+
 	mux.HandleFunc("/decks/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[len("/decks/"):]
 		method := r.Method
@@ -180,7 +194,9 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		srv.handle(handler, w, r)
 	})
 
-	mux.HandleFunc("/", srv.index)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		srv.handle(index(), w, r)
+	})
 
 	return mux
 }
@@ -188,13 +204,13 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *http.Request) {
 	if handler == nil {
 		err := response.NewError(http.StatusNotFound, r.URL.Path+" not found")
-		srv.renderError(w, err)
+		srv.renderError(w, err, nil)
 		return
 	}
 
 	user, err := srv.SessionManager.User(r)
 	if err != nil {
-		srv.renderError(w, err)
+		srv.renderError(w, err, nil)
 		return
 	}
 
@@ -202,12 +218,13 @@ func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *ht
 	page, err := res.Respond(w, r)
 
 	if page != nil {
+		page.User = user
 		srv.render(w, *page)
 		return
 	}
 
 	if err != nil {
-		srv.renderError(w, err)
+		srv.renderError(w, err, user)
 		return
 	}
 }
@@ -224,7 +241,7 @@ func (srv *Server) render(w http.ResponseWriter, page web.Page) {
 	}
 }
 
-func (srv *Server) renderError(w http.ResponseWriter, err error) {
+func (srv *Server) renderError(w http.ResponseWriter, err error, user *primitives.User) {
 	code := http.StatusInternalServerError
 
 	res, ok := err.(response.Error)
@@ -240,12 +257,14 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 		page = web.Page{
 			Title:    "Not Found",
 			Partials: []string{"404"},
+			User:     user,
 		}
 	case http.StatusBadRequest:
 		page = web.Page{
 			Title:    "Bad Request",
 			Content:  err,
 			Partials: []string{"400"},
+			User:     user,
 		}
 	default:
 		code = http.StatusInternalServerError
@@ -253,6 +272,7 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 			Title:    "Internal Server Error",
 			Content:  err,
 			Partials: []string{"500"},
+			User:     user,
 		}
 	}
 
@@ -263,19 +283,14 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 	srv.render(w, page)
 }
 
-func (srv *Server) index(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
+func index() response.Handler {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+		if r.Method != "GET" || r.URL.Path != "/" {
+			return response.NewError(http.StatusNotFound, r.URL.Path+" not found")
+		}
 
-	if r.URL.Path != "/" {
-		err := response.NewError(http.StatusNotFound, r.URL.Path+" not found")
-		srv.renderError(w, err)
-		return
+		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
 	}
-
-	http.Redirect(w, r, "/decks/", http.StatusMovedPermanently)
 }
 
 func authenticate(h response.Handler) response.Handler {

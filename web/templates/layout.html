@@ -21,8 +21,12 @@
           <a class="navbar-item" href="/decks/">Decks</a>
 				</div>
 				<div class="navbar-end">
-          <a class="navbar-item" href="/signup">Sign up</a>
-          <a class="navbar-item" href="/login">Log in</a>
+          {{ if .User }}
+            <a class="navbar-item" href="/logout">Log out</a>
+          {{ else }}
+            <a class="navbar-item" href="/signup">Sign up</a>
+            <a class="navbar-item" href="/login">Log in</a>
+          {{ end }}
 				</div>
 			</div>
 		</nav>

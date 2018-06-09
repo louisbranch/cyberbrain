@@ -48,6 +48,7 @@ func (m *Manager) LogIn(u primitives.User, w http.ResponseWriter) error {
 func (m *Manager) LogOut(w http.ResponseWriter) {
 	cookie := &http.Cookie{
 		Name:   cookieName,
+		Path:   "/",
 		MaxAge: -1,
 	}
 

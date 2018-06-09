@@ -12,6 +12,7 @@ type Page struct {
 	ActiveMenu string
 	Layout     string
 	Partials   []string
+	User       *primitives.User
 	Content    interface{}
 }
 

@@ -69,3 +69,10 @@ func Create(conn primitives.Database, ub web.URLBuilder,
 		return response.Redirect{Path: path, Code: http.StatusFound}
 	}
 }
+
+func Destroy(session web.SessionManager) response.Handler {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+		session.LogOut(w)
+		return response.Redirect{Path: "/", Code: http.StatusFound}
+	}
+}
