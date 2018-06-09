@@ -12,13 +12,13 @@ import (
 )
 
 func Index() response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
 	}
 }
 
 func New(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGenerator) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		query := r.URL.Query()
 		hash := query.Get("practice")
@@ -57,12 +57,12 @@ func New(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGen
 
 		// otherwise treat as a new round being created
 		handler := Create(conn, ub, gen)
-		return handler(w, r)
+		return handler(w, r, user)
 	}
 }
 
 func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGenerator) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		query := r.URL.Query()
 		hash := query.Get("practice")
@@ -97,7 +97,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.Practice
 }
 
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		id, err := ub.ParseID(hash)
 		if err != nil {
@@ -138,7 +138,7 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 }
 
 func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}

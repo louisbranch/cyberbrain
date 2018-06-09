@@ -7,8 +7,43 @@ import (
 	"gitlab.com/luizbranco/srs/primitives"
 )
 
-func FindDecks(db primitives.Database) ([]primitives.Deck, error) {
+func FindUser(db primitives.Database, id primitives.ID) (*primitives.User, error) {
+	q := newUserQuery()
+	q.where["id"] = id
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	user, ok := r.(*primitives.User)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return user, nil
+}
+
+func FindUserByEmail(db primitives.Database, email string) (*primitives.User, error) {
+	q := newUserQuery()
+	q.where["email"] = email
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	user, ok := r.(*primitives.User)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return user, nil
+}
+
+func FindDecks(db primitives.Database, userID primitives.ID) ([]primitives.Deck, error) {
 	q := newDeckQuery()
+	q.where["user_id"] = userID
 
 	rs, err := db.Query(q)
 	if err != nil {

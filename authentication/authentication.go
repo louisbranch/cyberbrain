@@ -24,7 +24,7 @@ func (a Authenticator) Verify(hash, password string) (bool, error) {
 
 	err := bcrypt.CompareHashAndPassword(h, p)
 	if err != nil {
-		return false, errors.Wrap(err, "faild to verify password")
+		return false, errors.Wrap(err, "failed to verify password")
 	}
 
 	return true, nil

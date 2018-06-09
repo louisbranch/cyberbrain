@@ -10,6 +10,7 @@ import (
 	"gitlab.com/luizbranco/srs/generator"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server"
+	"gitlab.com/luizbranco/srs/web/session"
 	"gitlab.com/luizbranco/srs/web/urlbuilder"
 )
 
@@ -30,6 +31,11 @@ func main() {
 
 	auth := authentication.Authenticator{}
 
+	session := &session.Manager{
+		Database: db,
+		Secret:   "saahskdhsakjdao8oKAAKJJAJSkjasEE", // FIXME
+	}
+
 	tpl := html.New("web/templates")
 
 	srv := &server.Server{
@@ -38,6 +44,7 @@ func main() {
 		URLBuilder:        ub,
 		PracticeGenerator: gen,
 		Authenticator:     auth,
+		SessionManager:    session,
 	}
 
 	mux := srv.NewServeMux()

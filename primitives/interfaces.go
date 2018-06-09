@@ -40,6 +40,6 @@ type PracticeGenerator interface {
 }
 
 type Authenticator interface {
-	Create(string) (string, error)
-	Verify(string, string) (bool, error)
+	Create(password string) (string, error)
+	Verify(hash string, password string) (bool, error)
 }

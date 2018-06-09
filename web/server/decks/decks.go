@@ -12,9 +12,13 @@ import (
 )
 
 func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
-		decks, err := db.FindDecks(conn)
+		if user != nil {
+			return response.Redirect{Path: "/login", Code: http.StatusFound}
+		}
+
+		decks, err := db.FindDecks(conn, user.ID())
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to find decks")
 		}
@@ -42,7 +46,7 @@ func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		page := web.Page{
 			Title:      "New Deck",
@@ -55,7 +59,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
@@ -81,7 +85,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request) response.Responder {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
 		deck, err := finder.Deck(conn, ub, hash, finder.WithTags|finder.WithCards)
 		if err != nil {

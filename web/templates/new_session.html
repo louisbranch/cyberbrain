@@ -1,14 +1,8 @@
 {{ define "content"}}
-  <form action="/signup/" method="post" accept-charset="utf-8">
-    <h1 class="title">Sign Up</h1>
+  <form action="/login/" method="post" accept-charset="utf-8">
+    <h1 class="title">Log In</h1>
     <div class="columns">
       <div class="column is-4">
-        <div class="field">
-          <label class="label">Name *</label>
-          <div class="control">
-            <input class="input" type="text" name="name" required />
-          </div>
-        </div>
         <div class="field">
           <label class="label">Email *</label>
           <div class="control">
@@ -26,7 +20,7 @@
         </div>
         <div class="field is-grouped">
           <div class="control">
-            <input class="button is-primary" type="submit" value="Sign Up" />
+            <input class="button is-primary" type="submit" value="Log In" />
           </div>
           <div class="control">
             <a class="button is-text" href="/">Cancel</a>

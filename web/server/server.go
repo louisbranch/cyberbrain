@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/cards"
@@ -13,6 +12,7 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
+	"gitlab.com/luizbranco/srs/web/server/sessions"
 	"gitlab.com/luizbranco/srs/web/server/tags"
 	"gitlab.com/luizbranco/srs/web/server/users"
 )
@@ -23,6 +23,7 @@ type Server struct {
 	Database          primitives.Database
 	PracticeGenerator primitives.PracticeGenerator
 	Authenticator     primitives.Authenticator
+	SessionManager    web.SessionManager
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
@@ -41,7 +42,23 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		case method == "GET" && path == "":
 			handler = users.New(srv.Database, srv.URLBuilder)
 		case method == "POST" && path == "":
-			handler = users.Create(srv.Database, srv.URLBuilder, srv.Authenticator)
+			handler = users.Create(srv.Database, srv.URLBuilder, srv.Authenticator, srv.SessionManager)
+		}
+
+		srv.handle(handler, w, r)
+	})
+
+	mux.HandleFunc("/login/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/login/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = sessions.New(srv.Database, srv.URLBuilder)
+		case method == "POST" && path == "":
+			handler = sessions.Create(srv.Database, srv.URLBuilder, srv.Authenticator, srv.SessionManager)
 		}
 
 		srv.handle(handler, w, r)
@@ -165,7 +182,13 @@ func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *ht
 		return
 	}
 
-	res := handler(w, r)
+	user, err := srv.SessionManager.User(r)
+	if err != nil {
+		srv.renderError(w, err)
+		return
+	}
+
+	res := handler(w, r, user)
 	page, err := res.Respond(w, r)
 
 	if page != nil {
@@ -223,7 +246,7 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 		}
 	}
 
-	log.Println(err, errors.Cause(err))
+	log.Println(err.Error())
 
 	w.WriteHeader(code)
 

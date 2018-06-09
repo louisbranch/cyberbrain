@@ -3,10 +3,11 @@ package response
 import (
 	"net/http"
 
+	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 )
 
-type Handler func(http.ResponseWriter, *http.Request) Responder
+type Handler func(http.ResponseWriter, *http.Request, *primitives.User) Responder
 
 type Responder interface {
 	Respond(http.ResponseWriter, *http.Request) (*web.Page, error)
@@ -46,7 +47,7 @@ func NewError(code int, msg string) Error {
 }
 
 func (e Error) Error() string {
-	return e.msg
+	return e.msg + ": " + e.err.Error()
 }
 
 func (e Error) Cause() error {

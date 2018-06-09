@@ -2,6 +2,7 @@ package web
 
 import (
 	"io"
+	"net/http"
 
 	"gitlab.com/luizbranco/srs/primitives"
 )
@@ -23,4 +24,10 @@ type URLBuilder interface {
 	EncodeID(primitives.ID) (string, error)
 
 	Path(string, primitives.Identifiable, ...primitives.Identifiable) (string, error)
+}
+
+type SessionManager interface {
+	LogIn(primitives.User, http.ResponseWriter) error
+	LogOut(http.ResponseWriter)
+	User(*http.Request) (*primitives.User, error)
 }

@@ -15,6 +15,16 @@ var tableQueries = []string{
 		);
 		`,
 	`
+		CREATE TABLE IF NOT EXISTS sessions(
+			id SERIAL PRIMARY KEY,
+			version INTEGER NOT NULL DEFAULT 1,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+			user_id INTEGER NOT NULL REFERENCES users ON DELETE CASCADE
+		);
+		`,
+	`
 		CREATE TABLE IF NOT EXISTS decks(
 			id SERIAL PRIMARY KEY,
 			version INTEGER NOT NULL DEFAULT 1,

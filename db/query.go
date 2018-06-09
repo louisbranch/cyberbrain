@@ -25,6 +25,17 @@ func (q *query) SortBy() map[string]string {
 	return q.sortBy
 }
 
+func newUserQuery() *query {
+	fn := func() primitives.Record {
+		return &primitives.User{}
+	}
+
+	return &query{
+		record: fn,
+		where:  make(map[string]interface{}),
+	}
+}
+
 func newDeckQuery() *query {
 	fn := func() primitives.Record {
 		return &primitives.Deck{}

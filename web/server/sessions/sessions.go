@@ -1,11 +1,11 @@
-package users
+package sessions
 
 import (
 	"net/http"
 
+	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
@@ -17,9 +17,9 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		}
 
 		page := web.Page{
-			Title:      "Sign Up",
-			ActiveMenu: "signup",
-			Partials:   []string{"new_user"},
+			Title:      "Log In",
+			ActiveMenu: "login",
+			Partials:   []string{"new_session"},
 		}
 
 		return response.NewContent(page)
@@ -39,14 +39,21 @@ func Create(conn primitives.Database, ub web.URLBuilder,
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		user, err := html.NewUserFromForm(r.Form, auth)
+		email := r.Form.Get("email")
+		password := r.Form.Get("password")
+
+		user, err := db.FindUserByEmail(conn, email)
 		if err != nil {
-			return response.WrapError(err, http.StatusBadRequest, "invalid user form")
+			return response.WrapError(err, http.StatusBadRequest, "user and password combination doesn't match")
 		}
 
-		err = conn.Create(user)
+		ok, err := auth.Verify(user.PasswordHash, password)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to create user")
+			return response.WrapError(err, http.StatusInternalServerError, "user and password combination doesn't match")
+		}
+
+		if !ok {
+			return response.WrapError(err, http.StatusBadRequest, "user and password combination doesn't match")
 		}
 
 		err = session.LogIn(*user, w)
