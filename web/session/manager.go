@@ -2,6 +2,7 @@ package session
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/srs/db"
@@ -71,10 +72,58 @@ func (m *Manager) User(r *http.Request) (*primitives.User, error) {
 		return nil, errors.Wrap(err, "failed to decrypt session id")
 	}
 
-	user, err := db.FindUser(m.Database, id)
+	n, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read session id")
+	}
+
+	s, err := findSession(m.Database, primitives.ID(n))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find session")
+	}
+
+	user, err := db.FindUser(m.Database, s.UserID)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find user")
 	}
 
 	return user, nil
+}
+
+func findSession(db primitives.Database, id primitives.ID) (*session, error) {
+	q := &query{id: id}
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	session, ok := r.(*session)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return session, nil
+}
+
+type query struct {
+	id primitives.ID
+}
+
+func (q *query) NewRecord() primitives.Record {
+	return &session{}
+}
+
+func (q *query) Where() map[string]interface{} {
+	return map[string]interface{}{
+		"id": q.id,
+	}
+}
+
+func (q *query) Raw() string {
+	return ""
+}
+
+func (q *query) SortBy() map[string]string {
+	return nil
 }

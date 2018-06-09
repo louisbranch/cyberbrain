@@ -81,6 +81,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = decks.Create(srv.Database, srv.URLBuilder)
 		}
 
+		handler = authenticate(handler)
+
 		srv.handle(handler, w, r)
 	})
 
@@ -102,6 +104,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		case method == "POST":
 			handler = cards.Update(srv.Database, srv.URLBuilder, path)
 		}
+
+		handler = authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -125,6 +129,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = tags.Update(srv.Database, srv.URLBuilder, path)
 		}
 
+		handler = authenticate(handler)
+
 		srv.handle(handler, w, r)
 	})
 
@@ -144,6 +150,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		case method == "POST" && path == "":
 			handler = practices.Create(srv.Database, srv.URLBuilder)
 		}
+
+		handler = authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -166,6 +174,8 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		case method == "POST":
 			handler = rounds.Update(srv.Database, srv.URLBuilder, path)
 		}
+
+		handler = authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -266,4 +276,15 @@ func (srv *Server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/decks/", http.StatusMovedPermanently)
+}
+
+func authenticate(h response.Handler) response.Handler {
+	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+
+		if user == nil {
+			return response.Redirect{Path: "/login", Code: http.StatusFound}
+		}
+
+		return h(w, r, user)
+	}
 }

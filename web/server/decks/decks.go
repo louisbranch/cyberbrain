@@ -14,10 +14,6 @@ import (
 func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
 
-		if user != nil {
-			return response.Redirect{Path: "/login", Code: http.StatusFound}
-		}
-
 		decks, err := db.FindDecks(conn, user.ID())
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to find decks")

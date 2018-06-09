@@ -5,7 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
+	"encoding/hex"
 	"io"
 	"strconv"
 
@@ -36,10 +36,10 @@ func (m *Manager) encrypt(id primitives.ID) (cypherID string, err error) {
 
 	cypher := gcm.Seal(nonce, nonce, []byte(i), nil)
 
-	return fmt.Sprintf("%x", cypher), nil
+	return hex.EncodeToString(cypher), nil
 }
 
-func (m *Manager) decrypt(cipherID string) (id primitives.ID, err error) {
+func (m *Manager) decrypt(cipherID string) (id string, err error) {
 	key := []byte(m.Secret)
 
 	block, err := aes.NewCipher(key[:])
@@ -52,21 +52,19 @@ func (m *Manager) decrypt(cipherID string) (id primitives.ID, err error) {
 		return id, errors.Wrap(err, "invalid id")
 	}
 
-	cid := []byte(string(cipherID))
+	decoded, err := hex.DecodeString(cipherID)
+	if err != nil {
+		return id, errors.Wrap(err, "failed to decode session id")
+	}
 
-	if len(cid) < gcm.NonceSize() {
+	if len(decoded) < gcm.NonceSize() {
 		return id, errors.New("malformed id")
 	}
 
-	b, err := gcm.Open(nil, cid[:gcm.NonceSize()], cid[gcm.NonceSize():], nil)
+	b, err := gcm.Open(nil, decoded[:gcm.NonceSize()], decoded[gcm.NonceSize():], nil)
 	if err != nil {
 		return id, errors.Wrap(err, "tampered id")
 	}
 
-	n, err := strconv.Atoi(string(b))
-	if err != nil {
-		return id, errors.Wrap(err, "invalid id number")
-	}
-
-	return primitives.ID(n), nil
+	return string(b), nil
 }
