@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"gitlab.com/luizbranco/srs/authentication"
 	"gitlab.com/luizbranco/srs/db/psql"
 	"gitlab.com/luizbranco/srs/generator"
 	"gitlab.com/luizbranco/srs/web/html"
@@ -27,6 +28,8 @@ func main() {
 		Database: db,
 	}
 
+	auth := authentication.Authenticator{}
+
 	tpl := html.New("web/templates")
 
 	srv := &server.Server{
@@ -34,6 +37,7 @@ func main() {
 		Database:          db,
 		URLBuilder:        ub,
 		PracticeGenerator: gen,
+		Authenticator:     auth,
 	}
 
 	mux := srv.NewServeMux()

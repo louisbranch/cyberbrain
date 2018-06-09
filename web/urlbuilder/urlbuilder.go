@@ -55,8 +55,7 @@ func (ub *URLBuilder) Path(method string, r primitives.Identifiable, params ...p
 
 	switch method {
 	case "INDEX":
-
-		return fmt.Sprintf("/%ss/%s", r.Type(), id), nil
+		return fmt.Sprintf("/%ss", r.Type()), nil
 	case "NEW":
 		return fmt.Sprintf("/%ss/new?%s", r.Type(), q), nil
 	case "SHOW":

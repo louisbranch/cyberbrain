@@ -1,0 +1,38 @@
+{{ define "content"}}
+  <form action="/signup/" method="post" accept-charset="utf-8">
+    <h1 class="title">Create User</h1>
+    <div class="columns">
+      <div class="column is-4">
+        <div class="field">
+          <label class="label">Name *</label>
+          <div class="control">
+            <input class="input" type="text" name="name" required />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Email *</label>
+          <div class="control">
+            <input class="input" type="email" name="email" required minlength="5" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Password *</label>
+          <div class="control">
+            <input class="input" type="password" name="password" required minlength="6" />
+          </div>
+        </div>
+        <div class="content">
+          <small>* required fields</small>
+        </div>
+        <div class="field is-grouped">
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Submit" />
+          </div>
+          <div class="control">
+            <a class="button is-text" href="/">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{{ end }}

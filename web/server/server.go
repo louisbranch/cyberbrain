@@ -14,6 +14,7 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
 	"gitlab.com/luizbranco/srs/web/server/tags"
+	"gitlab.com/luizbranco/srs/web/server/users"
 )
 
 type Server struct {
@@ -21,6 +22,7 @@ type Server struct {
 	URLBuilder        web.URLBuilder
 	Database          primitives.Database
 	PracticeGenerator primitives.PracticeGenerator
+	Authenticator     primitives.Authenticator
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
@@ -28,6 +30,22 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 
 	fs := http.FileServer(http.Dir("web/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
+
+	mux.HandleFunc("/signup/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/signup/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = users.New(srv.Database, srv.URLBuilder)
+		case method == "POST" && path == "":
+			handler = users.Create(srv.Database, srv.URLBuilder, srv.Authenticator)
+		}
+
+		srv.handle(handler, w, r)
+	})
 
 	mux.HandleFunc("/decks/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[len("/decks/"):]
@@ -193,12 +211,13 @@ func (srv *Server) renderError(w http.ResponseWriter, err error) {
 	case http.StatusBadRequest:
 		page = web.Page{
 			Title:    "Bad Request",
+			Content:  err,
 			Partials: []string{"400"},
 		}
 	default:
 		code = http.StatusInternalServerError
 		page = web.Page{
-			Title:    "500",
+			Title:    "Internal Server Error",
 			Content:  err,
 			Partials: []string{"500"},
 		}

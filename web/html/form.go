@@ -11,6 +11,36 @@ import (
 
 const CHECKED = "on"
 
+func NewUserFromForm(form url.Values, auth primitives.Authenticator) (*primitives.User, error) {
+	u := &primitives.User{}
+
+	u.Name = form.Get("name")
+	u.Email = form.Get("email")
+
+	password := form.Get("password")
+
+	if u.Name == "" {
+		return nil, errors.New("user name cannot be empty")
+	}
+
+	if u.Email == "" {
+		return nil, errors.New("user email cannot be empty")
+	}
+
+	if len(password) < 6 {
+		return nil, errors.New("user password cannot be less than 6 characters")
+	}
+
+	hash, err := auth.Create(password)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to hash user password")
+	}
+
+	u.PasswordHash = hash
+
+	return u, nil
+}
+
 func NewDeckFromForm(form url.Values) (*primitives.Deck, error) {
 	d := &primitives.Deck{}
 
