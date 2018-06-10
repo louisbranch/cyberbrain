@@ -16,12 +16,17 @@ import (
 	"gitlab.com/luizbranco/srs/web/urlbuilder"
 )
 
-var dbURL, sessionSecret, hashidSalt string
+var httpPort, dbURL, sessionSecret, hashidSalt string
 
 func init() {
+	httpPort = os.Getenv("HTTP_PORT")
 	dbURL = os.Getenv("DATABASE_URL")
 	sessionSecret = os.Getenv("SESSION_SECRET")
 	hashidSalt = os.Getenv("HASHID_SALT")
+
+	if httpPort == "" {
+		httpPort = "8080"
+	}
 
 	if dbURL == "" {
 		dbURL = "postgres://srs:s3cr3t@192.168.0.11:5432/srs?sslmode=disable"
@@ -35,6 +40,7 @@ func init() {
 		hashidSalt = "s3cret"
 	}
 
+	flag.StringVar(&httpPort, "http-port", httpPort, "http port to start server")
 	flag.StringVar(&dbURL, "database-url", dbURL, "database connection url")
 	flag.StringVar(&sessionSecret, "session-secret", sessionSecret, "session cookie id secret")
 	flag.StringVar(&hashidSalt, "hashid-salt", hashidSalt, "salt for hashid url")
@@ -77,6 +83,6 @@ func main() {
 
 	mux := srv.NewServeMux()
 
-	fmt.Println("Server listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	fmt.Printf("Server listening on port %s", httpPort)
+	log.Fatal(http.ListenAndServe(":"+httpPort, mux))
 }
