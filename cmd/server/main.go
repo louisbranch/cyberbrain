@@ -16,16 +16,28 @@ import (
 	"gitlab.com/luizbranco/srs/web/urlbuilder"
 )
 
-var dbURL, sessionSecret string
+var dbURL, sessionSecret, hashidSalt string
 
 func init() {
-	defaultDBURL := os.Getenv("DATABASE_URL")
+	dbURL = os.Getenv("DATABASE_URL")
+	sessionSecret = os.Getenv("SESSION_SECRET")
+	hashidSalt = os.Getenv("HASHID_SALT")
 
-	if defaultDBURL == "" {
-		defaultDBURL = "postgres://srs:s3cr3t@192.168.0.11:5432/srs?sslmode=disable"
+	if dbURL == "" {
+		dbURL = "postgres://srs:s3cr3t@192.168.0.11:5432/srs?sslmode=disable"
 	}
 
-	flag.StringVar(&dbURL, "database-url", defaultDBURL, "database connection url")
+	if sessionSecret == "" {
+		sessionSecret = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	}
+
+	if hashidSalt == "" {
+		hashidSalt = "s3cret"
+	}
+
+	flag.StringVar(&dbURL, "database-url", dbURL, "database connection url")
+	flag.StringVar(&sessionSecret, "session-secret", sessionSecret, "session cookie id secret")
+	flag.StringVar(&hashidSalt, "hashid-salt", hashidSalt, "salt for hashid url")
 
 	flag.Parse()
 }
@@ -36,7 +48,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ub, err := urlbuilder.New()
+	ub, err := urlbuilder.New(hashidSalt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +61,7 @@ func main() {
 
 	session := &session.Manager{
 		Database: db,
-		Secret:   "saahskdhsakjdao8oKAAKJJAJSkjasEE", // FIXME
+		Secret:   sessionSecret,
 	}
 
 	tpl := html.New("web/templates")

@@ -13,10 +13,10 @@ type URLBuilder struct {
 	hashid *hashids.HashID
 }
 
-func New() (*URLBuilder, error) {
+func New(salt string) (*URLBuilder, error) {
 	hd := &hashids.HashIDData{
 		Alphabet:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-		Salt:      "s3cr3t", // FIXME: load from env var
+		Salt:      salt,
 		MinLength: 5,
 	}
 
