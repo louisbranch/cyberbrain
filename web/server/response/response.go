@@ -47,6 +47,10 @@ func NewError(code int, msg string) Error {
 }
 
 func (e Error) Error() string {
+	return e.msg
+}
+
+func (e Error) FullError() string {
 	if e.err != nil {
 		return e.msg + ": " + e.err.Error()
 	}

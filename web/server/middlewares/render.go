@@ -24,8 +24,7 @@ func (rr *Renderer) Render(handler response.Handler, w http.ResponseWriter, r *h
 
 	user, err := rr.SessionManager.User(r)
 	if err != nil {
-		rr.renderError(w, err, nil)
-		return
+		log.Println(err)
 	}
 
 	ctx := NewContext(user)
@@ -92,7 +91,12 @@ func (rr *Renderer) renderError(w http.ResponseWriter, err error, user *primitiv
 		}
 	}
 
-	log.Println(err.Error())
+	switch err := err.(type) {
+	case response.Error:
+		log.Println(err.FullError())
+	default:
+		log.Println(err.Error())
+	}
 
 	w.WriteHeader(code)
 
