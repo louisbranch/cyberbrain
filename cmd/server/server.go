@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"gitlab.com/luizbranco/srs/authentication"
 	"gitlab.com/luizbranco/srs/db/psql"
@@ -14,8 +16,22 @@ import (
 	"gitlab.com/luizbranco/srs/web/urlbuilder"
 )
 
+var dbURL, sessionSecret string
+
+func init() {
+	defaultDBURL := os.Getenv("DATABASE_URL")
+
+	if defaultDBURL == "" {
+		defaultDBURL = "postgres://srs:s3cr3t@192.168.0.11:5432/srs?sslmode=disable"
+	}
+
+	flag.StringVar(&dbURL, "database-url", defaultDBURL, "database connection url")
+
+	flag.Parse()
+}
+
 func main() {
-	db, err := psql.New("192.168.0.11", "5432", "srs", "srs", "s3cr3t")
+	db, err := psql.New(dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}

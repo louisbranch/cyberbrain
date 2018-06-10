@@ -15,11 +15,8 @@ type Database struct {
 	*sql.DB
 }
 
-func New(host, port, dbname, user, pass string) (*Database, error) {
-	params := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host,
-		port, dbname, user, pass)
-
-	db, err := sql.Open("postgres", params)
+func New(url string) (*Database, error) {
+	db, err := sql.Open("postgres", url)
 	if err != nil {
 		return nil, err
 	}
