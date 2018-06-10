@@ -1,6 +1,9 @@
 package primitives
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type ID int
 
@@ -42,4 +45,12 @@ type PracticeGenerator interface {
 type Authenticator interface {
 	Create(password string) (string, error)
 	Verify(hash string, password string) (bool, error)
+}
+
+type Worker interface {
+	Register(string) error
+}
+
+type Job interface {
+	Run(ctx context.Context) error
 }
