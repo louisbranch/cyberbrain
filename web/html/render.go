@@ -111,7 +111,7 @@ func RenderDeck(d primitives.Deck, ub web.URLBuilder) (*Deck, error) {
 	dr.NewPracticePath = pp
 
 	for _, c := range d.Cards {
-		cr, err := RenderCard(c, ub)
+		cr, err := RenderCard(c, d, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render deck card")
 		}
@@ -120,7 +120,7 @@ func RenderDeck(d primitives.Deck, ub web.URLBuilder) (*Deck, error) {
 	}
 
 	for _, t := range d.Tags {
-		tr, err := RenderTag(t, ub)
+		tr, err := RenderTag(t, d, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render deck tag")
 		}
@@ -131,7 +131,7 @@ func RenderDeck(d primitives.Deck, ub web.URLBuilder) (*Deck, error) {
 	return dr, nil
 }
 
-func RenderCard(c primitives.Card, ub web.URLBuilder) (*Card, error) {
+func RenderCard(c primitives.Card, d primitives.Deck, ub web.URLBuilder) (*Card, error) {
 	cr := &Card{
 		ImageURLs:   c.ImageURLs,
 		SoundURLs:   c.SoundURLs,
@@ -145,7 +145,7 @@ func RenderCard(c primitives.Card, ub web.URLBuilder) (*Card, error) {
 
 	cr.ID = id
 
-	p, err := ub.Path("SHOW", c)
+	p, err := ub.Path("SHOW", c, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build card path")
 	}
@@ -153,7 +153,7 @@ func RenderCard(c primitives.Card, ub web.URLBuilder) (*Card, error) {
 	cr.Path = p
 
 	for _, t := range c.Tags {
-		tr, err := RenderTag(t, ub)
+		tr, err := RenderTag(t, d, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render card tag")
 		}
@@ -172,7 +172,7 @@ func RenderCard(c primitives.Card, ub web.URLBuilder) (*Card, error) {
 	return cr, nil
 }
 
-func RenderTag(t primitives.Tag, ub web.URLBuilder) (*Tag, error) {
+func RenderTag(t primitives.Tag, d primitives.Deck, ub web.URLBuilder) (*Tag, error) {
 	tr := &Tag{
 		Name: t.Name,
 	}
@@ -192,7 +192,7 @@ func RenderTag(t primitives.Tag, ub web.URLBuilder) (*Tag, error) {
 	tr.Path = p
 
 	for _, c := range t.Cards {
-		cr, err := RenderCard(c, ub)
+		cr, err := RenderCard(c, d, ub)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render tag card")
 		}

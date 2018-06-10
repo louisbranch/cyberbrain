@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
@@ -24,6 +26,10 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 
 		query := r.URL.Query()
 		hash := query.Get("deck")
+
+		d, _ := middlewares.CurrentDeck(ctx)
+
+		spew.Dump(d)
 
 		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
 		if err != nil {
@@ -106,7 +112,9 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderCard(*card, ub)
+		deck, _ := middlewares.CurrentDeck(ctx)
+
+		content, err := html.RenderCard(*card, deck, ub)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render card")
 		}

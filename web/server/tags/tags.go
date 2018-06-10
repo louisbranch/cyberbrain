@@ -9,6 +9,7 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
@@ -80,12 +81,14 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
+		deck, _ := middlewares.CurrentDeck(ctx)
+
 		tag, err := finder.Tag(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderTag(*tag, ub)
+		content, err := html.RenderTag(*tag, deck, ub)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render tag")
 		}

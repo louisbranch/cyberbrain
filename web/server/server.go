@@ -1,15 +1,14 @@
 package server
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/server/cards"
 	"gitlab.com/luizbranco/srs/web/server/decks"
+	"gitlab.com/luizbranco/srs/web/server/home"
 	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
@@ -80,52 +79,6 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		srv.handle(handler, w, r)
 	})
 
-	mux.HandleFunc("/decks/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/decks/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = decks.Index(srv.Database, srv.URLBuilder)
-		case method == "GET" && path == "new":
-			handler = decks.New(srv.Database, srv.URLBuilder)
-		case method == "GET":
-			handler = decks.Show(srv.Database, srv.URLBuilder, path)
-		case method == "POST" && path == "":
-			handler = decks.Create(srv.Database, srv.URLBuilder)
-		}
-
-		handler = middlewares.Authenticate(handler)
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/cards/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/cards/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = cards.Index()
-		case method == "GET" && path == "new":
-			handler = cards.New(srv.Database, srv.URLBuilder)
-		case method == "GET":
-			handler = cards.Show(srv.Database, srv.URLBuilder, path)
-		case method == "POST" && path == "":
-			handler = cards.Create(srv.Database, srv.URLBuilder)
-		case method == "POST":
-			handler = cards.Update(srv.Database, srv.URLBuilder, path)
-		}
-
-		handler = middlewares.Authenticate(handler)
-
-		srv.handle(handler, w, r)
-	})
-
 	mux.HandleFunc("/tags/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[len("/tags/"):]
 		method := r.Method
@@ -172,33 +125,19 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 		srv.handle(handler, w, r)
 	})
 
-	mux.HandleFunc("/rounds/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/rounds/"):]
-		method := r.Method
+	renderer := &middlewares.Renderer{
+		SessionManager: srv.SessionManager,
+		Template:       srv.Template,
+	}
 
-		var handler response.Handler
+	decksMux := decks.NewServeMux(renderer, srv.Database, srv.URLBuilder)
 
-		switch {
-		case method == "GET" && path == "":
-			handler = rounds.Index()
-		case method == "GET" && path == "new":
-			handler = rounds.New(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
-		case method == "GET":
-			handler = rounds.Show(srv.Database, srv.URLBuilder, path)
-		case method == "POST" && path == "":
-			handler = rounds.Create(srv.Database, srv.URLBuilder, srv.PracticeGenerator)
-		case method == "POST":
-			handler = rounds.Update(srv.Database, srv.URLBuilder, path)
-		}
+	roundsMux := rounds.NewServeMux(renderer, srv.Database, srv.URLBuilder,
+		srv.PracticeGenerator)
 
-		handler = middlewares.Authenticate(handler)
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		srv.handle(index(), w, r)
-	})
+	mux.Handle("/decks/", http.StripPrefix("/decks", decksMux))
+	mux.Handle("/rounds/", http.StripPrefix("/rounds", roundsMux))
+	mux.Handle("/", home.NewServeMux(renderer))
 
 	return mux
 }
@@ -285,14 +224,4 @@ func (srv *Server) renderError(w http.ResponseWriter, err error, user *primitive
 	w.WriteHeader(code)
 
 	srv.render(w, page)
-}
-
-func index() response.Handler {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
-		if r.Method != "GET" || r.URL.Path != "/" {
-			return response.NewError(http.StatusNotFound, r.URL.Path+" not found")
-		}
-
-		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
-	}
 }

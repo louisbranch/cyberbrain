@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/server/finder"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
 var userKey struct{}
+var deckKey struct{}
 
 func Authenticate(h response.Handler) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
@@ -39,9 +42,37 @@ func NewContext(user *primitives.User) context.Context {
 }
 
 func CurrentUser(ctx context.Context) (primitives.User, bool) {
-	valeu := ctx.Value(userKey)
+	value := ctx.Value(userKey)
 
-	user, ok := valeu.(primitives.User)
+	user, ok := value.(primitives.User)
 
 	return user, ok
+}
+
+func Deck(h response.Handler, db primitives.Database, ub web.URLBuilder, hash string) response.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
+
+		user, _ := CurrentUser(ctx)
+
+		deck, err := finder.Deck(db, ub, hash, finder.NoOption)
+		if err != nil {
+			return response.WrapError(err, http.StatusNotFound, "wrong deck id")
+		}
+
+		if user.ID() != deck.UserID {
+			return response.WrapError(err, http.StatusForbidden, "invalid deck owner")
+		}
+
+		ctx = context.WithValue(ctx, deckKey, *deck)
+
+		return h(ctx, w, r)
+	}
+}
+
+func CurrentDeck(ctx context.Context) (primitives.Deck, bool) {
+	value := ctx.Value(deckKey)
+
+	deck, ok := value.(primitives.Deck)
+
+	return deck, ok
 }
