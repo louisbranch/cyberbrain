@@ -3,12 +3,12 @@ package practices
 import (
 	"context"
 	"net/http"
+	"sort"
 
 	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
-	"gitlab.com/luizbranco/srs/web/server/finder"
 	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
@@ -22,15 +22,18 @@ func Index() response.Handler {
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		query := r.URL.Query()
-		hash := query.Get("deck")
+		deck := middlewares.CurrentDeck(ctx)
 
-		deck, cards, tags, err := finder.Deck(conn, ub, hash, finder.WithTags)
+		tags, err := db.FindTags(conn, deck.ID())
 		if err != nil {
-			return err.(response.Error)
+			return response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
 		}
 
-		content, err := html.RenderDeck(ub, *deck, cards, tags)
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].Name < tags[j].Name
+		})
+
+		content, err := html.RenderDeck(ub, deck, nil, tags)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}
@@ -51,14 +54,14 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		hash := r.Form.Get("deck")
+		deck := middlewares.CurrentDeck(ctx)
 
-		deck, _, tags, err := finder.Deck(conn, ub, hash, finder.WithTags)
+		tags, err := db.FindTags(conn, deck.ID())
 		if err != nil {
-			return err.(response.Error)
+			return response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
 		}
 
-		p, err := html.NewPracticeFromForm(*deck, tags, r.Form, ub)
+		p, err := html.NewPracticeFromForm(deck, tags, r.Form, ub)
 		if err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid practice values")
 		}
@@ -68,7 +71,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to create practice")
 		}
 
-		path, err := ub.Path("SHOW", p)
+		path, err := ub.Path("SHOW", p, deck)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to generate practice path")
 		}
@@ -90,7 +93,7 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return response.WrapError(err, http.StatusNotFound, "wrong practice id")
 		}
 
-		deck, _ := middlewares.CurrentDeck(ctx)
+		deck := middlewares.CurrentDeck(ctx)
 
 		content, err := html.RenderPractice(ub, deck, *p, true)
 		if err != nil {

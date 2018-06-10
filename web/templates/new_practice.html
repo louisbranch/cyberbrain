@@ -1,5 +1,5 @@
 {{ define "content"}}
-<form action="/practices/" method="post" accept-charset="utf-8">
+<form action="{{ .CreatePracticePath }}" method="post" accept-charset="utf-8">
   <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
   <h1 class="title">Practice</h1>
   <div class="columns">

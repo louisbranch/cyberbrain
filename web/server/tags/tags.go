@@ -22,7 +22,7 @@ func Index() response.Handler {
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		deck, _ := middlewares.CurrentDeck(ctx)
+		deck := middlewares.CurrentDeck(ctx)
 
 		content, err := html.RenderDeck(ub, deck, nil, nil)
 		if err != nil {
@@ -46,7 +46,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		deck, _ := middlewares.CurrentDeck(ctx)
+		deck := middlewares.CurrentDeck(ctx)
 
 		tag, err := html.NewTagFromForm(deck, r.Form)
 		if err != nil {
@@ -70,7 +70,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		deck, _ := middlewares.CurrentDeck(ctx)
+		deck := middlewares.CurrentDeck(ctx)
 
 		tag, cards, err := finder.Tag(conn, ub, hash, finder.WithCards)
 		if err != nil {

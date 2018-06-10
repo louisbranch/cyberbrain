@@ -69,10 +69,8 @@ func Deck(h response.Handler, db primitives.Database, ub web.URLBuilder, hash st
 	}
 }
 
-func CurrentDeck(ctx context.Context) (primitives.Deck, bool) {
+func CurrentDeck(ctx context.Context) primitives.Deck {
 	value := ctx.Value(deckKey)
 
-	deck, ok := value.(primitives.Deck)
-
-	return deck, ok
+	return value.(primitives.Deck)
 }

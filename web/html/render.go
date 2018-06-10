@@ -291,7 +291,7 @@ func RenderRound(ub web.URLBuilder, d primitives.Deck, r primitives.Round,
 		PromptImage: r.Prompt,
 	}
 
-	pr, err := RenderPractice(ub, d, p, false)
+	pr, err := RenderPractice(ub, d, p, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to render round practice")
 	}

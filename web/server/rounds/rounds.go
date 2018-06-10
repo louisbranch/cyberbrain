@@ -25,6 +25,8 @@ func New(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGen
 		query := r.URL.Query()
 		hash := query.Get("practice")
 
+		deck := middlewares.CurrentDeck(ctx)
+
 		practice, err := finder.Practice(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
@@ -32,7 +34,7 @@ func New(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGen
 
 		// if practice is done, redirect back to its page
 		if practice.Done {
-			path, err := ub.Path("SHOW", practice)
+			path, err := ub.Path("SHOW", deck, practice)
 			if err != nil {
 				return response.WrapError(err, http.StatusInternalServerError, "failed to generate practice path")
 			}
@@ -48,7 +50,7 @@ func New(conn primitives.Database, ub web.URLBuilder, gen primitives.PracticeGen
 		// if a round is still in progress, redirect to its page
 		for _, r := range rounds {
 			if !r.Done {
-				path, err := ub.Path("SHOW", r)
+				path, err := ub.Path("SHOW", r, deck)
 				if err != nil {
 					return response.WrapError(err, http.StatusInternalServerError, "failed to generate round path")
 				}
@@ -69,6 +71,8 @@ func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.Practice
 		query := r.URL.Query()
 		hash := query.Get("practice")
 
+		deck := middlewares.CurrentDeck(ctx)
+
 		practice, err := finder.Practice(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
@@ -76,7 +80,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.Practice
 
 		// if practice is done, redirect back to its page
 		if practice.Done {
-			path, err := ub.Path("SHOW", practice)
+			path, err := ub.Path("SHOW", practice, deck)
 			if err != nil {
 				return response.WrapError(err, http.StatusInternalServerError, "failed to generate practice path")
 			}
@@ -89,7 +93,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, gen primitives.Practice
 			return response.WrapError(err, http.StatusInternalServerError, "failed to generate new round")
 		}
 
-		path, err := ub.Path("SHOW", round)
+		path, err := ub.Path("SHOW", round, deck)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to generate round path")
 		}
@@ -116,7 +120,7 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return response.WrapError(err, http.StatusNotFound, "wrong practice id")
 		}
 
-		deck, _ := middlewares.CurrentDeck(ctx)
+		deck := middlewares.CurrentDeck(ctx)
 
 		content, err := html.RenderRound(ub, deck, *round, *practice)
 		if err != nil {
@@ -138,6 +142,8 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
+
+		deck := middlewares.CurrentDeck(ctx)
 
 		id, err := ub.ParseID(hash)
 		if err != nil {
@@ -180,7 +186,7 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			}
 		}
 
-		path, err := ub.Path("SHOW", round)
+		path, err := ub.Path("SHOW", round, deck)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to generate round path")
 		}
