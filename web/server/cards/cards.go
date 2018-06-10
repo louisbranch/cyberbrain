@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sort"
 
 	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/primitives"
@@ -25,9 +26,16 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 
 		deck, _ := middlewares.CurrentDeck(ctx)
 
-		// TODO: find tags
+		tags, err := db.FindTags(conn, deck.ID())
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
+		}
 
-		content, err := html.RenderDeck(ub, deck, nil, nil)
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].Name < tags[j].Name
+		})
+
+		content, err := html.RenderDeck(ub, deck, nil, tags)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}

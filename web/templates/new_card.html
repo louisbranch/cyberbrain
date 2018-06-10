@@ -1,5 +1,5 @@
 {{ define "content"}}
-  <form action="/cards/" method="post" accept-charset="utf-8">
+<form action="{{ .CreateCardPath }}" method="post" accept-charset="utf-8">
     <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
     <h1 class="title">Add Card to {{ .Name }}</h1>
     <div class="columns">

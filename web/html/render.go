@@ -19,6 +19,10 @@ type Deck struct {
 	NewCardPath     string
 	NewTagPath      string
 	NewPracticePath string
+
+	CreateCardPath     string
+	CreateTagPath      string
+	CreatePracticePath string
 }
 
 type Card struct {
@@ -98,6 +102,13 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 
 	dr.NewCardPath = cp
 
+	cp, err = ub.Path("CREATE", &primitives.Card{}, d)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build deck create card path")
+	}
+
+	dr.CreateCardPath = cp
+
 	tp, err := ub.Path("NEW", &primitives.Tag{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new tag path")
@@ -105,12 +116,26 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 
 	dr.NewTagPath = tp
 
+	tp, err = ub.Path("CREATE", &primitives.Tag{}, d)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build deck create tag path")
+	}
+
+	dr.CreateTagPath = tp
+
 	pp, err := ub.Path("NEW", &primitives.Practice{}, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deck new practice path")
 	}
 
 	dr.NewPracticePath = pp
+
+	pp, err = ub.Path("CREATE", &primitives.Practice{}, d)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build deck create practice path")
+	}
+
+	dr.CreatePracticePath = pp
 
 	for _, c := range cards {
 		cr, err := RenderCard(ub, d, c, nil, false)
@@ -190,7 +215,7 @@ func RenderTag(ub web.URLBuilder, d primitives.Deck, t primitives.Tag,
 
 	tr.ID = id
 
-	p, err := ub.Path("SHOW", t)
+	p, err := ub.Path("SHOW", t, d)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build tag path")
 	}

@@ -46,7 +46,10 @@ func (ub *URLBuilder) Path(method string, r primitives.Identifiable,
 	var prefix string
 
 	for _, r := range params {
-		// FIXME check for nil r
+		if r == nil {
+			continue
+		}
+
 		slug, err := ub.EncodeID(r.ID())
 		if err != nil {
 			return "", errors.Wrapf(err, "invalid path for record %s", r)
@@ -59,15 +62,21 @@ func (ub *URLBuilder) Path(method string, r primitives.Identifiable,
 		}
 	}
 
-	q := strings.Join(qs, "&")
+	var q string
+
+	if len(qs) > 0 {
+		q = "?" + strings.Join(qs, "&")
+	}
 
 	switch method {
 	case "INDEX":
 		return fmt.Sprintf("%s/%ss", prefix, r.Type()), nil
 	case "NEW":
-		return fmt.Sprintf("%s/%ss/new?%s", prefix, r.Type(), q), nil
+		return fmt.Sprintf("%s/%ss/new%s", prefix, r.Type(), q), nil
 	case "SHOW":
 		return fmt.Sprintf("%s/%ss/%s", prefix, r.Type(), id), nil
+	case "CREATE":
+		return fmt.Sprintf("%s/%ss", prefix, r.Type()), nil
 	default:
 		return fmt.Sprintf("%s/%s", prefix, r.Type()), nil
 	}
