@@ -41,7 +41,7 @@ func (g Generator) NewRound(p primitives.Practice) (*primitives.Round, error) {
 
 	err = g.Database.Create(r)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create round for practice %q, %v", pid, r)
+		return nil, errors.Wrapf(err, "failed to create round for practice %d, %v", pid, r)
 	}
 
 	return r, nil

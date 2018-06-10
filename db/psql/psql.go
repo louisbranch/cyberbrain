@@ -142,8 +142,8 @@ func (db *Database) Random(wq primitives.Query, n int) ([]primitives.Record, err
 		return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
 	}
 
-	raw := fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s ORDER BY RANDOM() LIMIT %d)`,
-		q.Columns(), q.Table(), q.Table(), n)
+	raw := fmt.Sprintf(`SELECT %s FROM %s WHERE id IN (SELECT id FROM %s %s ORDER BY RANDOM() LIMIT %d)`,
+		q.Columns(), q.Table(), q.Table(), where(wq), n)
 
 	return db.queryRows(wq, raw)
 }
