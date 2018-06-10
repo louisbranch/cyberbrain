@@ -108,7 +108,16 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 
 		deck := middlewares.CurrentDeck(ctx)
 
-		content, err := html.RenderCard(ub, deck, *card, tags, true)
+		deckTags, err := db.FindTags(conn, deck.ID())
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to find deck tags")
+		}
+
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].Name < tags[j].Name
+		})
+
+		content, err := html.RenderCard(ub, deck, deckTags, *card, tags, true)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render card")
 		}

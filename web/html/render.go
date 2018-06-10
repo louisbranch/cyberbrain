@@ -138,7 +138,7 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	dr.CreatePracticePath = pp
 
 	for _, c := range cards {
-		cr, err := RenderCard(ub, d, c, nil, false)
+		cr, err := RenderCard(ub, d, nil, c, nil, false)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render deck card")
 		}
@@ -158,8 +158,8 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	return dr, nil
 }
 
-func RenderCard(ub web.URLBuilder, d primitives.Deck, c primitives.Card,
-	tags []primitives.Tag, recursive bool) (*Card, error) {
+func RenderCard(ub web.URLBuilder, d primitives.Deck, deckTags []primitives.Tag,
+	c primitives.Card, cardTags []primitives.Tag, recursive bool) (*Card, error) {
 
 	cr := &Card{
 		ImageURLs:   c.ImageURLs,
@@ -181,7 +181,7 @@ func RenderCard(ub web.URLBuilder, d primitives.Deck, c primitives.Card,
 
 	cr.Path = p
 
-	for _, t := range tags {
+	for _, t := range cardTags {
 		tr, err := RenderTag(ub, d, t, nil, false)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render card tag")
@@ -191,7 +191,7 @@ func RenderCard(ub web.URLBuilder, d primitives.Deck, c primitives.Card,
 	}
 
 	if recursive {
-		dr, err := RenderDeck(ub, d, nil, nil)
+		dr, err := RenderDeck(ub, d, nil, deckTags)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render card deck")
 		}
@@ -223,7 +223,7 @@ func RenderTag(ub web.URLBuilder, d primitives.Deck, t primitives.Tag,
 	tr.Path = p
 
 	for _, c := range cards {
-		cr, err := RenderCard(ub, d, c, nil, false)
+		cr, err := RenderCard(ub, d, nil, c, nil, false)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to render tag card")
 		}

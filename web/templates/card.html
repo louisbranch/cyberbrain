@@ -61,7 +61,7 @@
               <div class="control">
                 <div class="select is-multiple">
                   <select name="tags" multiple size="10">
-                    {{ range .Tags }}
+                    {{ range .Deck.Tags }}
                       <option value="{{ .ID }}">{{ .Name }}</option>
                     {{ end }}
                   </select>
