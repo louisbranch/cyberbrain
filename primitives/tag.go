@@ -12,9 +12,6 @@ type Tag struct {
 
 	DeckID ID     `db:"deck_id"`
 	Name   string `db:"name"`
-
-	Deck  *Deck
-	Cards []Card
 }
 
 func (t Tag) ID() ID {

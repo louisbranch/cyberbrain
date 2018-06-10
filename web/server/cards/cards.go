@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/luizbranco/srs/db"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
@@ -24,19 +23,11 @@ func Index() response.Handler {
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		query := r.URL.Query()
-		hash := query.Get("deck")
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		d, _ := middlewares.CurrentDeck(ctx)
+		// TODO: find tags
 
-		spew.Dump(d)
-
-		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
-		if err != nil {
-			return err.(response.Error)
-		}
-
-		content, err := html.RenderDeck(*deck, ub)
+		content, err := html.RenderDeck(ub, deck, nil, nil)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}
@@ -58,14 +49,9 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		hash := r.Form.Get("deck")
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		deck, err := finder.Deck(conn, ub, hash, finder.NoOption)
-		if err != nil {
-			return err.(response.Error)
-		}
-
-		card, err := html.NewCardFromForm(*deck, r.Form)
+		card, err := html.NewCardFromForm(deck, r.Form)
 		if err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
 		}
@@ -107,14 +93,14 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		card, err := finder.Card(conn, ub, hash)
+		card, tags, err := finder.Card(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
 		}
 
 		deck, _ := middlewares.CurrentDeck(ctx)
 
-		content, err := html.RenderCard(*card, deck, ub)
+		content, err := html.RenderCard(ub, deck, *card, tags, true)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render card")
 		}
@@ -136,7 +122,7 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		card, err := finder.Card(conn, ub, hash)
+		card, _, err := finder.Card(conn, ub, hash)
 		if err != nil {
 			return err.(response.Error)
 		}

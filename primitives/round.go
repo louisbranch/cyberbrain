@@ -18,8 +18,6 @@ type Round struct {
 	Answer     string       `db:"answer"`
 	Correct    bool         `db:"correct"`
 	Done       bool         `db:"done"`
-
-	Practice *Practice
 }
 
 func (r Round) ID() ID {

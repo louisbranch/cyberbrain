@@ -54,7 +54,7 @@ func Deck(h response.Handler, db primitives.Database, ub web.URLBuilder, hash st
 
 		user, _ := CurrentUser(ctx)
 
-		deck, err := finder.Deck(db, ub, hash, finder.NoOption)
+		deck, _, _, err := finder.Deck(db, ub, hash, finder.NoOption)
 		if err != nil {
 			return response.WrapError(err, http.StatusNotFound, "wrong deck id")
 		}

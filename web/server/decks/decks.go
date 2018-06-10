@@ -26,7 +26,7 @@ func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		var content []*html.Deck
 
 		for _, d := range decks {
-			dr, err := html.RenderDeck(d, ub)
+			dr, err := html.RenderDeck(ub, d, nil, nil)
 			if err != nil {
 				return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 			}
@@ -91,12 +91,12 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		deck, err := finder.Deck(conn, ub, hash, finder.WithTags|finder.WithCards)
+		deck, cards, tags, err := finder.Deck(conn, ub, hash, finder.WithTags|finder.WithCards)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderDeck(*deck, ub)
+		content, err := html.RenderDeck(ub, *deck, cards, tags)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}

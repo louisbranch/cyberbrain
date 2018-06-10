@@ -9,6 +9,7 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
@@ -24,12 +25,12 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		query := r.URL.Query()
 		hash := query.Get("deck")
 
-		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
+		deck, cards, tags, err := finder.Deck(conn, ub, hash, finder.WithTags)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderDeck(*deck, ub)
+		content, err := html.RenderDeck(ub, *deck, cards, tags)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}
@@ -52,12 +53,12 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 
 		hash := r.Form.Get("deck")
 
-		deck, err := finder.Deck(conn, ub, hash, finder.WithTags)
+		deck, _, tags, err := finder.Deck(conn, ub, hash, finder.WithTags)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		p, err := html.NewPracticeFromForm(*deck, r.Form, ub)
+		p, err := html.NewPracticeFromForm(*deck, tags, r.Form, ub)
 		if err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid practice values")
 		}
@@ -89,14 +90,9 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return response.WrapError(err, http.StatusNotFound, "wrong practice id")
 		}
 
-		deck, err := db.FindDeck(conn, p.DeckID)
-		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "invalid deck id")
-		}
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		p.Deck = deck
-
-		content, err := html.RenderPractice(*p, ub)
+		content, err := html.RenderPractice(ub, deck, *p, true)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render practice")
 		}

@@ -22,15 +22,9 @@ func Index() response.Handler {
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		query := r.URL.Query()
-		hash := query.Get("deck")
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		deck, err := finder.Deck(conn, ub, hash, finder.NoOption)
-		if err != nil {
-			return err.(response.Error)
-		}
-
-		content, err := html.RenderDeck(*deck, ub)
+		content, err := html.RenderDeck(ub, deck, nil, nil)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}
@@ -52,14 +46,9 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		hash := r.Form.Get("deck")
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		deck, err := finder.Deck(conn, ub, hash, finder.NoOption)
-		if err != nil {
-			return err.(response.Error)
-		}
-
-		tag, err := html.NewTagFromForm(*deck, r.Form)
+		tag, err := html.NewTagFromForm(deck, r.Form)
 		if err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid tag form")
 		}
@@ -83,12 +72,12 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 
 		deck, _ := middlewares.CurrentDeck(ctx)
 
-		tag, err := finder.Tag(conn, ub, hash)
+		tag, cards, err := finder.Tag(conn, ub, hash, finder.WithCards)
 		if err != nil {
 			return err.(response.Error)
 		}
 
-		content, err := html.RenderTag(*tag, deck, ub)
+		content, err := html.RenderTag(ub, deck, *tag, cards, true)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render tag")
 		}
@@ -110,7 +99,7 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		tag, err := finder.Tag(conn, ub, hash)
+		tag, _, err := finder.Tag(conn, ub, hash, finder.NoOption)
 		if err != nil {
 			return err.(response.Error)
 		}

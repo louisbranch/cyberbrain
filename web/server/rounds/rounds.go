@@ -9,6 +9,7 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
@@ -115,15 +116,9 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return response.WrapError(err, http.StatusNotFound, "wrong practice id")
 		}
 
-		deck, err := db.FindDeck(conn, practice.DeckID)
-		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "invalid deck id")
-		}
+		deck, _ := middlewares.CurrentDeck(ctx)
 
-		round.Practice = practice
-		practice.Deck = deck
-
-		content, err := html.RenderRound(*round, ub)
+		content, err := html.RenderRound(ub, deck, *round, *practice)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render round")
 		}

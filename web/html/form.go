@@ -107,7 +107,7 @@ func NewTagFromForm(deck primitives.Deck, form url.Values) (*primitives.Tag, err
 	return t, nil
 }
 
-func NewPracticeFromForm(deck primitives.Deck, form url.Values, ub web.URLBuilder) (*primitives.Practice, error) {
+func NewPracticeFromForm(deck primitives.Deck, tags []primitives.Tag, form url.Values, ub web.URLBuilder) (*primitives.Practice, error) {
 	rounds := form.Get("rounds")
 	n, err := strconv.Atoi(rounds)
 	if err != nil {
@@ -129,7 +129,7 @@ func NewPracticeFromForm(deck primitives.Deck, form url.Values, ub web.URLBuilde
 
 		found := false
 
-		for _, t := range deck.Tags {
+		for _, t := range tags {
 			if t.ID() == id {
 				found = true
 				break
