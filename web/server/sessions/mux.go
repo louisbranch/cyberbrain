@@ -1,0 +1,54 @@
+package sessions
+
+import (
+	"net/http"
+
+	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
+	"gitlab.com/luizbranco/srs/web/server/response"
+)
+
+func NewLoginMux(renderer *middlewares.Renderer, db primitives.Database,
+	ub web.URLBuilder, auth primitives.Authenticator) *http.ServeMux {
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = New(db, ub)
+		case method == "POST" && path == "":
+			handler = Create(db, ub, auth, renderer.SessionManager)
+		}
+
+		renderer.Render(handler, w, r)
+	})
+
+	return mux
+}
+
+func NewLogoutMux(renderer *middlewares.Renderer) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path[len("/"):]
+		method := r.Method
+
+		var handler response.Handler
+
+		switch {
+		case method == "GET" && path == "":
+			handler = Destroy(renderer.SessionManager)
+		}
+
+		renderer.Render(handler, w, r)
+	})
+
+	return mux
+}

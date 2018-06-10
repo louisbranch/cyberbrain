@@ -10,11 +10,8 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/decks"
 	"gitlab.com/luizbranco/srs/web/server/home"
 	"gitlab.com/luizbranco/srs/web/server/middlewares"
-	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
-	"gitlab.com/luizbranco/srs/web/server/rounds"
 	"gitlab.com/luizbranco/srs/web/server/sessions"
-	"gitlab.com/luizbranco/srs/web/server/tags"
 	"gitlab.com/luizbranco/srs/web/server/users"
 )
 
@@ -33,110 +30,26 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	fs := http.FileServer(http.Dir("web/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	mux.HandleFunc("/signup/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/signup/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = users.New(srv.Database, srv.URLBuilder)
-		case method == "POST" && path == "":
-			handler = users.Create(srv.Database, srv.URLBuilder, srv.Authenticator, srv.SessionManager)
-		}
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/login/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/login/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = sessions.New(srv.Database, srv.URLBuilder)
-		case method == "POST" && path == "":
-			handler = sessions.Create(srv.Database, srv.URLBuilder, srv.Authenticator, srv.SessionManager)
-		}
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/logout/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/logout/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = sessions.Destroy(srv.SessionManager)
-		}
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/tags/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/tags/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = tags.Index()
-		case method == "GET" && path == "new":
-			handler = tags.New(srv.Database, srv.URLBuilder)
-		case method == "GET":
-			handler = tags.Show(srv.Database, srv.URLBuilder, path)
-		case method == "POST" && path == "":
-			handler = tags.Create(srv.Database, srv.URLBuilder)
-		case method == "POST":
-			handler = tags.Update(srv.Database, srv.URLBuilder, path)
-		}
-
-		handler = middlewares.Authenticate(handler)
-
-		srv.handle(handler, w, r)
-	})
-
-	mux.HandleFunc("/practices/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[len("/practices/"):]
-		method := r.Method
-
-		var handler response.Handler
-
-		switch {
-		case method == "GET" && path == "":
-			handler = practices.Index()
-		case method == "GET" && path == "new":
-			handler = practices.New(srv.Database, srv.URLBuilder)
-		case method == "GET":
-			handler = practices.Show(srv.Database, srv.URLBuilder, path)
-		case method == "POST" && path == "":
-			handler = practices.Create(srv.Database, srv.URLBuilder)
-		}
-
-		handler = middlewares.Authenticate(handler)
-
-		srv.handle(handler, w, r)
-	})
-
 	renderer := &middlewares.Renderer{
 		SessionManager: srv.SessionManager,
 		Template:       srv.Template,
 	}
 
-	decksMux := decks.NewServeMux(renderer, srv.Database, srv.URLBuilder)
+	signupMux := users.NewSignupMux(renderer, srv.Database, srv.URLBuilder,
+		srv.Authenticator)
 
-	roundsMux := rounds.NewServeMux(renderer, srv.Database, srv.URLBuilder,
+	loginMux := sessions.NewLoginMux(renderer, srv.Database, srv.URLBuilder,
+		srv.Authenticator)
+
+	logoutMux := sessions.NewLogoutMux(renderer)
+
+	decksMux := decks.NewServeMux(renderer, srv.Database, srv.URLBuilder,
 		srv.PracticeGenerator)
 
+	mux.Handle("/signup/", http.StripPrefix("/signup", signupMux))
+	mux.Handle("/login/", http.StripPrefix("/login", loginMux))
+	mux.Handle("/logout/", http.StripPrefix("/logout", logoutMux))
 	mux.Handle("/decks/", http.StripPrefix("/decks", decksMux))
-	mux.Handle("/rounds/", http.StripPrefix("/rounds", roundsMux))
 	mux.Handle("/", home.NewServeMux(renderer))
 
 	return mux

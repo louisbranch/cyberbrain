@@ -1,4 +1,4 @@
-package rounds
+package users
 
 import (
 	"net/http"
@@ -9,8 +9,9 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
-func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
-	ub web.URLBuilder, gen primitives.PracticeGenerator) *http.ServeMux {
+func NewSignupMux(renderer *middlewares.Renderer, db primitives.Database,
+	ub web.URLBuilder, auth primitives.Authenticator) *http.ServeMux {
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -21,18 +22,10 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 
 		switch {
 		case method == "GET" && path == "":
-			handler = Index()
-		case method == "GET" && path == "new":
-			handler = New(db, ub, gen)
-		case method == "GET":
-			handler = Show(db, ub, path)
+			handler = New(db, ub)
 		case method == "POST" && path == "":
-			handler = Create(db, ub, gen)
-		case method == "POST":
-			handler = Update(db, ub, path)
+			handler = Create(db, ub, auth, renderer.SessionManager)
 		}
-
-		handler = middlewares.Authenticate(handler)
 
 		renderer.Render(handler, w, r)
 	})

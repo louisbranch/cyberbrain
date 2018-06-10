@@ -8,11 +8,14 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/cards"
 	"gitlab.com/luizbranco/srs/web/server/middlewares"
+	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/srs/web/server/rounds"
+	"gitlab.com/luizbranco/srs/web/server/tags"
 )
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
-	ub web.URLBuilder) *http.ServeMux {
+	ub web.URLBuilder, gen primitives.PracticeGenerator) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +63,47 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 				handler = cards.Create(db, ub)
 			case method == "POST":
 				handler = cards.Update(db, ub, path)
+			}
+
+		case "tags":
+			switch {
+			case method == "GET" && path == "":
+				handler = tags.Index()
+			case method == "GET" && path == "new":
+				handler = tags.New(db, ub)
+			case method == "GET":
+				handler = tags.Show(db, ub, path)
+			case method == "POST" && path == "":
+				handler = tags.Create(db, ub)
+			case method == "POST":
+				handler = tags.Update(db, ub, path)
+			}
+
+		case "practices":
+			switch {
+			case method == "GET" && path == "":
+				handler = practices.Index()
+			case method == "GET" && path == "new":
+				handler = practices.New(db, ub)
+			case method == "GET":
+				handler = practices.Show(db, ub, path)
+			case method == "POST" && path == "":
+				handler = practices.Create(db, ub)
+			}
+
+		case "rounds":
+
+			switch {
+			case method == "GET" && path == "":
+				handler = rounds.Index()
+			case method == "GET" && path == "new":
+				handler = rounds.New(db, ub, gen)
+			case method == "GET":
+				handler = rounds.Show(db, ub, path)
+			case method == "POST" && path == "":
+				handler = rounds.Create(db, ub, gen)
+			case method == "POST":
+				handler = rounds.Update(db, ub, path)
 			}
 		}
 
