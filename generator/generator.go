@@ -35,7 +35,7 @@ func (g Generator) NewRound(p primitives.Practice) (*primitives.Round, error) {
 		PromptMode: p.PromptMode,
 		GuessMode:  p.GuessMode,
 		CardIDs:    []primitives.ID{card.ID()},
-		Prompt:     card.ImageURLs[0],
+		Prompt:     card.ImageURL,
 		Answer:     card.Definitions[0],
 	}
 

@@ -25,13 +25,13 @@
             <div class="field">
               <label class="label">Image URL *</label>
               <div class="control">
-                <input class="input" type="text" name="image_urls" required minlength="2" autocomplete="off" value="{{ first .ImageURLs }}" />
+                <input class="input" type="text" name="image_url" required minlength="2" autocomplete="off" value="{{ .ImageURL }}" />
               </div>
             </div>
             <div class="field">
               <label class="label">Sound URL</label>
               <div class="control">
-                <input class="input" type="text" name="sound_urls" autocomplete="off" value="{{ first .SoundURLs }}" />
+                <input class="input" type="text" name="sound_url" autocomplete="off" value="{{ .SoundURL }}" />
               </div>
             </div>
             {{ $deck := .Deck }}
@@ -74,13 +74,11 @@
     </div>
     <div class="column is-4">
       <div class="card">
-          {{ range .ImageURLs }}
         <div class="card-image">
           <figure class="image is-4by3">
-            <img src="{{ . }}">
+            <img src="{{ .ImageURL }}">
           </figure>
         </div>
-        {{ end }}
         <div class="card-content">
           <div class="content">
             <dl>

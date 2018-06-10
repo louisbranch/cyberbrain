@@ -47,8 +47,8 @@ var tableQueries = []string{
 
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			definitions TEXT[] NOT NULL CHECK (cardinality(definitions) > 0),
-			image_urls TEXT[],
-			sound_urls TEXT[]
+			image_url TEXT[],
+			sound_url TEXT[]
 		);
 		`,
 	`

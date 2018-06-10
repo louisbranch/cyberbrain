@@ -154,8 +154,8 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			return response.WrapError(err, http.StatusBadRequest, "invalid card form")
 		}
 
-		card.ImageURLs = newCard.ImageURLs
-		card.SoundURLs = newCard.SoundURLs
+		card.ImageURL = newCard.ImageURL
+		card.SoundURL = newCard.SoundURL
 		card.Definitions = newCard.Definitions
 
 		// TODO reassign card tags

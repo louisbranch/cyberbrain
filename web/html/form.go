@@ -70,17 +70,8 @@ func NewCardFromForm(deck primitives.Deck, form url.Values) (*primitives.Card, e
 		DeckID: deck.ID(),
 	}
 
-	for _, f := range form["image_urls"] {
-		if f != "" {
-			c.ImageURLs = append(c.ImageURLs, f)
-		}
-	}
-
-	for _, f := range form["sound_urls"] {
-		if f != "" {
-			c.SoundURLs = append(c.SoundURLs, f)
-		}
-	}
+	c.ImageURL = form.Get("image_url")
+	c.SoundURL = form.Get("sound_url")
 
 	for _, f := range form["definitions"] {
 		if f != "" {
@@ -88,7 +79,7 @@ func NewCardFromForm(deck primitives.Deck, form url.Values) (*primitives.Card, e
 		}
 	}
 
-	if len(c.ImageURLs) == 0 {
+	if c.ImageURL == "" {
 		return nil, errors.New("card image cannot be empty")
 	}
 
