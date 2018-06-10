@@ -1,13 +1,13 @@
 package response
 
 import (
+	"context"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 )
 
-type Handler func(http.ResponseWriter, *http.Request, *primitives.User) Responder
+type Handler func(context.Context, http.ResponseWriter, *http.Request) Responder
 
 type Responder interface {
 	Respond(http.ResponseWriter, *http.Request) (*web.Page, error)

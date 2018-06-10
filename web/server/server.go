@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/server/cards"
 	"gitlab.com/luizbranco/srs/web/server/decks"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/practices"
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
@@ -95,7 +97,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = decks.Create(srv.Database, srv.URLBuilder)
 		}
 
-		handler = authenticate(handler)
+		handler = middlewares.Authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -119,7 +121,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = cards.Update(srv.Database, srv.URLBuilder, path)
 		}
 
-		handler = authenticate(handler)
+		handler = middlewares.Authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -143,7 +145,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = tags.Update(srv.Database, srv.URLBuilder, path)
 		}
 
-		handler = authenticate(handler)
+		handler = middlewares.Authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -165,7 +167,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = practices.Create(srv.Database, srv.URLBuilder)
 		}
 
-		handler = authenticate(handler)
+		handler = middlewares.Authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -189,7 +191,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 			handler = rounds.Update(srv.Database, srv.URLBuilder, path)
 		}
 
-		handler = authenticate(handler)
+		handler = middlewares.Authenticate(handler)
 
 		srv.handle(handler, w, r)
 	})
@@ -214,7 +216,9 @@ func (srv *Server) handle(handler response.Handler, w http.ResponseWriter, r *ht
 		return
 	}
 
-	res := handler(w, r, user)
+	ctx := middlewares.NewContext(user)
+
+	res := handler(ctx, w, r)
 	page, err := res.Respond(w, r)
 
 	if page != nil {
@@ -284,22 +288,11 @@ func (srv *Server) renderError(w http.ResponseWriter, err error, user *primitive
 }
 
 func index() response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 		if r.Method != "GET" || r.URL.Path != "/" {
 			return response.NewError(http.StatusNotFound, r.URL.Path+" not found")
 		}
 
 		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
-	}
-}
-
-func authenticate(h response.Handler) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
-
-		if user == nil {
-			return response.Redirect{Path: "/login", Code: http.StatusFound}
-		}
-
-		return h(w, r, user)
 	}
 }

@@ -1,18 +1,20 @@
 package users
 
 import (
+	"context"
 	"net/http"
 
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		if user != nil {
+		if _, ok := middlewares.CurrentUser(ctx); ok {
 			return response.Redirect{Path: "/", Code: http.StatusFound}
 		}
 
@@ -29,9 +31,9 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Create(conn primitives.Database, ub web.URLBuilder,
 	auth primitives.Authenticator, session web.SessionManager) response.Handler {
 
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		if user != nil {
+		if _, ok := middlewares.CurrentUser(ctx); ok {
 			return response.Redirect{Path: "/", Code: http.StatusFound}
 		}
 

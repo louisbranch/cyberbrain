@@ -1,6 +1,7 @@
 package decks
 
 import (
+	"context"
 	"net/http"
 
 	"gitlab.com/luizbranco/srs/db"
@@ -8,11 +9,14 @@ import (
 	"gitlab.com/luizbranco/srs/web"
 	"gitlab.com/luizbranco/srs/web/html"
 	"gitlab.com/luizbranco/srs/web/server/finder"
+	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
 )
 
 func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
+
+		user, _ := middlewares.CurrentUser(ctx)
 
 		decks, err := db.FindDecks(conn, user.ID())
 		if err != nil {
@@ -42,7 +46,7 @@ func Index(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
 		page := web.Page{
 			Title:      "New Deck",
@@ -55,7 +59,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
@@ -65,6 +69,10 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		if err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid deck form")
 		}
+
+		user, _ := middlewares.CurrentUser(ctx)
+
+		deck.UserID = user.ID()
 
 		err = conn.Create(deck)
 		if err != nil {
@@ -81,7 +89,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 }
 
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
-	return func(w http.ResponseWriter, r *http.Request, user *primitives.User) response.Responder {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
 		deck, err := finder.Deck(conn, ub, hash, finder.WithTags|finder.WithCards)
 		if err != nil {

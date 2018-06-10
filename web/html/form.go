@@ -44,7 +44,6 @@ func NewUserFromForm(form url.Values, auth primitives.Authenticator) (*primitive
 func NewDeckFromForm(form url.Values) (*primitives.Deck, error) {
 	d := &primitives.Deck{}
 
-	d.UserID = 1 // FIXME
 	d.Name = form.Get("name")
 	d.Description = form.Get("description")
 	d.ImageURL = form.Get("image_url")
