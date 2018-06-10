@@ -40,3 +40,11 @@ func (d *Deck) SetCreatedAt(t time.Time) {
 func (d *Deck) SetUpdatedAt(t time.Time) {
 	d.MetaUpdatedAt = t
 }
+
+func (d *Deck) GetImageURL() string {
+	return d.ImageURL
+}
+
+func (d *Deck) SetImageURL(url string) {
+	d.ImageURL = url
+}

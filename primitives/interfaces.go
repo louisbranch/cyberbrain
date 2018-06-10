@@ -47,8 +47,12 @@ type Authenticator interface {
 	Verify(hash string, password string) (bool, error)
 }
 
+type WorkerPool interface {
+	Register(string, Worker) error
+}
+
 type Worker interface {
-	Register(string) error
+	Spawn() (Job, error)
 }
 
 type Job interface {

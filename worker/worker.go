@@ -25,7 +25,7 @@ func (w *Worker) Start() error {
 	return nil
 }
 
-func (w *Worker) RegisterJob() error {
+func (w *Worker) Register(name string, worker primitives.Worker) error {
 	return errors.New("not implemented")
 }
 

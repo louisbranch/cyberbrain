@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/luizbranco/srs/db/psql"
 	"gitlab.com/luizbranco/srs/worker"
+	"gitlab.com/luizbranco/srs/worker/jobs/s3img"
 )
 
 var dbURL string
@@ -27,9 +28,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	s3img := s3img.S3img{}
+
 	pool := &worker.Worker{
 		Database: db,
 	}
+
+	pool.Register("image_uploader", s3img)
 
 	log.Fatal(pool.Start())
 }
