@@ -117,8 +117,12 @@ var tableQueries = []string{
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
+			run_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			name TEXT NOT NULL CHECK(name <> ''),
-			args BYTEA
+			state TEXT NOT NULL CHECK(state <> ''),
+			args BYTEA,
+			error TEXT,
+			tries INTEGER NOT NULL DEFAULT 0
 		);
 		`,
 }

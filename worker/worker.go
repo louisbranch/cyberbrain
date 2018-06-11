@@ -1,7 +1,9 @@
 package worker
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -20,7 +22,7 @@ func (w *WorkerPool) Start() {
 	for {
 		select {
 		case <-tick.C:
-			// TODO
+			w.run()
 		}
 	}
 }
@@ -47,8 +49,9 @@ func (w *WorkerPool) Enqueue(name string, args map[string]string) error {
 	}
 
 	job := &Job{
-		Name: name,
-		Args: b,
+		Name:  name,
+		Args:  b,
+		State: scheduled,
 	}
 
 	err = w.Database.Create(job)
@@ -56,5 +59,114 @@ func (w *WorkerPool) Enqueue(name string, args map[string]string) error {
 		return errors.Wrapf(err, "failed to save job to database %q", name)
 	}
 
+	return nil
+}
+
+func (wp *WorkerPool) run() {
+	q := &query{}
+
+	rs, err := wp.Database.Query(q)
+	if err != nil {
+		err = errors.Wrap(err, "failed to query scheduled jobs")
+		log.Println(err)
+		return
+	}
+
+	var jobs []Job
+
+	for _, r := range rs {
+		job, ok := r.(*Job)
+		if !ok {
+			err := errors.Errorf("invalid record type %T", r)
+			log.Println(err)
+			return
+		}
+
+		jobs = append(jobs, *job)
+	}
+
+	for _, j := range jobs {
+		wp.runJob(j)
+	}
+}
+
+func (wp *WorkerPool) runJob(j Job) {
+	worker, ok := wp.workers[j.Name]
+
+	if !ok {
+		err := errors.Errorf("worker %q not registered", j.Name)
+		failedJob(wp.Database, j, err)
+		return
+	}
+
+	args := make(map[string]string)
+
+	err := json.Unmarshal(j.Args, &args)
+	if err != nil {
+		err = errors.Wrapf(err, "job %d %q args unmarshal failed", j.ID(), j.Name)
+		failedJob(wp.Database, j, err)
+		return
+	}
+
+	j.State = running
+
+	err = updateJob(wp.Database, j)
+	if err != nil {
+		return
+	}
+
+	job, err := worker.Spawn(args)
+	if err != nil {
+		failedJob(wp.Database, j, err)
+		return
+	}
+
+	go func() {
+		err = job.Run(context.Background()) // FIXME
+
+		if err != nil {
+			failedJob(wp.Database, j, err)
+			return
+		}
+
+		j.State = done
+		updateJob(wp.Database, j)
+
+	}()
+}
+
+func updateJob(db primitives.Database, j Job) error {
+	err := db.Update(&j)
+	if err != nil {
+		err := errors.Wrapf(err, "failed to update job %d %q", j.ID(), j.Name)
+		log.Println(err)
+	}
+	return err
+}
+
+func failedJob(db primitives.Database, j Job, err error) {
+	j.State = failed
+	j.Error = err.Error()
+
+	updateJob(db, j)
+}
+
+type query struct{}
+
+func (q *query) NewRecord() primitives.Record {
+	return &Job{}
+}
+
+func (q *query) Where() map[string]interface{} {
+	return map[string]interface{}{
+		"state": scheduled,
+	}
+}
+
+func (q *query) Raw() string {
+	return ""
+}
+
+func (q *query) SortBy() map[string]string {
 	return nil
 }

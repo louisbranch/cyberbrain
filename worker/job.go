@@ -6,14 +6,26 @@ import (
 	"gitlab.com/luizbranco/srs/primitives"
 )
 
+const (
+	scheduled = "scheduled"
+	running   = "running"
+	done      = "done"
+	retry     = "retry"
+	failed    = "failed"
+)
+
 type Job struct {
 	MetaID        primitives.ID `db:"id"`
 	MetaVersion   int           `db:"version"`
 	MetaCreatedAt time.Time     `db:"created_at"`
 	MetaUpdatedAt time.Time     `db:"updated_at"`
 
-	Name string `db:"name"`
-	Args []byte `db:"args"`
+	RunAt time.Time `db:"run_at"`
+	Name  string    `db:"name"`
+	State string    `db:"state"`
+	Args  []byte    `db:"args"`
+	Error string    `db:"error"`
+	Tries int       `db:"tries"`
 }
 
 func (j Job) ID() primitives.ID {
