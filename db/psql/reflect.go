@@ -59,6 +59,7 @@ func QueryFromRecord(r primitives.Record, ignored ...string) (*Query, error) {
 
 				sa := pq.Int64Array(slice)
 				addr = &sa
+			case reflect.Uint8: // []byte
 			default:
 				return nil, errors.Errorf("slice type %v not supported", e)
 			}

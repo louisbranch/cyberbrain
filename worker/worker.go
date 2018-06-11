@@ -2,7 +2,6 @@ package worker
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -15,17 +14,15 @@ type WorkerPool struct {
 	Database primitives.Database
 }
 
-func (w *WorkerPool) Start() error {
+func (w *WorkerPool) Start() {
 	tick := time.NewTicker(5 * time.Second)
 
 	for {
 		select {
 		case <-tick.C:
-			fmt.Printf(".")
+			// TODO
 		}
 	}
-
-	return nil
 }
 
 func (p *WorkerPool) Register(name string, worker primitives.Worker) error {

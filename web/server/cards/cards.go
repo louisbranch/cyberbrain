@@ -13,6 +13,7 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/finder"
 	"gitlab.com/luizbranco/srs/web/server/middlewares"
 	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/srs/worker/jobs"
 )
 
 func Index() response.Handler {
@@ -50,7 +51,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
-func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
+func Create(conn primitives.Database, ub web.URLBuilder, imgUp jobs.ImageUploader) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
 		if err := r.ParseForm(); err != nil {
@@ -87,6 +88,11 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 			if err != nil {
 				return response.WrapError(err, http.StatusInternalServerError, "failed to create card tag")
 			}
+		}
+
+		err = imgUp.Upload(card)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to update card img")
 		}
 
 		path, err := ub.Path("SHOW", deck)

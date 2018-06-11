@@ -14,6 +14,8 @@ import (
 	"gitlab.com/luizbranco/srs/web/server"
 	"gitlab.com/luizbranco/srs/web/session"
 	"gitlab.com/luizbranco/srs/web/urlbuilder"
+	"gitlab.com/luizbranco/srs/worker"
+	"gitlab.com/luizbranco/srs/worker/jobs/s3img"
 )
 
 var httpPort, dbURL, sessionSecret, hashidSalt string
@@ -54,6 +56,22 @@ func main() {
 		log.Fatal(err)
 	}
 
+	pool := &worker.WorkerPool{
+		Database: db,
+	}
+
+	s3 := &s3img.Worker{
+		Database:   db,
+		WorkerPool: pool,
+	}
+
+	err = s3.Register()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go pool.Start()
+
 	ub, err := urlbuilder.New(hashidSalt)
 	if err != nil {
 		log.Fatal(err)
@@ -79,10 +97,11 @@ func main() {
 		PracticeGenerator: gen,
 		Authenticator:     auth,
 		SessionManager:    session,
+		ImageUploader:     s3,
 	}
 
 	mux := srv.NewServeMux()
 
-	fmt.Printf("Server listening on port %s", httpPort)
+	fmt.Printf("Server listening on port %s\n", httpPort)
 	log.Fatal(http.ListenAndServe(":"+httpPort, mux))
 }

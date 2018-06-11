@@ -12,10 +12,11 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/rounds"
 	"gitlab.com/luizbranco/srs/web/server/tags"
+	"gitlab.com/luizbranco/srs/worker/jobs"
 )
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
-	ub web.URLBuilder, gen primitives.PracticeGenerator) *http.ServeMux {
+	ub web.URLBuilder, gen primitives.PracticeGenerator, imgUp jobs.ImageUploader) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,7 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 			case method == "GET":
 				handler = cards.Show(db, ub, path)
 			case method == "POST" && path == "":
-				handler = cards.Create(db, ub)
+				handler = cards.Create(db, ub, imgUp)
 			case method == "POST":
 				handler = cards.Update(db, ub, path)
 			}

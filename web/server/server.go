@@ -13,6 +13,7 @@ import (
 	"gitlab.com/luizbranco/srs/web/server/response"
 	"gitlab.com/luizbranco/srs/web/server/sessions"
 	"gitlab.com/luizbranco/srs/web/server/users"
+	"gitlab.com/luizbranco/srs/worker/jobs"
 )
 
 type Server struct {
@@ -22,6 +23,7 @@ type Server struct {
 	PracticeGenerator primitives.PracticeGenerator
 	Authenticator     primitives.Authenticator
 	SessionManager    web.SessionManager
+	ImageUploader     jobs.ImageUploader
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
@@ -44,7 +46,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	logoutMux := sessions.NewLogoutMux(renderer)
 
 	decksMux := decks.NewServeMux(renderer, srv.Database, srv.URLBuilder,
-		srv.PracticeGenerator)
+		srv.PracticeGenerator, srv.ImageUploader)
 
 	mux.Handle("/signup/", http.StripPrefix("/signup", signupMux))
 	mux.Handle("/login/", http.StripPrefix("/login", loginMux))
