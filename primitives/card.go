@@ -28,14 +28,22 @@ func (c *Card) SetID(id ID) {
 	c.MetaID = id
 }
 
-func (d *Card) SetVersion(v int) {
-	d.MetaVersion = v
+func (c *Card) SetVersion(v int) {
+	c.MetaVersion = v
 }
 
-func (d *Card) SetCreatedAt(t time.Time) {
-	d.MetaCreatedAt = t
+func (c *Card) SetCreatedAt(t time.Time) {
+	c.MetaCreatedAt = t
 }
 
-func (d *Card) SetUpdatedAt(t time.Time) {
-	d.MetaUpdatedAt = t
+func (c *Card) SetUpdatedAt(t time.Time) {
+	c.MetaUpdatedAt = t
+}
+
+func (c *Card) GetImageURL() string {
+	return c.ImageURL
+}
+
+func (c *Card) SetImageURL(url string) {
+	c.ImageURL = url
 }

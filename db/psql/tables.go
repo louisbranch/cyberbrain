@@ -110,4 +110,15 @@ var tableQueries = []string{
 			done BOOLEAN NOT NULL DEFAULT FALSE
 		);
 		`,
+	`
+		CREATE TABLE IF NOT EXISTS jobs(
+			id SERIAL PRIMARY KEY,
+			version INTEGER NOT NULL DEFAULT 1,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+			name TEXT NOT NULL CHECK(name <> ''),
+			args BYTEA
+		);
+		`,
 }

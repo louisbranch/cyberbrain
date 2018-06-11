@@ -28,13 +28,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s3img := s3img.S3img{}
-
-	pool := &worker.Worker{
+	pool := &worker.WorkerPool{
 		Database: db,
 	}
 
-	pool.Register("image_uploader", s3img)
+	s3 := &s3img.Worker{
+		Database:   db,
+		WorkerPool: pool,
+	}
+
+	err = s3.Register()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Fatal(pool.Start())
 }

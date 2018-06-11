@@ -1,23 +1,51 @@
 package s3img
 
 import (
-	"errors"
+	"strconv"
 
+	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/srs/primitives"
 	"gitlab.com/luizbranco/srs/worker/jobs"
 )
 
-type S3img struct {
+const name = "s3img"
+
+type Worker struct {
 	AWSID     string
 	AWSSecret string
 	AWSBucket string
 	AWSRegion string
 
-	Worker   primitives.Worker
-	Database primitives.Database
+	Database   primitives.Database
+	WorkerPool primitives.WorkerPool
 }
 
-func (s3 *S3img) Upload(i jobs.Imager) error {
+func (s3 *Worker) Register() error {
+	err := s3.WorkerPool.Register(name, s3)
+	if err != nil {
+		return errors.Wrap(err, "failed to register s3 worker")
+	}
 
-	return errors.New("not implemented")
+	return nil
+}
+
+func (s3 *Worker) Upload(i jobs.Imager) error {
+	id := strconv.Itoa(int(i.ID()))
+	t := i.Type()
+
+	args := map[string]string{
+		"id":   id,
+		"type": t,
+	}
+
+	err := s3.WorkerPool.Enqueue(name, args)
+	if err != nil {
+		return errors.Wrapf(err, "failed to enqueue s3 worker %s %s", t, id)
+	}
+
+	return nil
+}
+
+func (s3 *Worker) Spawn(args map[string]string) (primitives.Job, error) {
+	return nil, errors.New("not implemented")
 }
