@@ -52,6 +52,7 @@ func (w *WorkerPool) Enqueue(name string, args map[string]string) error {
 		Name:  name,
 		Args:  b,
 		State: scheduled,
+		RunAt: time.Now(),
 	}
 
 	err = w.Database.Create(job)

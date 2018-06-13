@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"gitlab.com/luizbranco/srs/authentication"
 	"gitlab.com/luizbranco/srs/db/psql"
 	"gitlab.com/luizbranco/srs/generator"
@@ -18,7 +19,8 @@ import (
 	"gitlab.com/luizbranco/srs/worker/jobs/s3img"
 )
 
-var httpPort, dbURL, sessionSecret, hashidSalt string
+var httpPort, dbURL, sessionSecret, hashidSalt, awsID, awsSecret, awsBucket,
+	awsRegion string
 
 func init() {
 	httpPort = os.Getenv("HTTP_PORT")
@@ -46,6 +48,10 @@ func init() {
 	flag.StringVar(&dbURL, "database-url", dbURL, "database connection url")
 	flag.StringVar(&sessionSecret, "session-secret", sessionSecret, "session cookie id secret")
 	flag.StringVar(&hashidSalt, "hashid-salt", hashidSalt, "salt for hashid url")
+	flag.StringVar(&awsID, "aws-id", "", "AWS Access Key ID")
+	flag.StringVar(&awsSecret, "aws-secret", "", "AWS Access Key Secret")
+	flag.StringVar(&awsBucket, "aws-bucket", "", "AWS Bucket Name")
+	flag.StringVar(&awsRegion, "aws-region", endpoints.UsEast2RegionID, "AWS Region")
 
 	flag.Parse()
 }
@@ -63,6 +69,10 @@ func main() {
 	s3 := &s3img.Worker{
 		Database:   db,
 		WorkerPool: pool,
+		AWSID:      awsID,
+		AWSSecret:  awsSecret,
+		AWSBucket:  awsBucket,
+		AWSRegion:  awsRegion,
 	}
 
 	err = s3.Register()
