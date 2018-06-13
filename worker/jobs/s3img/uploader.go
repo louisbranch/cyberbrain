@@ -44,13 +44,14 @@ func (w *Worker) Register() error {
 	return nil
 }
 
-func (w *Worker) Upload(i jobs.Imager) error {
+func (w *Worker) Upload(i jobs.Imager, name string) error {
 	id := strconv.Itoa(int(i.ID()))
 	t := i.Type()
 
 	args := map[string]string{
 		"id":   id,
 		"type": t,
+		"name": name,
 	}
 
 	err := w.WorkerPool.Enqueue(workerName, args)
@@ -64,6 +65,7 @@ func (w *Worker) Upload(i jobs.Imager) error {
 func (w *Worker) Spawn(args map[string]string) (primitives.Job, error) {
 	j := &Job{
 		Type:      args["type"],
+		Name:      args["name"],
 		client:    w.client,
 		db:        w.Database,
 		awsBucket: w.AWSBucket,

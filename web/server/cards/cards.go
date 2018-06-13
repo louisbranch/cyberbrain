@@ -90,7 +90,12 @@ func Create(conn primitives.Database, ub web.URLBuilder, imgUp jobs.ImageUploade
 			}
 		}
 
-		err = imgUp.Upload(card)
+		hash, err := ub.EncodeID(card.ID())
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to encode card id")
+		}
+
+		err = imgUp.Upload(card, hash)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to update card img")
 		}

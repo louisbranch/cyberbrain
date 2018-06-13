@@ -151,23 +151,3 @@ func failedJob(db primitives.Database, j Job, err error) {
 
 	updateJob(db, j)
 }
-
-type query struct{}
-
-func (q *query) NewRecord() primitives.Record {
-	return &Job{}
-}
-
-func (q *query) Where() map[string]interface{} {
-	return map[string]interface{}{
-		"state": scheduled,
-	}
-}
-
-func (q *query) Raw() string {
-	return ""
-}
-
-func (q *query) SortBy() map[string]string {
-	return nil
-}

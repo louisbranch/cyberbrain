@@ -17,6 +17,7 @@ import (
 type Job struct {
 	ID   primitives.ID
 	Type string
+	Name string
 
 	awsBucket string
 	db        primitives.Database
@@ -49,15 +50,19 @@ func (j *Job) Run(ctx context.Context) error {
 
 	b := buff.Bytes()
 
-	var name string
+	var ext string
 
 	mime := http.DetectContentType(b)
 	switch mime {
+	case "image/png":
+		ext = "png"
 	case "image/jpeg":
-		name = fmt.Sprintf("%ss/%d.jpg", j.Type, j.ID)
+		ext = "jpb"
 	default:
 		return errors.Wrapf(err, "mime-type %q cannot be used for image %q %d", mime, j.Type, j.ID)
 	}
+
+	name := fmt.Sprintf("%ss/%s.%s", j.Type, j.Name, ext)
 
 	r := bytes.NewReader(b)
 

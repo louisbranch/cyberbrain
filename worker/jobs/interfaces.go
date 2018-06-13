@@ -9,5 +9,5 @@ type Imager interface {
 }
 
 type ImageUploader interface {
-	Upload(Imager) error
+	Upload(Imager, string) error
 }
