@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 type Page struct {

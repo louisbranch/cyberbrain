@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/server/decks"
-	"gitlab.com/luizbranco/srs/web/server/home"
-	"gitlab.com/luizbranco/srs/web/server/middlewares"
-	"gitlab.com/luizbranco/srs/web/server/response"
-	"gitlab.com/luizbranco/srs/web/server/sessions"
-	"gitlab.com/luizbranco/srs/web/server/users"
-	"gitlab.com/luizbranco/srs/worker/jobs"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/web"
+	"gitlab.com/luizbranco/cyberbrain/web/server/decks"
+	"gitlab.com/luizbranco/cyberbrain/web/server/home"
+	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
+	"gitlab.com/luizbranco/cyberbrain/web/server/response"
+	"gitlab.com/luizbranco/cyberbrain/web/server/sessions"
+	"gitlab.com/luizbranco/cyberbrain/web/server/users"
+	"gitlab.com/luizbranco/cyberbrain/worker/jobs"
 )
 
 type Server struct {

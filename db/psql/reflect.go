@@ -7,7 +7,7 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 type Query struct {

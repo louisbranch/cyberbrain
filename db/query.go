@@ -1,6 +1,6 @@
 package db
 
-import "gitlab.com/luizbranco/srs/primitives"
+import "gitlab.com/luizbranco/cyberbrain/primitives"
 
 type query struct {
 	record func() primitives.Record

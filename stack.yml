@@ -10,11 +10,11 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: srs
-      POSTGRES_USER: srs
+      POSTGRES_DB: cyberbrain
+      POSTGRES_USER: cyberbrain
       POSTGRES_PASSWORD: s3cr3t
 
 volumes:
   db-data:
     external:
-      name: srs-db-data
+      name: cyberbrain-db-data

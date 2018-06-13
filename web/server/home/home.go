@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/web/server/middlewares"
-	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
+	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
 func NewServeMux(renderer *middlewares.Renderer) *http.ServeMux {

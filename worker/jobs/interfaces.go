@@ -1,6 +1,6 @@
 package jobs
 
-import "gitlab.com/luizbranco/srs/primitives"
+import "gitlab.com/luizbranco/cyberbrain/primitives"
 
 type Imager interface {
 	primitives.Identifiable

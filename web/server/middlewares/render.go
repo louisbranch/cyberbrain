@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/web"
+	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
 type Renderer struct {

@@ -3,7 +3,7 @@ package session
 import (
 	"time"
 
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 type session struct {

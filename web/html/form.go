@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/web"
 )
 
 const CHECKED = "on"

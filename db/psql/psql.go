@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 const version = 1

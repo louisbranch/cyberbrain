@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/html"
-	"gitlab.com/luizbranco/srs/web/server/middlewares"
-	"gitlab.com/luizbranco/srs/web/server/response"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/web"
+	"gitlab.com/luizbranco/cyberbrain/web/html"
+	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
+	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/db"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/db"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 type Generator struct {

@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/worker/jobs"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/worker/jobs"
 )
 
 const workerName = "s3img"

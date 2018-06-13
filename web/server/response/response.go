@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"gitlab.com/luizbranco/srs/web"
+	"gitlab.com/luizbranco/cyberbrain/web"
 )
 
 type Handler func(context.Context, http.ResponseWriter, *http.Request) Responder

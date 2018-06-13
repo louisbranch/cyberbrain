@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 func FindUser(db primitives.Database, id primitives.ID) (*primitives.User, error) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/speps/go-hashids"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 type URLBuilder struct {

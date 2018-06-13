@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/luizbranco/srs/primitives"
-	"gitlab.com/luizbranco/srs/web"
-	"gitlab.com/luizbranco/srs/web/server/cards"
-	"gitlab.com/luizbranco/srs/web/server/middlewares"
-	"gitlab.com/luizbranco/srs/web/server/practices"
-	"gitlab.com/luizbranco/srs/web/server/response"
-	"gitlab.com/luizbranco/srs/web/server/rounds"
-	"gitlab.com/luizbranco/srs/web/server/tags"
-	"gitlab.com/luizbranco/srs/worker/jobs"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
+	"gitlab.com/luizbranco/cyberbrain/web"
+	"gitlab.com/luizbranco/cyberbrain/web/server/cards"
+	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
+	"gitlab.com/luizbranco/cyberbrain/web/server/practices"
+	"gitlab.com/luizbranco/cyberbrain/web/server/response"
+	"gitlab.com/luizbranco/cyberbrain/web/server/rounds"
+	"gitlab.com/luizbranco/cyberbrain/web/server/tags"
+	"gitlab.com/luizbranco/cyberbrain/worker/jobs"
 )
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,

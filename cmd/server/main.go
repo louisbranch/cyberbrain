@@ -8,15 +8,15 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws/endpoints"
-	"gitlab.com/luizbranco/srs/authentication"
-	"gitlab.com/luizbranco/srs/db/psql"
-	"gitlab.com/luizbranco/srs/generator"
-	"gitlab.com/luizbranco/srs/web/html"
-	"gitlab.com/luizbranco/srs/web/server"
-	"gitlab.com/luizbranco/srs/web/session"
-	"gitlab.com/luizbranco/srs/web/urlbuilder"
-	"gitlab.com/luizbranco/srs/worker"
-	"gitlab.com/luizbranco/srs/worker/jobs/s3img"
+	"gitlab.com/luizbranco/cyberbrain/authentication"
+	"gitlab.com/luizbranco/cyberbrain/db/psql"
+	"gitlab.com/luizbranco/cyberbrain/generator"
+	"gitlab.com/luizbranco/cyberbrain/web/html"
+	"gitlab.com/luizbranco/cyberbrain/web/server"
+	"gitlab.com/luizbranco/cyberbrain/web/session"
+	"gitlab.com/luizbranco/cyberbrain/web/urlbuilder"
+	"gitlab.com/luizbranco/cyberbrain/worker"
+	"gitlab.com/luizbranco/cyberbrain/worker/jobs/s3img"
 )
 
 var httpPort, dbURL, sessionSecret, hashidSalt, awsID, awsSecret, awsBucket,
@@ -33,7 +33,7 @@ func init() {
 	}
 
 	if dbURL == "" {
-		dbURL = "postgres://srs:s3cr3t@192.168.0.11:5432/srs?sslmode=disable"
+		dbURL = "postgres://cyberbrain:s3cr3t@192.168.0.11:5432/cyberbrain?sslmode=disable"
 	}
 
 	if sessionSecret == "" {

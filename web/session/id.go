@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"gitlab.com/luizbranco/srs/primitives"
+	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 func (m *Manager) encrypt(id primitives.ID) (cypherID string, err error) {
