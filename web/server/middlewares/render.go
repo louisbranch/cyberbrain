@@ -24,6 +24,7 @@ func (rr *Renderer) Render(handler response.Handler, w http.ResponseWriter, r *h
 
 	user, err := rr.SessionManager.User(r)
 	if err != nil {
+		rr.SessionManager.LogOut(w)
 		log.Println(err)
 	}
 
