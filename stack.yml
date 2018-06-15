@@ -1,10 +1,9 @@
-version: '3.2'
+version: '3.6'
 
 services:
 
   db:
     image: postgres
-    restart: always
     ports:
       - "5432:5432"
     volumes:
@@ -13,8 +12,23 @@ services:
       POSTGRES_DB: cyberbrain
       POSTGRES_USER: cyberbrain
       POSTGRES_PASSWORD: s3cr3t
+    networks:
+      - backend
+
+  server:
+    image: cyberbrain-app/server:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgres://cyberbrain:s3cr3t@db:5432/cyberbrain?sslmode=disable"
+    networks:
+      - backend
 
 volumes:
   db-data:
-    external:
-      name: cyberbrain-db-data
+    name: cyberbrain-db-data
+
+networks:
+  backend:

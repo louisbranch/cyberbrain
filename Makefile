@@ -1,5 +1,10 @@
 .PHONY: db
 
-db:
+swarm:
 	docker swarm init
-	docker stack deploy -c stack.yml postgres
+
+up:
+	docker stack deploy -c stack.yml cyberbrain
+
+down:
+	docker stack rm cyberbrain
