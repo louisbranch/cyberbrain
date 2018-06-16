@@ -1,5 +1,3 @@
-.PHONY: db
-
 docker:
 	docker build --rm -t cyberbrain/server:latest .
 
