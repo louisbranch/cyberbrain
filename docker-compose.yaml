@@ -16,7 +16,7 @@ services:
       - backend
 
   server:
-    image: cyberbrain-app/server:latest
+    image: cyberbrain/server:latest
     ports:
       - "8080:8080"
     depends_on:

@@ -1,10 +1,7 @@
 .PHONY: db
 
-swarm:
-	docker swarm init
+docker:
+	docker build --rm -t gcr.io/cyberbrain-app/server .
 
-up:
-	docker stack deploy -c stack.yml cyberbrain
-
-down:
-	docker stack rm cyberbrain
+push:
+	gcloud container builds submit --tag gcr.io/cyberbrain-app/server .

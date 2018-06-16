@@ -1,17 +1,17 @@
 FROM golang:alpine AS build-env
-ENV src /go/src/gitlab.com/luizbranco/cyberbrain
-WORKDIR $src
-ADD . $src
-RUN apk add --no-cache git
-RUN cd ${src}/cmd/server && go get -u && go build -o server
+ENV repo gitlab.com/luizbranco/cyberbrain/cmd/server
+WORKDIR /app
+RUN apk update && apk add git && apk add ca-certificates
+RUN go get -u $repo
+RUN go build -o /app/server $repo
 
 FROM alpine
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 ENV src /go/src/gitlab.com/luizbranco/cyberbrain
 WORKDIR /app
+COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-env ${src}/web/assets /app/web/assets
 COPY --from=build-env ${src}/web/templates /app/web/templates
-COPY --from=build-env ${src}/cmd/server/server /app
+COPY --from=build-env /app/server /app
 
 EXPOSE 8080
 ENTRYPOINT ./server
