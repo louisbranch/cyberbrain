@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"gitlab.com/luizbranco/cyberbrain/web"
 	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
@@ -24,6 +25,16 @@ func Index() response.Handler {
 			return response.NewError(http.StatusNotFound, r.URL.Path+" not found")
 		}
 
-		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
+		if _, ok := middlewares.CurrentUser(ctx); ok {
+			return response.Redirect{Path: "/decks/", Code: http.StatusFound}
+		}
+
+		page := web.Page{
+			Title:      "CyberBrain.app",
+			ActiveMenu: "home",
+			Partials:   []string{"home"},
+		}
+
+		return response.NewContent(page)
 	}
 }
