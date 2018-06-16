@@ -59,7 +59,7 @@ func init() {
 func main() {
 	db, err := psql.New(dbURL)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("unable to connect to db %s", err)
 	}
 
 	pool := &worker.WorkerPool{
@@ -77,14 +77,14 @@ func main() {
 
 	err = s3.Register()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("unable to register AWS S3 job %s", err)
 	}
 
 	go pool.Start()
 
 	ub, err := urlbuilder.New(hashidSalt)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("unable to initialize urbuilder %s", err)
 	}
 
 	gen := generator.Generator{
@@ -113,5 +113,9 @@ func main() {
 	mux := srv.NewServeMux()
 
 	fmt.Printf("Server listening on port %s\n", httpPort)
-	log.Fatal(http.ListenAndServe(":"+httpPort, mux))
+
+	err = http.ListenAndServe(":"+httpPort, mux)
+	if err != nil {
+		log.Fatalf("unable to start server %s", err)
+	}
 }
