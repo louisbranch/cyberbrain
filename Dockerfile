@@ -1,9 +1,9 @@
 FROM golang:alpine AS build-env
-ENV repo gitlab.com/luizbranco/cyberbrain/cmd/server
+ENV repo gitlab.com/luizbranco/cyberbrain
 WORKDIR /app
 RUN apk update && apk add git && apk add ca-certificates
-RUN go get -u $repo
-RUN go build -o /app/server $repo
+RUN go get -u ${repo}/cmd/server
+RUN go build -o /app/server ${repo}/cmd/server
 
 FROM alpine
 ENV src /go/src/gitlab.com/luizbranco/cyberbrain
