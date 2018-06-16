@@ -1,7 +1,7 @@
 .PHONY: db
 
 docker:
-	docker build --rm -t gcr.io/cyberbrain-app/server .
+	docker build --rm -t cyberbrain/server:latest .
 
 push:
-	gcloud container builds submit --tag gcr.io/cyberbrain-app/server .
+	docker push cyberbrain/server:latest
