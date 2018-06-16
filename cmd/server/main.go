@@ -1,13 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"gitlab.com/luizbranco/cyberbrain/authentication"
 	"gitlab.com/luizbranco/cyberbrain/db/psql"
 	"gitlab.com/luizbranco/cyberbrain/generator"
@@ -19,21 +17,19 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/worker/jobs/s3img"
 )
 
-var httpPort, dbURL, sessionSecret, hashidSalt, awsID, awsSecret, awsBucket,
-	awsRegion string
+func main() {
+	httpPort := os.Getenv("HTTP_PORT")
+	dbURL := os.Getenv("DATABASE_URL")
+	sessionSecret := os.Getenv("SESSION_SECRET")
+	hashidSalt := os.Getenv("HASHID_SALT")
 
-func init() {
-	httpPort = os.Getenv("HTTP_PORT")
-	dbURL = os.Getenv("DATABASE_URL")
-	sessionSecret = os.Getenv("SESSION_SECRET")
-	hashidSalt = os.Getenv("HASHID_SALT")
+	awsID := os.Getenv("AWS_ID")
+	awsSecret := os.Getenv("AWS_SECRET")
+	awsBucket := os.Getenv("AWS_BUCKET")
+	awsRegion := os.Getenv("AWS_REGION")
 
 	if httpPort == "" {
 		httpPort = "8080"
-	}
-
-	if dbURL == "" {
-		dbURL = "postgres://cyberbrain:s3cr3t@192.168.0.11:5432/cyberbrain?sslmode=disable"
 	}
 
 	if sessionSecret == "" {
@@ -44,19 +40,6 @@ func init() {
 		hashidSalt = "s3cret"
 	}
 
-	flag.StringVar(&httpPort, "http-port", httpPort, "http port to start server")
-	flag.StringVar(&dbURL, "database-url", dbURL, "database connection url")
-	flag.StringVar(&sessionSecret, "session-secret", sessionSecret, "session cookie id secret")
-	flag.StringVar(&hashidSalt, "hashid-salt", hashidSalt, "salt for hashid url")
-	flag.StringVar(&awsID, "aws-id", "", "AWS Access Key ID")
-	flag.StringVar(&awsSecret, "aws-secret", "", "AWS Access Key Secret")
-	flag.StringVar(&awsBucket, "aws-bucket", "", "AWS Bucket Name")
-	flag.StringVar(&awsRegion, "aws-region", endpoints.UsEast2RegionID, "AWS Region")
-
-	flag.Parse()
-}
-
-func main() {
 	db, err := psql.New(dbURL)
 	if err != nil {
 		log.Fatalf("unable to connect to db %s", err)
@@ -84,7 +67,7 @@ func main() {
 
 	ub, err := urlbuilder.New(hashidSalt)
 	if err != nil {
-		log.Fatalf("unable to initialize urbuilder %s", err)
+		log.Fatalf("unable to initialize URL builder %s", err)
 	}
 
 	gen := generator.Generator{
