@@ -16,13 +16,16 @@ services:
       - backend
 
   server:
-    image: cyberbrain/server:latest
+    image: cyberbrain/server:dev
     ports:
       - "8080:8080"
     depends_on:
       - db
     environment:
+      ENVIRONMENT: development
       DATABASE_URL: "postgres://cyberbrain:s3cr3t@db:5432/cyberbrain?sslmode=disable"
+      SESSION_SECRET: S5L56UH4TKQNYJMNK486WLH7E4MQRV26
+      HASHID_SALT: LXRQSJ68ZUXMEQOP2E0T7QJW43GGC3FA
     networks:
       - backend
 

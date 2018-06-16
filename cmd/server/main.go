@@ -32,14 +32,6 @@ func main() {
 		httpPort = "8080"
 	}
 
-	if sessionSecret == "" {
-		sessionSecret = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-	}
-
-	if hashidSalt == "" {
-		hashidSalt = "s3cret"
-	}
-
 	db, err := psql.New(dbURL)
 	if err != nil {
 		log.Fatalf("unable to connect to db %s", err)
