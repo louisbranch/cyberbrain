@@ -93,7 +93,6 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 			}
 
 		case "rounds":
-
 			switch {
 			case method == "GET" && path == "":
 				handler = rounds.Index()
@@ -106,6 +105,10 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 			case method == "POST":
 				handler = rounds.Update(db, ub, path)
 			}
+
+		default:
+			renderer.Render(nil, w, r)
+			return
 		}
 
 		handler = middlewares.Deck(handler, db, ub, deckID)
