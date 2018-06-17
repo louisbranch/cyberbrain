@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.0.3
+
 - Add MIT license file
 - Add Changelog file
 - Add `make release` cmd
