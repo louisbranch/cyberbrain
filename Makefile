@@ -4,5 +4,7 @@ dev:
 	docker-compose up
 
 release:
-	docker build --rm --no-cache  -f Dockerfile -t cyberbrain/server:v${version} .
-	docker push cyberbrain/server:v${version}
+	git tag ${version}
+	git push origin ${version}
+	docker build --rm --no-cache  -f Dockerfile -t cyberbrain/server:${version} .
+	docker push cyberbrain/server:${version}
