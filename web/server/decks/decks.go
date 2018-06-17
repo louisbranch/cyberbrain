@@ -111,3 +111,57 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 		return response.NewContent(page)
 	}
 }
+
+func Edit(conn primitives.Database, ub web.URLBuilder) response.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
+
+		deck := middlewares.CurrentDeck(ctx)
+
+		content, err := html.RenderDeck(ub, deck, nil, nil)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
+		}
+
+		page := web.Page{
+			Title:      deck.Name + " Deck",
+			ActiveMenu: "decks",
+			Partials:   []string{"edit_deck"},
+			Content:    content,
+		}
+
+		return response.NewContent(page)
+	}
+}
+
+func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
+
+		if err := r.ParseForm(); err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "invalid form")
+		}
+
+		deck, _, _, err := finder.Deck(conn, ub, hash, finder.NoOption)
+		if err != nil {
+			return err.(response.Error)
+		}
+
+		deck.Name = r.Form.Get("name")
+		deck.Description = r.Form.Get("description")
+
+		if deck.Name == "" {
+			return response.NewError(http.StatusBadRequest, "deck name cannot be empty")
+		}
+
+		err = conn.Update(deck)
+		if err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "failed to update deck")
+		}
+
+		path, err := ub.Path("SHOW", deck)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to generate deck path")
+		}
+
+		return response.Redirect{Path: path, Code: http.StatusFound}
+	}
+}

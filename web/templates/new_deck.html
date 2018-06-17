@@ -1,50 +1,50 @@
 {{ define "content"}}
-  <form action="/decks/" method="post" accept-charset="utf-8">
-    <h1 class="title">Create Deck</h1>
-    <div class="columns">
-      <div class="column is-4">
-        <div class="field">
-          <label class="label">Name *</label>
-          <div class="control">
-            <input class="input" type="text" name="name" required />
-          </div>
+<form action="/decks/" method="post" accept-charset="utf-8">
+  <h1 class="title">Create Deck</h1>
+  <div class="columns">
+    <div class="column is-4">
+      <div class="field">
+        <label class="label">Name *</label>
+        <div class="control">
+          <input class="input" type="text" name="name" required />
         </div>
-        <div class="field">
-          <label class="label">Description</label>
-          <div class="control">
-            <textarea class="textarea" name="description" rows="2"></textarea>
-          </div>
+      </div>
+      <div class="field">
+        <label class="label">Description</label>
+        <div class="control">
+          <textarea class="textarea" name="description" rows="2"></textarea>
         </div>
-        <div class="field">
-          <label class="label">Card Field 1 *</label>
-          <div class="control">
-            <input class="input" type="text" name="fields" required placeholder="eg: formal writing" />
-          </div>
+      </div>
+      <div class="field">
+        <label class="label">Card Field 1 *</label>
+        <div class="control">
+          <input class="input" type="text" name="fields" required placeholder="eg: formal writing" />
         </div>
-        <div class="field">
-          <label class="label">Card Field 2</label>
-          <div class="control">
-            <input class="input" type="text" name="fields" placeholder="eg: informal writing" />
-          </div>
+      </div>
+      <div class="field">
+        <label class="label">Card Field 2</label>
+        <div class="control">
+          <input class="input" type="text" name="fields" placeholder="eg: informal writing" />
         </div>
-        <div class="field">
-          <label class="label">Card Field 3</label>
-          <div class="control">
-            <input class="input" type="text" name="fields" placeholder="eg: phonetic" />
-          </div>
+      </div>
+      <div class="field">
+        <label class="label">Card Field 3</label>
+        <div class="control">
+          <input class="input" type="text" name="fields" placeholder="eg: phonetic" />
         </div>
-        <div class="content">
-          <small>* required fields</small>
+      </div>
+      <div class="content">
+        <small>* required fields</small>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <input class="button is-primary" type="submit" value="Submit" />
         </div>
-        <div class="field is-grouped">
-          <div class="control">
-            <input class="button is-primary" type="submit" value="Submit" />
-          </div>
-          <div class="control">
-            <a class="button is-text" href="/decks">Cancel</a>
-          </div>
+        <div class="control">
+          <a class="button is-text" href="/decks">Cancel</a>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</form>
 {{ end }}

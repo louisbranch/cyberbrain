@@ -16,6 +16,7 @@ type Deck struct {
 	Cards       []*Card
 
 	Path            string
+	EditPath        string
 	NewCardPath     string
 	NewTagPath      string
 	NewPracticePath string
@@ -94,6 +95,7 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	}
 
 	dr.Path = p
+	dr.EditPath = p + "/edit"
 
 	cp, err := ub.Path("NEW", &primitives.Card{}, d)
 	if err != nil {

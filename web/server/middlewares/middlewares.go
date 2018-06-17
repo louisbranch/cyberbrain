@@ -10,8 +10,8 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
-var userKey struct{}
-var deckKey struct{}
+type userKey struct{}
+type deckKey struct{}
 
 func Authenticate(h response.Handler) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
@@ -38,11 +38,11 @@ func NewContext(user *primitives.User) context.Context {
 	u := *user
 	u.PasswordHash = ""
 
-	return context.WithValue(ctx, userKey, u)
+	return context.WithValue(ctx, userKey{}, u)
 }
 
 func CurrentUser(ctx context.Context) (primitives.User, bool) {
-	value := ctx.Value(userKey)
+	value := ctx.Value(userKey{})
 
 	user, ok := value.(primitives.User)
 
@@ -63,14 +63,14 @@ func Deck(h response.Handler, db primitives.Database, ub web.URLBuilder, hash st
 			return response.WrapError(err, http.StatusForbidden, "invalid deck owner")
 		}
 
-		ctx = context.WithValue(ctx, deckKey, *deck)
+		ctx = context.WithValue(ctx, deckKey{}, *deck)
 
 		return h(ctx, w, r)
 	}
 }
 
 func CurrentDeck(ctx context.Context) primitives.Deck {
-	value := ctx.Value(deckKey)
+	value := ctx.Value(deckKey{})
 
 	return value.(primitives.Deck)
 }

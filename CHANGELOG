@@ -10,10 +10,11 @@
 - Improve layout and navigation
 - Fix panic when deck subroute was not found, eg: /decks/XXXX/edit
 - Fix S3 job jpg extension
+- Add edit deck
 
 ## v0.0.2
 
-- Update cm/server to use only env vars
+- Update cmd/server to use only env vars
 - Update Dockerfile.dev for local development
 
 ## v0.0.1

@@ -38,9 +38,13 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 				handler = Show(db, ub, deckID)
 			case method == "POST" && deckID == "":
 				handler = Create(db, ub)
+			case method == "POST":
+				handler = Update(db, ub, deckID)
 			}
 
-			handler = middlewares.Authenticate(handler)
+			if handler != nil {
+				handler = middlewares.Authenticate(handler)
+			}
 
 			renderer.Render(handler, w, r)
 			return
@@ -52,6 +56,11 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 		}
 
 		switch paths[2] {
+		case "edit":
+			if method == "GET" && path == "" {
+				handler = Edit(db, ub)
+			}
+
 		case "cards":
 			switch {
 			case method == "GET" && path == "":
@@ -105,15 +114,13 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 			case method == "POST":
 				handler = rounds.Update(db, ub, path)
 			}
-
-		default:
-			renderer.Render(nil, w, r)
-			return
 		}
 
-		handler = middlewares.Deck(handler, db, ub, deckID)
+		if handler != nil {
+			handler = middlewares.Deck(handler, db, ub, deckID)
 
-		handler = middlewares.Authenticate(handler)
+			handler = middlewares.Authenticate(handler)
+		}
 
 		renderer.Render(handler, w, r)
 	})
