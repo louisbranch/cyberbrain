@@ -1,7 +1,6 @@
 {{ define "content" }}
 <nav class="breadcrumb" aria-label="breadcrumbs">
   <ul>
-    <li><a href="/">Home</a></li>
     <li><a href="/decks/">Decks</a></li>
     <li><a href="{{ .Deck.Path }}">{{ .Deck.Name }}</a></li>
     <li class="is-active"><a href="#" aria-current="page">Card</a></li>
@@ -11,15 +10,8 @@
 <section class="section">
   <div class="columns">
     <div class="column is-8">
-      <h1 class="title">Edit Card</h1>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="columns">
-    <div class="column is-8">
       <form action="{{ .Path }}" method="post" accept-charset="utf-8">
+        <h1 class="title">Edit Card</h1>
         <div class="columns">
           <div class="column is-6">
             <div class="field">
