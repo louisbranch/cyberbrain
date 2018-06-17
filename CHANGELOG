@@ -7,6 +7,7 @@
 - Add `make release` cmd
 - Improve layout and navigation
 - Fix panic when deck subroute was not found, eg: /decks/XXXX/edit
+- Fix S3 job jpg extension
 
 ## v0.0.2
 
