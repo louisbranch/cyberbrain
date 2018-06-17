@@ -5,6 +5,7 @@
 - Add MIT license file
 - Add Changelog file
 - Add `make release` cmd
+- Improve layout and navigation
 
 ## v0.0.2
 

@@ -1,55 +1,63 @@
 {{ define "content"}}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Path }}">{{ .Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">Add Card</a></li>
+  </ul>
+</nav>
+
 <form action="{{ .CreateCardPath }}" method="post" accept-charset="utf-8">
-    <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
-    <h1 class="title">Add Card to {{ .Name }}</h1>
-    <div class="columns">
-      <div class="column is-4">
-        <div class="field">
-          <label class="label">Image URL *</label>
-          <div class="control">
-            <input class="input" type="text" name="image_url" required minlength="2" autocomplete="off" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Sound URL</label>
-          <div class="control">
-            <input class="input" type="text" name="sound_url" />
-          </div>
-        </div>
-        {{ range .Fields }}
-          <div class="field">
-            <label class="label">{{ . }} *</label>
-            <div class="control">
-              <input class="input" type="text" name="definitions" required autocomplete="off" />
-            </div>
-          </div>
-        {{ end }}
-        <div class="content">
-          <small>* required fields</small>
-        </div>
-        <div class="field is-grouped">
-          <div class="control">
-            <input class="button is-primary" type="submit" value="Submit" />
-          </div>
-          <div class="control">
-            <a class="button is-text" href="{{ .Path }}">Cancel</a>
-          </div>
+  <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
+  <h1 class="title">Add Card to {{ .Name }}</h1>
+  <div class="columns">
+    <div class="column is-4">
+      <div class="field">
+        <label class="label">Image URL *</label>
+        <div class="control">
+          <input class="input" type="text" name="image_url" required minlength="2" autocomplete="off" />
         </div>
       </div>
-      <div class="column is-4">
+      <div class="field">
+        <label class="label">Sound URL</label>
+        <div class="control">
+          <input class="input" type="text" name="sound_url" />
+        </div>
+      </div>
+      {{ range .Fields }}
         <div class="field">
-          <label class="label">Tags</label>
+          <label class="label">{{ . }} *</label>
           <div class="control">
-            <div class="select is-multiple">
-              <select name="tags" multiple size="10">
-                {{ range .Tags }}
-                  <option value="{{ .ID }}">{{ .Name }}</option>
-                {{ end }}
-              </select>
-            </div>
+            <input class="input" type="text" name="definitions" required autocomplete="off" />
+          </div>
+        </div>
+      {{ end }}
+      <div class="content">
+        <small>* required fields</small>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <input class="button is-primary" type="submit" value="Submit" />
+        </div>
+        <div class="control">
+          <a class="button is-text" href="{{ .Path }}">Cancel</a>
+        </div>
+      </div>
+    </div>
+    <div class="column is-4">
+      <div class="field">
+        <label class="label">Tags</label>
+        <div class="control">
+          <div class="select is-multiple">
+            <select name="tags" multiple size="10">
+              {{ range .Tags }}
+                <option value="{{ .ID }}">{{ .Name }}</option>
+              {{ end }}
+            </select>
           </div>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</form>
 {{ end }}

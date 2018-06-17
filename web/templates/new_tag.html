@@ -1,4 +1,12 @@
 {{ define "content"}}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Path }}">{{ .Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">New Tag</a></li>
+  </ul>
+</nav>
+
 <form action="{{ .CreateTagPath }}" method="post" accept-charset="utf-8">
   <input type="hidden" name="deck" id="deck" value="{{ .ID }}" />
   <h1 class="title">Add Tag to {{ .Name }}</h1>
@@ -7,7 +15,7 @@
       <div class="field">
         <label class="label">Name *</label>
         <div class="control">
-          <input class="input" type="text" name="name" required placeholder="eg: animals" />
+          <input class="input" type="text" name="name" required placeholder="eg: animal" autofocus />
         </div>
       </div>
       <div class="content">
