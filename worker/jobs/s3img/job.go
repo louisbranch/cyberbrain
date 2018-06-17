@@ -57,7 +57,7 @@ func (j *Job) Run(ctx context.Context) error {
 	case "image/png":
 		ext = "png"
 	case "image/jpeg":
-		ext = "jpb"
+		ext = "jpg"
 	default:
 		return errors.Wrapf(err, "mime-type %q cannot be used for image %q %d", mime, j.Type, j.ID)
 	}
