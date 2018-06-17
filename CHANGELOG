@@ -1,0 +1,16 @@
+# Changelog
+
+## Unreleased
+
+- Add MIT license file
+- Add Changelog file
+- Add `make release` cmd
+
+## v0.0.2
+
+- Update cm/server to use only env vars
+- Update Dockerfile.dev for local development
+
+## v0.0.1
+
+Initial public release
