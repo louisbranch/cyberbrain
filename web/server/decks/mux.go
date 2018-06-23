@@ -12,11 +12,11 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 	"gitlab.com/luizbranco/cyberbrain/web/server/rounds"
 	"gitlab.com/luizbranco/cyberbrain/web/server/tags"
-	"gitlab.com/luizbranco/cyberbrain/worker/jobs"
+	"gitlab.com/luizbranco/cyberbrain/worker"
 )
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
-	ub web.URLBuilder, gen primitives.PracticeGenerator, imgUp jobs.ImageUploader) *http.ServeMux {
+	ub web.URLBuilder, gen primitives.PracticeGenerator, resizer worker.ImageResizer) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 			case method == "GET":
 				handler = cards.Show(db, ub, path)
 			case method == "POST" && path == "":
-				handler = cards.Create(db, ub, imgUp)
+				handler = cards.Create(db, ub, resizer)
 			case method == "POST":
 				handler = cards.Update(db, ub, path)
 			}

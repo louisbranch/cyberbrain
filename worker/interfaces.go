@@ -1,4 +1,4 @@
-package jobs
+package worker
 
 import "gitlab.com/luizbranco/cyberbrain/primitives"
 
@@ -8,6 +8,6 @@ type Imager interface {
 	SetImageURL(string)
 }
 
-type ImageUploader interface {
-	Upload(Imager, string) error
+type ImageResizer interface {
+	Resize(i Imager, name string, width int, height int) error
 }

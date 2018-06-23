@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -16,9 +15,11 @@ type Renderer struct {
 }
 
 func (rr *Renderer) Render(handler response.Handler, w http.ResponseWriter, r *http.Request) {
+	log.Printf("[%s] %s\n", r.Method, r.RequestURI)
+
 	if handler == nil {
 		err := response.NewError(http.StatusNotFound, r.URL.Path+" not found")
-		rr.renderError(w, err, nil)
+		rr.renderError(w, r, err, nil)
 		return
 	}
 
@@ -35,29 +36,29 @@ func (rr *Renderer) Render(handler response.Handler, w http.ResponseWriter, r *h
 
 	if page != nil {
 		page.User = user
-		rr.render(w, *page)
-		return
+		err = rr.render(w, *page)
 	}
 
 	if err != nil {
-		rr.renderError(w, err, user)
+		rr.renderError(w, r, err, user)
 		return
 	}
 }
 
-func (rr *Renderer) render(w http.ResponseWriter, page web.Page) {
+func (rr *Renderer) render(w http.ResponseWriter, page web.Page) error {
 	if page.Layout == "" {
 		page.Layout = "layout"
 	}
 
 	err := rr.Template.Render(w, page)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, err)
+		return err
 	}
+
+	return nil
 }
 
-func (rr *Renderer) renderError(w http.ResponseWriter, err error, user *primitives.User) {
+func (rr *Renderer) renderError(w http.ResponseWriter, r *http.Request, err error, user *primitives.User) {
 	code := http.StatusInternalServerError
 
 	res, ok := err.(response.Error)
@@ -94,9 +95,9 @@ func (rr *Renderer) renderError(w http.ResponseWriter, err error, user *primitiv
 
 	switch err := err.(type) {
 	case response.Error:
-		log.Println(err.FullError())
+		log.Printf("ERROR - [%s] %s (%s)\n", r.Method, r.RequestURI, err.FullError())
 	default:
-		log.Println(err.Error())
+		log.Printf("ERROR - [%s] %s (%s)\n", r.Method, r.RequestURI, err.Error())
 	}
 
 	w.WriteHeader(code)

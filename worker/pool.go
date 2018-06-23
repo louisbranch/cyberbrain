@@ -42,10 +42,10 @@ func (p *WorkerPool) Register(name string, worker primitives.Worker) error {
 	return nil
 }
 
-func (w *WorkerPool) Enqueue(name string, args map[string]string) error {
-	b, err := json.Marshal(args)
+func (w *WorkerPool) Enqueue(name string, v interface{}) error {
+	b, err := json.Marshal(v)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal job args %q", name)
+		return errors.Wrapf(err, "failed to marshal job %q", name)
 	}
 
 	job := &Job{
@@ -100,23 +100,14 @@ func (wp *WorkerPool) runJob(j Job) {
 		return
 	}
 
-	args := make(map[string]string)
-
-	err := json.Unmarshal(j.Args, &args)
-	if err != nil {
-		err = errors.Wrapf(err, "job %d %q args unmarshal failed", j.ID(), j.Name)
-		failedJob(wp.Database, j, err)
-		return
-	}
-
 	j.State = running
 
-	err = updateJob(wp.Database, j)
+	err := updateJob(wp.Database, j)
 	if err != nil {
 		return
 	}
 
-	job, err := worker.Spawn(args)
+	job, err := worker.Spawn(j.Args)
 	if err != nil {
 		failedJob(wp.Database, j, err)
 		return

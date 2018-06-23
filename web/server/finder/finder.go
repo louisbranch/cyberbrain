@@ -72,7 +72,7 @@ func Practice(conn primitives.Database, ub web.URLBuilder, i identifier) (*primi
 	return practice, nil
 }
 
-func Card(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitives.Card,
+func Card(conn primitives.Database, ub web.URLBuilder, i identifier, opt option) (*primitives.Card,
 	[]primitives.Tag, error) {
 
 	id, err := parseID(ub, i)
@@ -83,6 +83,10 @@ func Card(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitive
 	card, err := db.FindCard(conn, id)
 	if err != nil {
 		return nil, nil, response.WrapError(err, http.StatusBadRequest, "wrong card id")
+	}
+
+	if opt&WithTags == 0 {
+		return card, nil, nil
 	}
 
 	tags, err := db.FindTagsByCard(conn, card.ID())

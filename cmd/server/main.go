@@ -14,7 +14,12 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/session"
 	"gitlab.com/luizbranco/cyberbrain/web/urlbuilder"
 	"gitlab.com/luizbranco/cyberbrain/worker"
-	"gitlab.com/luizbranco/cyberbrain/worker/jobs/s3img"
+	"gitlab.com/luizbranco/cyberbrain/worker/resizer"
+)
+
+const (
+	Development = "dev"
+	Production  = "prod"
 )
 
 func main() {
@@ -22,11 +27,16 @@ func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 	sessionSecret := os.Getenv("SESSION_SECRET")
 	hashidSalt := os.Getenv("HASHID_SALT")
+	env := os.Getenv("ENVIRONMENT")
 
-	awsID := os.Getenv("AWS_ID")
-	awsSecret := os.Getenv("AWS_SECRET")
+	if env == "" {
+		env = Development
+	}
+
+	blitlineID := os.Getenv("BLITLINE_ID")
+	blitlineCallbackURL := os.Getenv("BLITLINE_CALLBACK_URL")
+
 	awsBucket := os.Getenv("AWS_BUCKET")
-	awsRegion := os.Getenv("AWS_REGION")
 
 	if httpPort == "" {
 		httpPort = "8080"
@@ -41,16 +51,15 @@ func main() {
 		Database: db,
 	}
 
-	s3 := &s3img.Worker{
-		Database:   db,
-		WorkerPool: pool,
-		AWSID:      awsID,
-		AWSSecret:  awsSecret,
-		AWSBucket:  awsBucket,
-		AWSRegion:  awsRegion,
+	imgResizer := &resizer.Worker{
+		WorkerPool:  pool,
+		AWSBucket:   awsBucket,
+		BlitlineID:  blitlineID,
+		CallbackURL: blitlineCallbackURL,
+		Poll:        env == Development,
 	}
 
-	err = s3.Register()
+	err = imgResizer.Register()
 	if err != nil {
 		log.Fatalf("unable to register AWS S3 job %s", err)
 	}
@@ -82,12 +91,12 @@ func main() {
 		PracticeGenerator: gen,
 		Authenticator:     auth,
 		SessionManager:    session,
-		ImageUploader:     s3,
+		ImageResizer:      imgResizer,
 	}
 
 	mux := srv.NewServeMux()
 
-	fmt.Printf("Server listening on port %s\n", httpPort)
+	fmt.Printf("server listening on port %s\n", httpPort)
 
 	err = http.ListenAndServe(":"+httpPort, mux)
 	if err != nil {

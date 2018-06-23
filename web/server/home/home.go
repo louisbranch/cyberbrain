@@ -2,6 +2,7 @@ package home
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"gitlab.com/luizbranco/cyberbrain/web"
@@ -22,6 +23,7 @@ func NewServeMux(renderer *middlewares.Renderer) *http.ServeMux {
 func Index() response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 		if r.Method != "GET" || r.URL.Path != "/" {
+			log.Printf("[404] %s", r.URL.Path)
 			return response.NewError(http.StatusNotFound, r.URL.Path+" not found")
 		}
 

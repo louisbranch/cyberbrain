@@ -49,11 +49,11 @@ type Authenticator interface {
 
 type WorkerPool interface {
 	Register(string, Worker) error
-	Enqueue(string, map[string]string) error
+	Enqueue(string, interface{}) error
 }
 
 type Worker interface {
-	Spawn(map[string]string) (Job, error)
+	Spawn([]byte) (Job, error)
 }
 
 type Job interface {

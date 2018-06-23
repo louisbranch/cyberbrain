@@ -13,7 +13,7 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/server/finder"
 	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
-	"gitlab.com/luizbranco/cyberbrain/worker/jobs"
+	"gitlab.com/luizbranco/cyberbrain/worker"
 )
 
 func Index() response.Handler {
@@ -51,7 +51,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
-func Create(conn primitives.Database, ub web.URLBuilder, imgUp jobs.ImageUploader) response.Handler {
+func Create(conn primitives.Database, ub web.URLBuilder, resizer worker.ImageResizer) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
 		if err := r.ParseForm(); err != nil {
@@ -95,9 +95,9 @@ func Create(conn primitives.Database, ub web.URLBuilder, imgUp jobs.ImageUploade
 			return response.WrapError(err, http.StatusInternalServerError, "failed to encode card id")
 		}
 
-		err = imgUp.Upload(card, hash)
+		err = resizer.Resize(card, hash, 400, 300)
 		if err != nil {
-			return response.WrapError(err, http.StatusInternalServerError, "failed to update card img")
+			return response.WrapError(err, http.StatusInternalServerError, "failed to enqueue card resize job")
 		}
 
 		path, err := ub.Path("SHOW", deck)
@@ -112,7 +112,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, imgUp jobs.ImageUploade
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		card, tags, err := finder.Card(conn, ub, hash)
+		card, tags, err := finder.Card(conn, ub, hash, finder.WithTags)
 		if err != nil {
 			return err.(response.Error)
 		}
@@ -150,7 +150,7 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
 
-		card, _, err := finder.Card(conn, ub, hash)
+		card, _, err := finder.Card(conn, ub, hash, finder.NoOption)
 		if err != nil {
 			return err.(response.Error)
 		}

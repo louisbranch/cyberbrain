@@ -1,7 +1,10 @@
 dev:
 	CGO_ENABLED=0 go build -a -installsuffix cgo -o bin/server cmd/server/main.go
-	docker build --rm --no-cache -f Dockerfile.dev -t cyberbrain/server:dev .
-	docker-compose up
+	docker build --rm -f Dockerfile.dev -t cyberbrain/server:dev .
+	manifold run -- docker-compose up
+
+ci:
+	go test ./...
 
 release:
 	git tag ${version}

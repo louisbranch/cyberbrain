@@ -22,10 +22,13 @@ services:
     depends_on:
       - db
     environment:
-      ENVIRONMENT: development
+      ENVIRONMENT: dev
       DATABASE_URL: "postgres://cyberbrain:s3cr3t@db:5432/cyberbrain?sslmode=disable"
       SESSION_SECRET: S5L56UH4TKQNYJMNK486WLH7E4MQRV26
       HASHID_SALT: LXRQSJ68ZUXMEQOP2E0T7QJW43GGC3FA
+      AWS_BUCKET: ${AWS_BUCKET}
+      BLITLINE_ID: ${BLITLINE_ID}
+      BLITLINE_CALLBACK_URL: ${BLITLINE_CALLBACK_URL}
     networks:
       - backend
 
