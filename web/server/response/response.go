@@ -14,15 +14,19 @@ type Responder interface {
 }
 
 type Content struct {
-	page web.Page
+	page *web.Page
 }
 
 func (c Content) Respond(w http.ResponseWriter, r *http.Request) (*web.Page, error) {
-	return &c.page, nil
+	return c.page, nil
 }
 
 func NewContent(page web.Page) Content {
-	return Content{page: page}
+	return Content{page: &page}
+}
+
+func NoContent() Content {
+	return Content{}
 }
 
 type Error struct {

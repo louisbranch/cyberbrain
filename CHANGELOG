@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Respond with `200` for `[HEAD] /`
+
 ## v0.0.6
 
 - Add /_healthz endpoint for Kubernetes liveness
