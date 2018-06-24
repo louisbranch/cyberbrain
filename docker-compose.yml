@@ -29,6 +29,8 @@ services:
       AWS_BUCKET: ${AWS_BUCKET}
       BLITLINE_ID: ${BLITLINE_ID}
       BLITLINE_CALLBACK_URL: ${BLITLINE_CALLBACK_URL}
+      PIIO_DOMAIN: ${PIIO_DOMAIN}
+      PIIO_ID: ${PIIO_ID}
     networks:
       - backend
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## v0.0.5
+
+- Use Piio's image compression service
+
+## v0.0.4
+
+- Replace AWS S3 image uploader with Blitline resizer worker
+
 ## v0.0.3
 
 - Add MIT license file

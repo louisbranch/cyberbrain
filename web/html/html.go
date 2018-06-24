@@ -1,6 +1,7 @@
 package html
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"path"
@@ -18,7 +19,10 @@ type HTML struct {
 	cache    map[string]*template.Template
 }
 
-func New(basepath string) *HTML {
+func New(basepath, piioDomain, piioAppID string) *HTML {
+	fns["piioScript"] = piioScript(piioDomain, piioAppID)
+	fns["img"] = img(piioAppID != "")
+
 	return &HTML{
 		basepath: basepath,
 		cache:    make(map[string]*template.Template),
@@ -66,7 +70,7 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 			return nil, err
 		}
 		h.sync.Lock()
-		//TODO h.cache[id] = tpl
+		h.cache[id] = tpl
 		h.sync.Unlock()
 	}
 
@@ -88,4 +92,39 @@ func contains(list []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func piioScript(domain, appID string) func() template.HTML {
+	tag := `<script type="application/javascript">
+  var piioData = {
+    appKey: "%s",
+    encodeSrc: false,
+    domain: "%s"
+  }
+</script>
+<script src="//js.piio.co/%s/piio.min.js"></script>
+`
+
+	if domain != "" && appID != "" {
+		tag = fmt.Sprintf(tag, appID, domain, appID)
+	} else {
+		tag = ""
+	}
+
+	return func() template.HTML {
+		return template.HTML(tag)
+	}
+}
+
+func img(optimize bool) func(string) template.HTML {
+	tag := `<img src="%s" />`
+
+	if optimize {
+		tag = `<img data-piio="%s"
+src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8+f9vPQAJZAN2rlRQVAAAAABJRU5ErkJggg==" />`
+	}
+
+	return func(imgURL string) template.HTML {
+		return template.HTML(fmt.Sprintf(tag, imgURL))
+	}
 }

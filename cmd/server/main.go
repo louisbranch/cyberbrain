@@ -38,6 +38,9 @@ func main() {
 
 	awsBucket := os.Getenv("AWS_BUCKET")
 
+	piioDomain := os.Getenv("PIIO_DOMAIN")
+	piioID := os.Getenv("PIIO_ID")
+
 	if httpPort == "" {
 		httpPort = "8080"
 	}
@@ -82,7 +85,7 @@ func main() {
 		Secret:   sessionSecret,
 	}
 
-	tpl := html.New("web/templates")
+	tpl := html.New("web/templates", piioDomain, piioID)
 
 	srv := &server.Server{
 		Template:          tpl,
