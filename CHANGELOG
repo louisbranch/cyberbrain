@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.0.6
+
+- Add /_healthz endpoint for Kubernetes liveness
+
 ## v0.0.5
 
 - Use Piio's image compression service

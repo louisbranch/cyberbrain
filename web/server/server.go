@@ -53,6 +53,11 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	mux.Handle("/logout/", http.StripPrefix("/logout", logoutMux))
 	mux.Handle("/decks/", http.StripPrefix("/decks", decksMux))
 	mux.Handle("/blitline/", http.StripPrefix("/blitline", blitlineMux))
+
+	mux.HandleFunc("/_healthz/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	mux.Handle("/", home.NewServeMux(renderer))
 
 	return mux
