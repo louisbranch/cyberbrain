@@ -15,6 +15,9 @@
           <figure class="image is-4by3">
             {{ img .PromptImage }}
           </figure>
+          {{ if .Caption }}
+            <figcaption>{{ .Caption }}</figcaption>
+          {{ end }}
         </div>
         <div class="card-content">
           {{ if .Done }}

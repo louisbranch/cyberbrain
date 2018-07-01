@@ -125,4 +125,7 @@ var tableQueries = []string{
 			tries INTEGER NOT NULL DEFAULT 0
 		);
 		`,
+
+	` ALTER TABLE cards ADD COLUMN IF NOT EXISTS caption TEXT;`,
+	` ALTER TABLE rounds ADD COLUMN IF NOT EXISTS caption TEXT;`,
 }

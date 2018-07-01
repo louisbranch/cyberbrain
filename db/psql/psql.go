@@ -39,7 +39,7 @@ func (db *Database) Create(r primitives.Record) error {
 	r.SetUpdatedAt(now)
 	r.SetVersion(version)
 
-	q, err := QueryFromRecord(r, "id")
+	q, err := QueryFromRecord(r, Insert, "id")
 	if err != nil {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
 	}
@@ -64,7 +64,7 @@ func (db *Database) Update(r primitives.Record) error {
 
 	r.SetUpdatedAt(now)
 
-	q, err := QueryFromRecord(r, "id")
+	q, err := QueryFromRecord(r, Update, "id")
 	if err != nil {
 		return errors.Wrapf(err, "failed to get record fields %v", r)
 	}
@@ -81,7 +81,7 @@ func (db *Database) Update(r primitives.Record) error {
 }
 
 func (db *Database) Query(wq primitives.Query) ([]primitives.Record, error) {
-	q, err := QueryFromRecord(wq.NewRecord())
+	q, err := QueryFromRecord(wq.NewRecord(), Select)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
@@ -94,7 +94,7 @@ func (db *Database) Query(wq primitives.Query) ([]primitives.Record, error) {
 func (db *Database) Get(wq primitives.Query) (primitives.Record, error) {
 	r := wq.NewRecord()
 
-	q, err := QueryFromRecord(r)
+	q, err := QueryFromRecord(r, Select)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %s", q)
 	}
@@ -134,7 +134,7 @@ func (db *Database) Count(wq primitives.Query) (int, error) {
 
 func (db *Database) Random(wq primitives.Query, n int) ([]primitives.Record, error) {
 	r := wq.NewRecord()
-	q, err := QueryFromRecord(r)
+	q, err := QueryFromRecord(r, Select)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
 	}
@@ -148,7 +148,7 @@ func (db *Database) Random(wq primitives.Query, n int) ([]primitives.Record, err
 func (db *Database) queryRows(wq primitives.Query, query string) ([]primitives.Record, error) {
 	rows, err := db.DB.Query(query)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to query records %v", wq)
+		return nil, errors.Wrapf(err, "failed to query records %q", query)
 	}
 	defer rows.Close()
 
@@ -158,14 +158,14 @@ func (db *Database) queryRows(wq primitives.Query, query string) ([]primitives.R
 
 		r := wq.NewRecord()
 
-		q, err := QueryFromRecord(r)
+		q, err := QueryFromRecord(r, Select)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get record fields %v", wq)
+			return nil, errors.Wrapf(err, "failed to get record fields %q", query)
 		}
 
 		err = q.Scan(rows)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to scan records %v", wq)
+			return nil, errors.Wrapf(err, "failed to scan records %q", query)
 		}
 
 		records = append(records, r)
@@ -173,7 +173,7 @@ func (db *Database) queryRows(wq primitives.Query, query string) ([]primitives.R
 
 	err = rows.Err()
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to query records %v", wq)
+		return nil, errors.Wrapf(err, "failed to query records %q", query)
 	}
 
 	return records, nil

@@ -17,7 +17,15 @@ type Query struct {
 	addrs   []interface{}
 }
 
-func QueryFromRecord(r primitives.Record, ignored ...string) (*Query, error) {
+type QueryType string
+
+const (
+	Select QueryType = "SELECT"
+	Insert           = "INSERT"
+	Update           = "UPDATED"
+)
+
+func QueryFromRecord(r primitives.Record, t QueryType, ignored ...string) (*Query, error) {
 	rv := reflect.ValueOf(r)
 	if rv.Kind() != reflect.Ptr {
 		return nil, errors.Errorf("cannot get database fields for record %v", r)
@@ -42,6 +50,11 @@ func QueryFromRecord(r primitives.Record, ignored ...string) (*Query, error) {
 		addr := field.Addr().Interface()
 
 		q.fields = append(q.fields, addr)
+
+		// Scan null strings as empty strings
+		if t == Select && field.Kind() == reflect.String {
+			tag = fmt.Sprintf("COALESCE(%s, '') as %s", tag, tag)
+		}
 
 		if field.Kind() == reflect.Slice {
 			switch e := field.Type().Elem(); e.Kind() {
@@ -165,5 +178,5 @@ func where(cond primitives.Query) string {
 		sort = append(sort, fmt.Sprintf("%s %s", k, v))
 	}
 
-	return q + "ORDER BY " + strings.Join(sort, " AND ")
+	return q + " ORDER BY " + strings.Join(sort, " AND ")
 }

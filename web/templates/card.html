@@ -21,6 +21,12 @@
               </div>
             </div>
             <div class="field">
+              <label class="label">Caption</label>
+              <div class="control">
+                <input class="input" type="text" name="caption" autocomplete="off" value="{{ .Caption }}"/>
+              </div>
+            </div>
+            <div class="field">
               <label class="label">Sound URL</label>
               <div class="control">
                 <input class="input" type="text" name="sound_url" autocomplete="off" value="{{ .SoundURL }}" />
@@ -70,6 +76,9 @@
           <figure class="image is-4by3">
             {{ img .ImageURL }}
           </figure>
+          {{ if .Caption }}
+            <figcaption>{{ .Caption }}</figcaption>
+          {{ end }}
         </div>
         <div class="card-content">
           <div class="content">

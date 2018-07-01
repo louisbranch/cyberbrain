@@ -1,3 +1,10 @@
 label.checkbox + label.checkbox {
   margin-left: 10px;
 }
+
+figcaption {
+  text-align: center;
+  background-color: #ddd;
+  font-size: 1.2rem;
+  padding: 0.2rem 0;
+}

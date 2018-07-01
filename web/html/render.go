@@ -30,6 +30,7 @@ type Card struct {
 	ID          string
 	ImageURL    string
 	SoundURL    string
+	Caption     string
 	Definitions []string
 
 	Path string
@@ -62,6 +63,7 @@ type Practice struct {
 
 type Round struct {
 	PromptImage string
+	Caption     string
 	Answer      string
 	Guess       string
 	Done        bool
@@ -166,6 +168,7 @@ func RenderCard(ub web.URLBuilder, d primitives.Deck, deckTags []primitives.Tag,
 	cr := &Card{
 		ImageURL:    c.ImageURL,
 		SoundURL:    c.SoundURL,
+		Caption:     c.Caption,
 		Definitions: c.Definitions,
 	}
 
@@ -291,6 +294,7 @@ func RenderRound(ub web.URLBuilder, d primitives.Deck, r primitives.Round,
 		Done:        r.Done,
 		Correct:     r.Correct,
 		PromptImage: r.Prompt,
+		Caption:     r.Caption,
 	}
 
 	pr, err := RenderPractice(ub, d, p, true)

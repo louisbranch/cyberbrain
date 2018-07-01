@@ -72,6 +72,7 @@ func NewCardFromForm(deck primitives.Deck, form url.Values) (*primitives.Card, e
 
 	c.ImageURL = form.Get("image_url")
 	c.SoundURL = form.Get("sound_url")
+	c.Caption = form.Get("caption")
 
 	for _, f := range form["definitions"] {
 		if f != "" {

@@ -19,9 +19,15 @@
         </div>
       </div>
       <div class="field">
+        <label class="label">Caption</label>
+        <div class="control">
+          <input class="input" type="text" name="caption" autocomplete="off" />
+        </div>
+      </div>
+      <div class="field">
         <label class="label">Sound URL</label>
         <div class="control">
-          <input class="input" type="text" name="sound_url" />
+          <input class="input" type="text" name="sound_url" autocomplete="off" />
         </div>
       </div>
       {{ range .Fields }}

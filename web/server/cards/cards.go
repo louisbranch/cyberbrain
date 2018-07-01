@@ -168,6 +168,7 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 		card.ImageURL = newCard.ImageURL
 		card.SoundURL = newCard.SoundURL
 		card.Definitions = newCard.Definitions
+		card.Caption = newCard.Caption
 
 		// TODO reassign card tags
 

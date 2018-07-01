@@ -14,6 +14,7 @@ type Card struct {
 	Definitions []string `db:"definitions"`
 	ImageURL    string   `db:"image_url"`
 	SoundURL    string   `db:"sound_url"`
+	Caption     string   `db:"caption"`
 }
 
 func (c Card) ID() ID {
