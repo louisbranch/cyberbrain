@@ -14,6 +14,7 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/session"
 	"gitlab.com/luizbranco/cyberbrain/web/urlbuilder"
 	"gitlab.com/luizbranco/cyberbrain/worker"
+	"gitlab.com/luizbranco/cyberbrain/worker/offline"
 	"gitlab.com/luizbranco/cyberbrain/worker/resizer"
 )
 
@@ -54,17 +55,25 @@ func main() {
 		Database: db,
 	}
 
-	imgResizer := &resizer.Worker{
-		WorkerPool:  pool,
-		AWSBucket:   awsBucket,
-		BlitlineID:  blitlineID,
-		CallbackURL: blitlineCallbackURL,
-		Poll:        env == Development,
-	}
+	var imgResizer worker.ImageResizer
 
-	err = imgResizer.Register()
-	if err != nil {
-		log.Fatalf("unable to register AWS S3 job %s", err)
+	if env == Production {
+		blitlineResizer := &resizer.Worker{
+			WorkerPool:  pool,
+			AWSBucket:   awsBucket,
+			BlitlineID:  blitlineID,
+			CallbackURL: blitlineCallbackURL,
+			Poll:        env == Development,
+		}
+
+		err := blitlineResizer.Register()
+		if err != nil {
+			log.Fatalf("unable to register AWS S3 job %s", err)
+		}
+
+		imgResizer = blitlineResizer
+	} else {
+		imgResizer = &offline.ImageOfflineResizer{}
 	}
 
 	go pool.Start()

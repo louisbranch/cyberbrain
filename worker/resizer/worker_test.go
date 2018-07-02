@@ -6,11 +6,12 @@ import (
 
 	"gitlab.com/luizbranco/cyberbrain/primitives"
 	"gitlab.com/luizbranco/cyberbrain/test"
+	"gitlab.com/luizbranco/cyberbrain/test/mocks"
 )
 
 func TestWorker_Register(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
-		pool := &test.WorkerPool{}
+		pool := &mocks.WorkerPool{}
 
 		w := &Worker{
 			WorkerPool: pool,
@@ -36,7 +37,7 @@ func TestWorker_Register(t *testing.T) {
 	})
 
 	t.Run("worker fails to enqueue", func(t *testing.T) {
-		pool := &test.WorkerPool{}
+		pool := &mocks.WorkerPool{}
 
 		w := &Worker{
 			WorkerPool: pool,
@@ -53,7 +54,7 @@ func TestWorker_Resize(t *testing.T) {
 	}
 
 	t.Run("ok", func(t *testing.T) {
-		pool := &test.WorkerPool{}
+		pool := &mocks.WorkerPool{}
 
 		w := &Worker{
 			WorkerPool:  pool,
@@ -96,7 +97,7 @@ func TestWorker_Resize(t *testing.T) {
 	})
 
 	t.Run("worker fails to enqueue", func(t *testing.T) {
-		pool := &test.WorkerPool{}
+		pool := &mocks.WorkerPool{}
 
 		w := &Worker{
 			WorkerPool: pool,

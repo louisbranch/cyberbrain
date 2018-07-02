@@ -102,3 +102,14 @@ func newRoundQuery() *query {
 		where:  make(map[string]interface{}),
 	}
 }
+
+func newCardScheduleQuery() *query {
+	fn := func() primitives.Record {
+		return &primitives.CardSchedule{}
+	}
+
+	return &query{
+		record: fn,
+		where:  make(map[string]interface{}),
+	}
+}

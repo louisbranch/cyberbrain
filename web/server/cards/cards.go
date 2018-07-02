@@ -80,7 +80,7 @@ func Create(conn primitives.Database, ub web.URLBuilder, resizer worker.ImageRes
 			}
 
 			ct := primitives.CardTag{
-				CardID: card.MetaID,
+				CardID: card.ID(),
 				TagID:  id,
 			}
 
@@ -98,6 +98,13 @@ func Create(conn primitives.Database, ub web.URLBuilder, resizer worker.ImageRes
 		err = resizer.Resize(card, hash, 400, 300)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to enqueue card resize job")
+		}
+
+		schedule := primitives.NewCardSchedule(deck.ID(), card.ID())
+
+		err = conn.Create(schedule)
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to create card schedule")
 		}
 
 		path, err := ub.Path("SHOW", deck)

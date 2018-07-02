@@ -17,6 +17,7 @@ import (
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 	ub web.URLBuilder, gen primitives.PracticeGenerator, resizer worker.ImageResizer) *http.ServeMux {
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

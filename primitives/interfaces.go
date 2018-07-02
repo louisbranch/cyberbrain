@@ -2,10 +2,15 @@ package primitives
 
 import (
 	"context"
+	"strconv"
 	"time"
 )
 
 type ID int
+
+func (id ID) String() string {
+	return strconv.Itoa(int(id))
+}
 
 type Identifiable interface {
 	ID() ID

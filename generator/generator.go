@@ -22,11 +22,9 @@ func init() {
 func (g Generator) NewRound(p primitives.Practice) (*primitives.Round, error) {
 	pid := p.ID()
 
-	// TODO query should find by tags and where field(s) are not null
-	// TODO should exclude cards already used in the same practice
-	card, err := db.RandomCard(g.Database, p.DeckID)
+	card, err := db.NextCard(g.Database, p.DeckID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to find random card for practice %q", pid)
+		return nil, errors.Wrapf(err, "failed to find next card for practice %q", pid)
 	}
 
 	// TODO implement different types of prompt and guess modes

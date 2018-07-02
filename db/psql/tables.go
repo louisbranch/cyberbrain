@@ -7,7 +7,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			name TEXT NOT NULL CHECK(name <> ''),
 			email TEXT NOT NULL UNIQUE CHECK(email <> ''),
 			password_hash TEXT NOT NULL CHECK(password_hash <> ''),
@@ -20,7 +19,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			user_id INTEGER NOT NULL REFERENCES users ON DELETE CASCADE
 		);
 		`,
@@ -30,7 +28,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			user_id INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
 			name TEXT NOT NULL CHECK(name <> ''),
 			description TEXT,
@@ -44,7 +41,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			definitions TEXT[] NOT NULL CHECK (cardinality(definitions) > 0),
 			image_url TEXT NOT NULL CHECK(image_url <> ''),
@@ -57,7 +53,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			name TEXT NOT NULL CHECK(name <> ''),
 			UNIQUE (deck_id, name)
@@ -69,7 +64,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
 			tag_id INTEGER NOT NULL REFERENCES tags ON DELETE CASCADE,
 			UNIQUE (card_id, tag_id)
@@ -81,7 +75,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
 			prompt_mode INTEGER NOT NULL DEFAULT 0,
 			guess_mode INTEGER NOT NULL DEFAULT 0,
@@ -97,7 +90,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE RESTRICT,
 			card_ids INTEGER[] NOT NULL CHECK (cardinality(card_ids) > 0),
 			prompt_mode INTEGER NOT NULL DEFAULT 0,
@@ -116,7 +108,6 @@ var tableQueries = []string{
 			version INTEGER NOT NULL DEFAULT 1,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 			run_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			name TEXT NOT NULL CHECK(name <> ''),
 			state TEXT NOT NULL CHECK(state <> ''),
@@ -128,4 +119,17 @@ var tableQueries = []string{
 
 	` ALTER TABLE cards ADD COLUMN IF NOT EXISTS caption TEXT;`,
 	` ALTER TABLE rounds ADD COLUMN IF NOT EXISTS caption TEXT;`,
+	`
+		CREATE TABLE IF NOT EXISTS card_schedules(
+			id SERIAL PRIMARY KEY,
+			version INTEGER NOT NULL DEFAULT 1,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			next_date TIMESTAMPTZ NOT NULL,
+			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
+			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
+			current_score INTEGER NOT NULL DEFAULT 0,
+			max_score INTEGER NOT NULL DEFAULT 0
+		);
+		`,
 }

@@ -16,20 +16,27 @@ type Database struct {
 }
 
 func New(url string) (*Database, error) {
-	db, err := sql.Open("postgres", url)
+	conn, err := sql.Open("postgres", url)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, q := range tableQueries {
-		_, err = db.Exec(q)
+		_, err = conn.Exec(q)
 
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &Database{db}, nil
+	db := &Database{conn}
+
+	err = createCardSchedules(db)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create card schedules")
+	}
+
+	return db, nil
 }
 
 func (db *Database) Create(r primitives.Record) error {

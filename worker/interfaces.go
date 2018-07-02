@@ -11,3 +11,7 @@ type Imager interface {
 type ImageResizer interface {
 	Resize(i Imager, name string, width int, height int) error
 }
+
+type CardScheduler interface {
+	Schedule(deckID, cardID primitives.ID, correct bool) error
+}

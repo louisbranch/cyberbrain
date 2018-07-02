@@ -45,8 +45,12 @@ func (r *Round) SetUpdatedAt(t time.Time) {
 	r.MetaUpdatedAt = t
 }
 
-func (r *Round) GuessAnswer(answer string) {
+func (r *Round) GuessAnswer(answer string) bool {
+	correct := r.Answer == answer
+
 	r.Guess = answer
-	r.Correct = r.Answer == answer
+	r.Correct = correct
 	r.Done = true
+
+	return correct
 }

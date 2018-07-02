@@ -1,11 +1,11 @@
 package db
 
 import (
-	"strconv"
-
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
+
+var ErrNotEnoughCards = errors.New("not enough cards")
 
 func FindUser(db primitives.Database, id primitives.ID) (*primitives.User, error) {
 	q := newUserQuery()
@@ -112,11 +112,9 @@ func FindCardsByDeck(db primitives.Database, deckID primitives.ID) ([]primitives
 }
 
 func FindCardsByTag(db primitives.Database, tagID primitives.ID) ([]primitives.Card, error) {
-	id := strconv.Itoa(int(tagID))
-
 	raw := `SELECT c.* FROM cards c
 	LEFT JOIN card_tags ct ON c.id = ct.card_id
-	WHERE ct.tag_id = ` + id + " ORDER BY c.updated_at DESC;"
+	WHERE ct.tag_id = ` + tagID.String() + " ORDER BY c.updated_at DESC;"
 
 	q := newCardQuery()
 	q.raw = raw
@@ -130,11 +128,9 @@ func FindCardsByTag(db primitives.Database, tagID primitives.ID) ([]primitives.C
 }
 
 func FindTagsByCard(db primitives.Database, cardID primitives.ID) ([]primitives.Tag, error) {
-	id := strconv.Itoa(int(cardID))
-
 	raw := `SELECT t.* FROM tags t
 	LEFT JOIN card_tags ct ON t.id = ct.tag_id
-	WHERE ct.card_id = ` + id + ";"
+	WHERE ct.card_id = ` + cardID.String() + ";"
 
 	q := newTagQuery()
 	q.raw = raw
@@ -246,11 +242,16 @@ func CountRounds(db primitives.Database, practiceID primitives.ID) (int, error) 
 	return db.Count(q)
 }
 
-func RandomCard(db primitives.Database, deckID primitives.ID) (*primitives.Card, error) {
-	q := newCardQuery()
-	q.where["deck_id"] = deckID
+func NextCard(db primitives.Database, deckID primitives.ID) (*primitives.Card, error) {
+	raw := `SELECT c.* FROM cards c
+	LEFT JOIN card_schedules cs ON c.id = cs.card_id
+	WHERE cs.deck_id = ` + deckID.String() + ` AND cs.next_date <= now()
+	ORDER BY cs.next_date ASC LIMIT 1;`
 
-	rs, err := db.Random(q, 1)
+	q := newCardQuery()
+	q.raw = raw
+
+	rs, err := db.QueryRaw(q)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +262,7 @@ func RandomCard(db primitives.Database, deckID primitives.ID) (*primitives.Card,
 	}
 
 	if len(cards) == 0 {
-		return nil, errors.New("not enough cards")
+		return nil, ErrNotEnoughCards
 	}
 
 	return &cards[0], nil
@@ -297,4 +298,21 @@ func castRounds(rs []primitives.Record) ([]primitives.Round, error) {
 	}
 
 	return rounds, nil
+}
+
+func FindCardSchedule(db primitives.Database, id primitives.ID) (*primitives.CardSchedule, error) {
+	q := newCardScheduleQuery()
+	q.where["card_id"] = id
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	schedule, ok := r.(*primitives.CardSchedule)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return schedule, nil
 }

@@ -139,6 +139,7 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 
 func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
+
 		if err := r.ParseForm(); err != nil {
 			return response.WrapError(err, http.StatusBadRequest, "invalid form")
 		}
@@ -161,11 +162,28 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 			return response.WrapError(err, http.StatusBadRequest, "invalid guess")
 		}
 
-		round.GuessAnswer(guess)
+		correct := round.GuessAnswer(guess)
 
 		err = conn.Update(round)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to update round")
+		}
+
+		if len(round.CardIDs) > 0 {
+			cardID := round.CardIDs[0]
+
+			schedule, err := db.FindCardSchedule(conn, cardID)
+			if err != nil {
+				return response.WrapError(err, http.StatusInternalServerError, "failed to find card schedule")
+			}
+
+			schedule.Reschedule(correct)
+
+			err = conn.Update(schedule)
+
+			if err != nil {
+				return response.WrapError(err, http.StatusInternalServerError, "failed to update card schedule")
+			}
 		}
 
 		practice, err := db.FindPractice(conn, round.PracticeID)
