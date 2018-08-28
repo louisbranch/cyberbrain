@@ -1,5 +1,7 @@
 module gitlab.com/luizbranco/cyberbrain
 
+// +heroku install ./cmd/...
+
 require (
 	github.com/aws/aws-sdk-go v1.14.8
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
