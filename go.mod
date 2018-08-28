@@ -1,5 +1,6 @@
 module gitlab.com/luizbranco/cyberbrain
 
+// +heroku goVersion go1.11
 // +heroku install ./cmd/...
 
 require (

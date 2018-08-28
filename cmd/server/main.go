@@ -24,7 +24,7 @@ const (
 )
 
 func main() {
-	httpPort := os.Getenv("HTTP_PORT")
+	httpPort := os.Getenv("PORT")
 	dbURL := os.Getenv("DATABASE_URL")
 	sessionSecret := os.Getenv("SESSION_SECRET")
 	hashidSalt := os.Getenv("HASHID_SALT")
