@@ -41,6 +41,9 @@
               {{ img .ImageURL }}
             </a>
           </figure>
+          {{ if .Caption }}
+            <figcaption>{{ .Caption }}</figcaption>
+          {{ end }}
         </div>
         <div class="card-content">
           <div class="content">
