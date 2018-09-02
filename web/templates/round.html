@@ -33,9 +33,9 @@
                 {{ end }}
               </div>
               {{ if .Practice.Done }}
-                <a class="button is-primary" href="{{ .Practice.Path }}">See Results</a>
+                <a class="button is-primary" href="{{ .Practice.Path }}" autofocus>See Results</a>
               {{ else}}
-                <a class="button is-primary" href="{{ .Practice.NewRoundPath }}">Continue</a>
+                <a class="button is-primary" href="{{ .Practice.NewRoundPath }}" autofocus>Continue</a>
               {{ end }}
             </div>
           {{ else }}
@@ -44,7 +44,7 @@
                 <div class="field">
                   <label class="label">Answer</label>
                   <div class="control">
-                    <input class="input" type="text" name="guess" required autocomplete="off"/>
+                    <input class="input" type="text" name="guess" required autocomplete="off" autofocus />
                   </div>
                 </div>
                 <div class="field is-grouped">
