@@ -58,20 +58,6 @@ func Deck(conn primitives.Database, ub web.URLBuilder, i identifier,
 	return deck, cards, tags, nil
 }
 
-func Practice(conn primitives.Database, ub web.URLBuilder, i identifier) (*primitives.Practice, error) {
-	id, err := parseID(ub, i)
-	if err != nil {
-		return nil, err
-	}
-
-	practice, err := db.FindPractice(conn, id)
-	if err != nil {
-		return nil, response.WrapError(err, http.StatusBadRequest, "wrong practice id")
-	}
-
-	return practice, nil
-}
-
 func Card(conn primitives.Database, ub web.URLBuilder, i identifier, opt option) (*primitives.Card,
 	[]primitives.Tag, error) {
 
@@ -127,6 +113,22 @@ func Tag(conn primitives.Database, ub web.URLBuilder, i identifier,
 	}
 
 	return tag, cards, nil
+}
+
+func CardReview(conn primitives.Database, ub web.URLBuilder, i identifier) (
+	*primitives.CardReview, error) {
+
+	id, err := parseID(ub, i)
+	if err != nil {
+		return nil, err
+	}
+
+	review, err := db.FindCardReview(conn, id)
+	if err != nil {
+		return nil, response.WrapError(err, http.StatusBadRequest, "wrong review id")
+	}
+
+	return review, nil
 }
 
 func parseID(ub web.URLBuilder, i identifier) (primitives.ID, error) {

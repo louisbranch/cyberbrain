@@ -1,0 +1,47 @@
+{{ define "content" }}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Card.Deck.Path }}">{{ .Card.Deck.Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">Card Review</a></li>
+  </ul>
+</nav>
+
+<section class="section">
+  <h1 class="title">Card Review</h1>
+  <div class="columns">
+    <div class="column is-4">
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-4by3">
+            {{ img .Card.ImageURL }}
+          </figure>
+          {{ if .Card.Caption }}
+            <figcaption>{{ .Card.Caption }}</figcaption>
+          {{ end }}
+        </div>
+        <div class="card-content">
+          <div class="content">
+            <form action="{{ .ReviewPath }}" method="post" accept-charset="utf-8">
+              <input type="hidden" value="{{ .Card.ID }}" name="card_id" />
+              <div class="field">
+                <label class="label">Answer</label>
+                <div class="control">
+                  <input class="input" type="text" name="answer" required autocomplete="off" autofocus />
+                </div>
+              </div>
+              <div class="field is-grouped">
+                <div class="control">
+                  <input class="button is-primary" type="submit" value="Submit" name="action" />
+                  <input class="button" type="submit" value="Skip" formnovalidate name="action" />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+{{ end }}

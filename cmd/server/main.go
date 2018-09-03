@@ -8,7 +8,6 @@ import (
 
 	"gitlab.com/luizbranco/cyberbrain/authentication"
 	"gitlab.com/luizbranco/cyberbrain/db/psql"
-	"gitlab.com/luizbranco/cyberbrain/generator"
 	"gitlab.com/luizbranco/cyberbrain/web/html"
 	"gitlab.com/luizbranco/cyberbrain/web/server"
 	"gitlab.com/luizbranco/cyberbrain/web/session"
@@ -83,10 +82,6 @@ func main() {
 		log.Fatalf("unable to initialize URL builder %s", err)
 	}
 
-	gen := generator.Generator{
-		Database: db,
-	}
-
 	auth := authentication.Authenticator{}
 
 	session := &session.Manager{
@@ -94,16 +89,15 @@ func main() {
 		Secret:   sessionSecret,
 	}
 
-	tpl := html.New("web/templates", piioDomain, piioID)
+	tpl := html.New("web/templates", env, piioDomain, piioID)
 
 	srv := &server.Server{
-		Template:          tpl,
-		Database:          db,
-		URLBuilder:        ub,
-		PracticeGenerator: gen,
-		Authenticator:     auth,
-		SessionManager:    session,
-		ImageResizer:      imgResizer,
+		Template:       tpl,
+		Database:       db,
+		URLBuilder:     ub,
+		Authenticator:  auth,
+		SessionManager: session,
+		ImageResizer:   imgResizer,
 	}
 
 	mux := srv.NewServeMux()

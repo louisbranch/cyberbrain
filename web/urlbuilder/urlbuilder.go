@@ -13,6 +13,10 @@ type URLBuilder struct {
 	hashid *hashids.HashID
 }
 
+type Slugger interface {
+	Slug() string
+}
+
 func New(salt string) (*URLBuilder, error) {
 	hd := &hashids.HashIDData{
 		Alphabet:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -28,7 +32,7 @@ func New(salt string) (*URLBuilder, error) {
 	return &URLBuilder{hashid: h}, nil
 }
 
-func (ub *URLBuilder) Path(method string, r primitives.Identifiable,
+func (ub *URLBuilder) Path(method string, idn primitives.Identifiable,
 	params ...primitives.Identifiable) (string, error) {
 
 	var qs []string
@@ -36,10 +40,10 @@ func (ub *URLBuilder) Path(method string, r primitives.Identifiable,
 	var id string
 	var err error
 
-	if r != nil {
-		id, err = ub.EncodeID(r.ID())
+	if idn != nil {
+		id, err = ub.EncodeID(idn.ID())
 		if err != nil {
-			return "", errors.Wrapf(err, "invalid path for record %s", r)
+			return "", errors.Wrapf(err, "invalid path for record %s", idn)
 		}
 	}
 
@@ -68,17 +72,23 @@ func (ub *URLBuilder) Path(method string, r primitives.Identifiable,
 		q = "?" + strings.Join(qs, "&")
 	}
 
+	slug := idn.Type()
+	slugger, ok := idn.(Slugger)
+	if ok {
+		slug = slugger.Slug()
+	}
+
 	switch method {
 	case "INDEX":
-		return fmt.Sprintf("%s/%ss", prefix, r.Type()), nil
+		return fmt.Sprintf("%s/%ss", prefix, slug), nil
 	case "NEW":
-		return fmt.Sprintf("%s/%ss/new%s", prefix, r.Type(), q), nil
+		return fmt.Sprintf("%s/%ss/new%s", prefix, slug, q), nil
 	case "SHOW":
-		return fmt.Sprintf("%s/%ss/%s", prefix, r.Type(), id), nil
+		return fmt.Sprintf("%s/%ss/%s", prefix, slug, id), nil
 	case "CREATE":
-		return fmt.Sprintf("%s/%ss", prefix, r.Type()), nil
+		return fmt.Sprintf("%s/%ss", prefix, slug), nil
 	default:
-		return fmt.Sprintf("%s/%s", prefix, r.Type()), nil
+		return fmt.Sprintf("%s/%s", prefix, slug), nil
 	}
 }
 

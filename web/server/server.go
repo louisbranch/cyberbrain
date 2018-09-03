@@ -15,13 +15,12 @@ import (
 )
 
 type Server struct {
-	Template          web.Template
-	URLBuilder        web.URLBuilder
-	Database          primitives.Database
-	PracticeGenerator primitives.PracticeGenerator
-	Authenticator     primitives.Authenticator
-	SessionManager    web.SessionManager
-	ImageResizer      worker.ImageResizer
+	Template       web.Template
+	URLBuilder     web.URLBuilder
+	Database       primitives.Database
+	Authenticator  primitives.Authenticator
+	SessionManager web.SessionManager
+	ImageResizer   worker.ImageResizer
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
@@ -44,7 +43,7 @@ func (srv *Server) NewServeMux() *http.ServeMux {
 	logoutMux := sessions.NewLogoutMux(renderer)
 
 	decksMux := decks.NewServeMux(renderer, srv.Database, srv.URLBuilder,
-		srv.PracticeGenerator, srv.ImageResizer)
+		srv.ImageResizer)
 
 	blitlineMux := blitline.NewServeMux(renderer, srv.Database, srv.URLBuilder)
 

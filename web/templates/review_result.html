@@ -1,0 +1,52 @@
+{{ define "content" }}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/decks/">Decks</a></li>
+    <li><a href="{{ .Card.Deck.Path }}">{{ .Card.Deck.Name }}</a></li>
+    <li class="is-active"><a href="#" aria-current="page">Card Review</a></li>
+  </ul>
+</nav>
+
+<section class="section">
+  <h1 class="title">Card Review</h1>
+  <div class="columns">
+    <div class="column is-4">
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-4by3">
+            {{ img .Card.ImageURL }}
+          </figure>
+          {{ if .Card.Caption }}
+            <figcaption>{{ .Card.Caption }}</figcaption>
+          {{ end }}
+        </div>
+        <div class="card-content">
+          <div class="content">
+            {{ if .Review.Correct }}
+              <div class="notification is-success">
+                Your answer is correct!
+              </div>
+            {{ else if .Review.Skipped }}
+              <div class="notification is-warning">
+                You skipped the answer.
+              </div>
+            {{ else }}
+              <div class="notification is-warning">
+                You answer is wrong.
+              </div>
+            {{ end }}
+             Possible answers are:
+             <ul>
+               {{ range .Card.Definitions }}
+                 <li>{{ .}}</li>
+               {{ end }}
+             </ul>
+             <a class="button is-primary" href="{{ .Card.Deck.NewCardReviewPath }}">Next Card</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+{{ end }}

@@ -33,6 +33,7 @@ func newUserQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }
 
@@ -44,6 +45,7 @@ func newDeckQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }
 
@@ -67,6 +69,7 @@ func newTagQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }
 
@@ -78,28 +81,7 @@ func newCardTagQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
-	}
-}
-
-func newPracticeQuery() *query {
-	fn := func() primitives.Record {
-		return &primitives.Practice{}
-	}
-
-	return &query{
-		record: fn,
-		where:  make(map[string]interface{}),
-	}
-}
-
-func newRoundQuery() *query {
-	fn := func() primitives.Record {
-		return &primitives.Round{}
-	}
-
-	return &query{
-		record: fn,
-		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }
 
@@ -111,5 +93,18 @@ func newCardScheduleQuery() *query {
 	return &query{
 		record: fn,
 		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
+	}
+}
+
+func newCardReviewQuery() *query {
+	fn := func() primitives.Record {
+		return &primitives.CardReview{}
+	}
+
+	return &query{
+		record: fn,
+		where:  make(map[string]interface{}),
+		sortBy: make(map[string]string),
 	}
 }

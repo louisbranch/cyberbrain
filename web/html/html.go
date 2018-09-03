@@ -15,16 +15,18 @@ import (
 
 type HTML struct {
 	basepath string
+	env      string
 	sync     sync.RWMutex
 	cache    map[string]*template.Template
 }
 
-func New(basepath, piioDomain, piioAppID string) *HTML {
+func New(basepath, env, piioDomain, piioAppID string) *HTML {
 	fns["piioScript"] = piioScript(piioDomain, piioAppID)
 	fns["img"] = img(piioAppID != "")
 
 	return &HTML{
 		basepath: basepath,
+		env:      env,
 		cache:    make(map[string]*template.Template),
 	}
 }
@@ -70,7 +72,9 @@ func (h *HTML) parse(names ...string) (tpl *template.Template, err error) {
 			return nil, err
 		}
 		h.sync.Lock()
-		h.cache[id] = tpl
+		if h.env != "dev" {
+			h.cache[id] = tpl
+		}
 		h.sync.Unlock()
 	}
 

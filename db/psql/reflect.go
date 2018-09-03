@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
+	"gitlab.com/luizbranco/cyberbrain/db"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
@@ -147,10 +149,6 @@ func (q *Query) Scan(row Scannable) error {
 func where(cond primitives.Query) string {
 	where := cond.Where()
 
-	if len(where) == 0 {
-		return ""
-	}
-
 	var clause []string
 	for k, v := range where {
 		switch t := v.(type) {
@@ -158,13 +156,25 @@ func where(cond primitives.Query) string {
 			clause = append(clause, fmt.Sprintf("%s = '%s'", k, v))
 		case int, primitives.ID:
 			clause = append(clause, fmt.Sprintf("%s = %d", k, v))
+		case db.GreaterOrEqual:
+			date := v.(db.GreaterOrEqual).Time
+			val := date.Format(time.RFC3339)
+			clause = append(clause, fmt.Sprintf("%s >= '%s'::date", k, val))
+		case db.LessOrEqual:
+			date := v.(db.LessOrEqual).Time
+			val := date.Format(time.RFC3339)
+			clause = append(clause, fmt.Sprintf("%s <= '%s'::date", k, val))
 		default:
 			err := fmt.Sprintf("invalid type %q for where clause", t)
 			panic(err)
 		}
 	}
 
-	q := "WHERE " + strings.Join(clause, " AND ")
+	var q string
+
+	if len(clause) >= 1 {
+		q = "WHERE " + strings.Join(clause, " AND ")
+	}
 
 	sortBy := cond.SortBy()
 

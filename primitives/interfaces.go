@@ -43,10 +43,6 @@ type Query interface {
 	SortBy() map[string]string
 }
 
-type PracticeGenerator interface {
-	NewRound(Practice) (*Round, error)
-}
-
 type Authenticator interface {
 	Create(password string) (string, error)
 	Verify(hash string, password string) (bool, error)

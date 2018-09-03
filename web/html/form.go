@@ -2,11 +2,9 @@ package html
 
 import (
 	"net/url"
-	"strconv"
 
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
-	"gitlab.com/luizbranco/cyberbrain/web"
 )
 
 const CHECKED = "on"
@@ -97,46 +95,4 @@ func NewTagFromForm(deck primitives.Deck, form url.Values) (*primitives.Tag, err
 		Name:   form.Get("name"),
 	}
 	return t, nil
-}
-
-func NewPracticeFromForm(deck primitives.Deck, tags []primitives.Tag, form url.Values, ub web.URLBuilder) (*primitives.Practice, error) {
-	rounds := form.Get("rounds")
-	n, err := strconv.Atoi(rounds)
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid number of rounds")
-	}
-
-	p := &primitives.Practice{
-		DeckID:      deck.ID(),
-		TotalRounds: n,
-	}
-
-	tagID := form.Get("tags")
-
-	if tagID != "" {
-		id, err := ub.ParseID(tagID)
-		if err != nil {
-			errors.Wrap(err, "invalid tag id")
-		}
-
-		found := false
-
-		for _, t := range tags {
-			if t.ID() == id {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return nil, errors.Errorf("invalid tag id %s", tagID)
-		}
-
-		p.TagID = &id
-	}
-
-	p.PromptMode = primitives.PracticeImages
-	p.GuessMode = primitives.PracticeDefinitions
-
-	return p, nil
 }

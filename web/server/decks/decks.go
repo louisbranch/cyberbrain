@@ -96,10 +96,17 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 			return err.(response.Error)
 		}
 
+		scheduled, err := db.CountCardsScheduled(conn, deck.ID())
+		if err != nil {
+			return response.WrapError(err, http.StatusInternalServerError, "failed to count cards scheduled")
+		}
+
 		content, err := html.RenderDeck(ub, *deck, cards, tags)
 		if err != nil {
 			return response.WrapError(err, http.StatusInternalServerError, "failed to render deck")
 		}
+
+		content.CardsScheduled = scheduled
 
 		page := web.Page{
 			Title:      deck.Name + " Deck",

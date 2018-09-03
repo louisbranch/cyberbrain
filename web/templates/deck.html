@@ -10,8 +10,9 @@
   <div class="columns">
     <div class="column is-8">
       <h1 class="title">{{ .Name }}</h1>
-      <p class="subtitle">{{ .Description }}</p>
-      <a href="{{ .EditPath }}" >edit</a>
+      <p class="subtitle">{{ .Description }} <a href="{{ .EditPath }}" >edit</a></p>
+
+      <a class="button is-primary" href="{{ .NewCardReviewPath }}">Review Cards ({{ .CardsScheduled }})</a>
     </div>
     <div class="column is-4">
       <h3 class="title is-4">Tags</h3>
@@ -29,7 +30,6 @@
   <h2 class="title is-4">Cards</h2>
   <div class="content">
     <a class="button is-primary" href="{{ .NewCardPath }}">Add Card</a>
-    <a class="button" href="{{ .NewPracticePath }}">Practice</a>
   </div>
   <div class="columns is-multiline">
     {{ range .Cards }}

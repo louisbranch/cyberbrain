@@ -1,11 +1,21 @@
 package db
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
 )
 
 var ErrNotEnoughCards = errors.New("not enough cards")
+
+type LessOrEqual struct {
+	Time time.Time
+}
+
+type GreaterOrEqual struct {
+	Time time.Time
+}
 
 func FindUser(db primitives.Database, id primitives.ID) (*primitives.User, error) {
 	q := newUserQuery()
@@ -188,86 +198,6 @@ func castTags(rs []primitives.Record) ([]primitives.Tag, error) {
 	return tags, nil
 }
 
-func FindPractice(db primitives.Database, id primitives.ID) (*primitives.Practice, error) {
-	q := newPracticeQuery()
-	q.where["id"] = id
-
-	r, err := db.Get(q)
-	if err != nil {
-		return nil, err
-	}
-
-	p, ok := r.(*primitives.Practice)
-
-	if !ok {
-		return nil, errors.Errorf("invalid record type %T", r)
-	}
-
-	return p, nil
-}
-
-func FindRound(db primitives.Database, id primitives.ID) (*primitives.Round, error) {
-	q := newRoundQuery()
-	q.where["id"] = id
-
-	r, err := db.Get(q)
-	if err != nil {
-		return nil, err
-	}
-
-	p, ok := r.(*primitives.Round)
-	if !ok {
-		return nil, errors.Errorf("invalid record type %T", r)
-	}
-
-	return p, nil
-}
-
-func FindRounds(db primitives.Database, practiceID primitives.ID) ([]primitives.Round, error) {
-	q := newRoundQuery()
-	q.where["practice_id"] = practiceID
-
-	rs, err := db.Query(q)
-	if err != nil {
-		return nil, err
-	}
-
-	return castRounds(rs)
-}
-
-func CountRounds(db primitives.Database, practiceID primitives.ID) (int, error) {
-	q := newRoundQuery()
-	q.where["practice_id"] = practiceID
-
-	return db.Count(q)
-}
-
-func NextCard(db primitives.Database, deckID primitives.ID) (*primitives.Card, error) {
-	raw := `SELECT c.* FROM cards c
-	LEFT JOIN card_schedules cs ON c.id = cs.card_id
-	WHERE cs.deck_id = ` + deckID.String() + ` AND cs.next_date <= now()
-	ORDER BY cs.next_date ASC LIMIT 1;`
-
-	q := newCardQuery()
-	q.raw = raw
-
-	rs, err := db.QueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-
-	cards, err := castCards(rs)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cards) == 0 {
-		return nil, ErrNotEnoughCards
-	}
-
-	return &cards[0], nil
-}
-
 func castCards(rs []primitives.Record) ([]primitives.Card, error) {
 	var cards []primitives.Card
 
@@ -284,25 +214,24 @@ func castCards(rs []primitives.Record) ([]primitives.Card, error) {
 	return cards, nil
 }
 
-func castRounds(rs []primitives.Record) ([]primitives.Round, error) {
-	var rounds []primitives.Round
+func CountCardsScheduled(db primitives.Database, deckID primitives.ID) (int, error) {
+	q := newCardScheduleQuery()
+	q.where["deck_id"] = deckID
+	q.where["next_date"] = LessOrEqual{time.Now().UTC()}
 
-	for _, r := range rs {
-		round, ok := r.(*primitives.Round)
-
-		if !ok {
-			return nil, errors.Errorf("invalid record type %T", r)
-		}
-
-		rounds = append(rounds, *round)
+	n, err := db.Count(q)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to count cards scheduled for deck %d", deckID)
 	}
 
-	return rounds, nil
+	return n, nil
 }
 
-func FindCardSchedule(db primitives.Database, id primitives.ID) (*primitives.CardSchedule, error) {
+func FindNextCardScheduled(db primitives.Database, deckID primitives.ID) (*primitives.CardSchedule, error) {
 	q := newCardScheduleQuery()
-	q.where["card_id"] = id
+	q.where["deck_id"] = deckID
+	q.where["next_date"] = LessOrEqual{time.Now().UTC()}
+	q.sortBy["created_at"] = "asc"
 
 	r, err := db.Get(q)
 	if err != nil {
@@ -315,4 +244,40 @@ func FindCardSchedule(db primitives.Database, id primitives.ID) (*primitives.Car
 	}
 
 	return schedule, nil
+}
+
+func FindCardSchedule(db primitives.Database, cardID primitives.ID) (*primitives.CardSchedule, error) {
+	q := newCardScheduleQuery()
+	q.where["card_id"] = cardID
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	schedule, ok := r.(*primitives.CardSchedule)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return schedule, nil
+}
+
+func FindCardReview(db primitives.Database, id primitives.ID) (
+	*primitives.CardReview, error) {
+
+	q := newCardReviewQuery()
+	q.where["id"] = id
+
+	r, err := db.Get(q)
+	if err != nil {
+		return nil, err
+	}
+
+	review, ok := r.(*primitives.CardReview)
+	if !ok {
+		return nil, errors.Errorf("invalid record type %T", r)
+	}
+
+	return review, nil
 }

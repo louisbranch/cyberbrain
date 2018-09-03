@@ -8,15 +8,14 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web"
 	"gitlab.com/luizbranco/cyberbrain/web/server/cards"
 	"gitlab.com/luizbranco/cyberbrain/web/server/middlewares"
-	"gitlab.com/luizbranco/cyberbrain/web/server/practices"
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
-	"gitlab.com/luizbranco/cyberbrain/web/server/rounds"
+	"gitlab.com/luizbranco/cyberbrain/web/server/reviews"
 	"gitlab.com/luizbranco/cyberbrain/web/server/tags"
 	"gitlab.com/luizbranco/cyberbrain/worker"
 )
 
 func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
-	ub web.URLBuilder, gen primitives.PracticeGenerator, resizer worker.ImageResizer) *http.ServeMux {
+	ub web.URLBuilder, resizer worker.ImageResizer) *http.ServeMux {
 
 	mux := http.NewServeMux()
 
@@ -25,7 +24,7 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 
 		var handler response.Handler
 
-		paths := strings.SplitN(r.URL.Path, "/", 4)
+		paths := strings.Split(r.URL.Path, "/")
 
 		deckID := paths[1]
 
@@ -90,30 +89,16 @@ func NewServeMux(renderer *middlewares.Renderer, db primitives.Database,
 				handler = tags.Update(db, ub, path)
 			}
 
-		case "practices":
+		case "reviews":
 			switch {
 			case method == "GET" && path == "":
-				handler = practices.Index()
+				handler = reviews.Index()
 			case method == "GET" && path == "new":
-				handler = practices.New(db, ub)
+				handler = reviews.New(db, ub)
 			case method == "GET":
-				handler = practices.Show(db, ub, path)
-			case method == "POST" && path == "":
-				handler = practices.Create(db, ub)
-			}
-
-		case "rounds":
-			switch {
-			case method == "GET" && path == "":
-				handler = rounds.Index()
-			case method == "GET" && path == "new":
-				handler = rounds.New(db, ub, gen)
-			case method == "GET":
-				handler = rounds.Show(db, ub, path)
-			case method == "POST" && path == "":
-				handler = rounds.Create(db, ub, gen)
+				handler = reviews.Show(db, ub, path)
 			case method == "POST":
-				handler = rounds.Update(db, ub, path)
+				handler = reviews.Create(db, ub)
 			}
 		}
 

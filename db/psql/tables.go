@@ -70,39 +70,6 @@ var tableQueries = []string{
 		);
 		`,
 	`
-		CREATE TABLE IF NOT EXISTS practices(
-			id SERIAL PRIMARY KEY,
-			version INTEGER NOT NULL DEFAULT 1,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
-			prompt_mode INTEGER NOT NULL DEFAULT 0,
-			guess_mode INTEGER NOT NULL DEFAULT 0,
-			field INTEGER NOT NULL DEFAULT 0,
-			tag_id INTEGER,
-			total_rounds INTEGER NOT NULL CHECK(total_rounds > 0),
-			done BOOLEAN NOT NULL DEFAULT FALSE
-		);
-		`,
-	`
-		CREATE TABLE IF NOT EXISTS rounds(
-			id SERIAL PRIMARY KEY,
-			version INTEGER NOT NULL DEFAULT 1,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-			practice_id INTEGER NOT NULL REFERENCES practices ON DELETE RESTRICT,
-			card_ids INTEGER[] NOT NULL CHECK (cardinality(card_ids) > 0),
-			prompt_mode INTEGER NOT NULL DEFAULT 0,
-			guess_mode INTEGER NOT NULL DEFAULT 0,
-			options TEXT[],
-			prompt TEXT NOT NULL CHECK(prompt <> ''),
-			guess TEXT,
-			answer TEXT NOT NULL CHECK(answer <> ''),
-			correct BOOLEAN NOT NULL DEFAULT FALSE,
-			done BOOLEAN NOT NULL DEFAULT FALSE
-		);
-		`,
-	`
 		CREATE TABLE IF NOT EXISTS jobs(
 			id SERIAL PRIMARY KEY,
 			version INTEGER NOT NULL DEFAULT 1,
@@ -118,7 +85,6 @@ var tableQueries = []string{
 		`,
 
 	` ALTER TABLE cards ADD COLUMN IF NOT EXISTS caption TEXT;`,
-	` ALTER TABLE rounds ADD COLUMN IF NOT EXISTS caption TEXT;`,
 	`
 		CREATE TABLE IF NOT EXISTS card_schedules(
 			id SERIAL PRIMARY KEY,
@@ -130,6 +96,19 @@ var tableQueries = []string{
 			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
 			current_score INTEGER NOT NULL DEFAULT 0,
 			max_score INTEGER NOT NULL DEFAULT 0
+		);
+		`,
+	`
+		CREATE TABLE IF NOT EXISTS card_reviews(
+			id SERIAL PRIMARY KEY,
+			version INTEGER NOT NULL DEFAULT 1,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			deck_id INTEGER NOT NULL REFERENCES decks ON DELETE CASCADE,
+			card_id INTEGER NOT NULL REFERENCES cards ON DELETE CASCADE,
+			answer TEXT NOT NULL,
+			skipped BOOLEAN NOT NULL DEFAULT false,
+			correct BOOLEAN NOT NULL DEFAULT false
 		);
 		`,
 }
