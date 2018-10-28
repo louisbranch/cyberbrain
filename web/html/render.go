@@ -12,6 +12,7 @@ type Deck struct {
 	Description    string
 	ImageURL       string
 	Fields         []string
+	PrimaryField   int
 	CardsScheduled int
 	Tags           []*Tag
 	Cards          []*Card
@@ -53,10 +54,11 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	tags []primitives.Tag) (*Deck, error) {
 
 	dr := &Deck{
-		Name:        d.Name,
-		Description: d.Description,
-		ImageURL:    d.ImageURL,
-		Fields:      d.Fields,
+		Name:         d.Name,
+		Description:  d.Description,
+		ImageURL:     d.ImageURL,
+		Fields:       d.Fields,
+		PrimaryField: d.PrimaryField,
 	}
 
 	id, err := ub.EncodeID(d.ID())

@@ -10,11 +10,12 @@ type Deck struct {
 	MetaCreatedAt time.Time `db:"created_at"`
 	MetaUpdatedAt time.Time `db:"updated_at"`
 
-	UserID      ID       `db:"user_id"`
-	Name        string   `db:"name"`
-	Description string   `db:"description"`
-	ImageURL    string   `db:"image_url"`
-	Fields      []string `db:"fields"`
+	UserID       ID       `db:"user_id"`
+	Name         string   `db:"name"`
+	Description  string   `db:"description"`
+	ImageURL     string   `db:"image_url"`
+	Fields       []string `db:"fields"`
+	PrimaryField int      `db:"primary_field"`
 }
 
 func (d Deck) ID() ID {

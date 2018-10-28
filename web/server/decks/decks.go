@@ -3,6 +3,7 @@ package decks
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"gitlab.com/luizbranco/cyberbrain/db"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
@@ -154,6 +155,14 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 
 		deck.Name = r.Form.Get("name")
 		deck.Description = r.Form.Get("description")
+
+		field := r.Form.Get("primary_field")
+		id, err := strconv.Atoi(field)
+		if err != nil {
+			return response.WrapError(err, http.StatusBadRequest, "invalid primary field")
+		}
+
+		deck.PrimaryField = id
 
 		if deck.Name == "" {
 			return response.NewError(http.StatusBadRequest, "deck name cannot be empty")

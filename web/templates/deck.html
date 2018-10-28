@@ -10,7 +10,7 @@
   <div class="columns">
     <div class="column is-8">
       <h1 class="title">{{ .Name }}</h1>
-      <p class="subtitle">{{ .Description }} <a href="{{ .EditPath }}" >edit</a></p>
+      <p class="subtitle">{{ .Description }} <a href="{{ .EditPath }}">edit</a></p>
 
       <a class="button is-primary" href="{{ .NewCardReviewPath }}">Review Cards ({{ .CardsScheduled }})</a>
     </div>
@@ -32,6 +32,7 @@
     <a class="button is-primary" href="{{ .NewCardPath }}">Add Card</a>
   </div>
   <div class="columns is-multiline">
+    {{ $deck := . }}
     {{ range .Cards }}
     <div class="column is-3">
       <div class="card">
@@ -42,13 +43,13 @@
             </a>
           </figure>
           {{ if .Caption }}
-            <figcaption>{{ .Caption }}</figcaption>
+          <figcaption>{{ .Caption }}</figcaption>
           {{ end }}
         </div>
         <div class="card-content">
           <div class="content">
             <p class="is-size-3 has-text-centered">
-              {{ first .Definitions }}
+              {{ index .Definitions $deck.PrimaryField }}
             </p>
           </div>
         </div>
