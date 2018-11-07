@@ -3,6 +3,8 @@ package reviews
 import (
 	"context"
 	"net/http"
+	"strconv"
+	"time"
 
 	"gitlab.com/luizbranco/cyberbrain/db"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
@@ -13,12 +15,14 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
+// Index returns a response handler that redirect to /decks/ page
 func Index() response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 		return response.Redirect{Path: "/decks/", Code: http.StatusFound}
 	}
 }
 
+// New returns a reponse handler that displays the next card scheduled
 func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
@@ -48,14 +52,30 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		content := struct {
 			Card       *html.Card
 			ReviewPath string
+			Field      int
 		}{
 			Card:       cardC,
 			ReviewPath: path,
+			Field:      -1,
+		}
+
+		field, ok := parseCardField(r, card)
+		if ok {
+			content.Field = field
+
+			cookie := http.Cookie{
+				Name:    "deck_field",
+				Value:   strconv.Itoa(field),
+				Path:    "/",
+				Expires: time.Now().Add(30 * time.Minute),
+			}
+
+			http.SetCookie(w, &cookie)
 		}
 
 		page := web.Page{
 			Title:    "Card Review",
-			Partials: []string{"review"},
+			Partials: []string{"new_review"},
 			Content:  content,
 		}
 
@@ -63,6 +83,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
+// Summary returns a response handler that display the summary of the review
 func Summary(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
@@ -89,6 +110,7 @@ func Summary(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
+// Create returns a response handler that creates a new card review
 func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
@@ -154,6 +176,7 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 	}
 }
 
+// Show returns a response handler that displays a new card for review
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
@@ -190,4 +213,27 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 
 		return response.NewContent(page)
 	}
+}
+
+func parseCardField(r *http.Request, card *primitives.Card) (int, bool) {
+	q := r.URL.Query()
+	field := q.Get("field")
+
+	if field == "" {
+		cookie, err := r.Cookie("deck_field")
+		if err != nil {
+			return -1, false
+		}
+
+		field = cookie.Value
+	}
+
+	if field != "" {
+		n, err := strconv.Atoi(field)
+		if err == nil && n >= 0 && len(card.Definitions) > n {
+			return n, true
+		}
+	}
+
+	return -1, false
 }

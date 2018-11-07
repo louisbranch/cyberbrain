@@ -13,9 +13,15 @@
     <div class="column is-4">
       <div class="card">
         <div class="card-image">
-          <figure class="image is-4by3">
-            {{ img .Card.ImageURL }}
-          </figure>
+          {{ if ge .Field 0 }}
+            <div class="card-text-only">
+              {{ index .Card.Definitions .Field }}
+            </div>
+          {{ else }}
+            <figure class="image is-4by3">
+              {{ img .Card.ImageURL }}
+            </figure>
+          {{ end }}
           {{ if .Card.Caption }}
             <figcaption>{{ .Card.Caption }}</figcaption>
           {{ end }}
@@ -42,6 +48,5 @@
       </div>
     </div>
   </div>
-</section>
 </section>
 {{ end }}

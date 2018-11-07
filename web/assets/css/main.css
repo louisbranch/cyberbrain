@@ -2,6 +2,13 @@ label.checkbox + label.checkbox {
   margin-left: 10px;
 }
 
+/* Font-size when card image has text instead */
+.card-text-only {
+  font-size: 100px;
+  text-align: center;
+  padding-bottom: 30px;
+}
+
 figcaption {
   position: absolute;
   bottom: 0;
