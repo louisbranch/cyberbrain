@@ -111,5 +111,6 @@ var tableQueries = []string{
 			correct BOOLEAN NOT NULL DEFAULT false
 		);
 		`,
-	` ALTER TABLE decks ADD COLUMN IF NOT EXISTS primary_field INTEGER DEFAULT 0;`,
+	`ALTER TABLE decks ADD COLUMN IF NOT EXISTS primary_field INTEGER DEFAULT 0;`,
+	`ALTER TABLE cards ADD COLUMN IF NOT EXISTS nsfw BOOLEAN NOT NULL DEFAULT false;`,
 }

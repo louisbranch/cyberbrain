@@ -15,6 +15,11 @@ import (
 	"gitlab.com/luizbranco/cyberbrain/web/server/response"
 )
 
+type preferences struct {
+	Field int
+	NSFW  bool
+}
+
 // Index returns a response handler that redirect to /decks/ page
 func Index() response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
@@ -28,15 +33,12 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 
 		deck := middlewares.CurrentDeck(ctx)
 
-		schedule, err := db.FindNextCardScheduled(conn, deck.ID())
+		pref := loadPreferences(w, r, deck)
+
+		card, err := db.FindNextCardScheduled(conn, deck.ID(), pref.NSFW)
 		if err != nil {
 			handler := Summary(conn, ub)
 			return handler(ctx, w, r)
-		}
-
-		card, _, err := finder.Card(conn, ub, schedule.CardID, finder.NoOption)
-		if err != nil {
-			return err.(response.Error)
 		}
 
 		cardC, err := html.RenderCard(ub, deck, nil, *card, nil, true)
@@ -56,21 +58,7 @@ func New(conn primitives.Database, ub web.URLBuilder) response.Handler {
 		}{
 			Card:       cardC,
 			ReviewPath: path,
-			Field:      -1,
-		}
-
-		field, ok := parseCardField(r, card)
-		if ok {
-			content.Field = field
-
-			cookie := http.Cookie{
-				Name:    "deck_field",
-				Value:   strconv.Itoa(field),
-				Path:    "/",
-				Expires: time.Now().Add(30 * time.Minute),
-			}
-
-			http.SetCookie(w, &cookie)
+			Field:      pref.Field,
 		}
 
 		page := web.Page{
@@ -215,25 +203,71 @@ func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Han
 	}
 }
 
-func parseCardField(r *http.Request, card *primitives.Card) (int, bool) {
+func loadPreferences(w http.ResponseWriter, r *http.Request,
+	deck primitives.Deck) preferences {
+
 	q := r.URL.Query()
 	field := q.Get("field")
+	nsfw := q.Get("nsfw")
+
+	p := preferences{
+		Field: -1,
+		NSFW:  false,
+	}
 
 	if field == "" {
 		cookie, err := r.Cookie("deck_field")
-		if err != nil {
-			return -1, false
+		if err != nil && err != http.ErrNoCookie {
+			return p
 		}
 
-		field = cookie.Value
+		if cookie != nil {
+			field = cookie.Value
+		}
+	}
+
+	if nsfw == "" {
+		cookie, err := r.Cookie("nsfw")
+		if err != nil && err != http.ErrNoCookie {
+			return p
+		}
+
+		if cookie != nil {
+			nsfw = cookie.Value
+		}
 	}
 
 	if field != "" {
 		n, err := strconv.Atoi(field)
-		if err == nil && n >= 0 && len(card.Definitions) > n {
-			return n, true
+		if err == nil && n >= 0 && len(deck.Fields) > n {
+			p.Field = n
 		}
 	}
 
-	return -1, false
+	if field != "" {
+		cookie := http.Cookie{
+			Name:    "deck_field",
+			Value:   field,
+			Path:    "/",
+			Expires: time.Now().Add(30 * time.Minute),
+		}
+		http.SetCookie(w, &cookie)
+	}
+
+	if nsfw != "" {
+		if nsfw == "true" {
+			p.NSFW = true
+		}
+
+		cookie := http.Cookie{
+			Name:    "nsfw",
+			Value:   nsfw,
+			Path:    "/",
+			Expires: time.Now().Add(30 * time.Minute),
+		}
+
+		http.SetCookie(w, &cookie)
+	}
+
+	return p
 }

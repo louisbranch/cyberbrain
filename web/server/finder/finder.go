@@ -13,16 +13,17 @@ import (
 
 type identifier interface{}
 
-type option int
+type Option int
 
 const (
-	NoOption option = 0
-	WithTags        = 1 << iota
+	NoOption Option = 0
+	WithTags Option = 1 << iota
 	WithCards
+	NSFW
 )
 
 func Deck(conn primitives.Database, ub web.URLBuilder, i identifier,
-	opt option) (*primitives.Deck, []primitives.Card, []primitives.Tag, error) {
+	opt Option) (*primitives.Deck, []primitives.Card, []primitives.Tag, error) {
 
 	id, err := parseID(ub, i)
 	if err != nil {
@@ -37,8 +38,13 @@ func Deck(conn primitives.Database, ub web.URLBuilder, i identifier,
 	var cards []primitives.Card
 	var tags []primitives.Tag
 
+	nsfw := false
+	if opt&NSFW > 0 {
+		nsfw = true
+	}
+
 	if opt&WithCards > 0 {
-		cards, err = db.FindCardsByDeck(conn, id)
+		cards, err = db.FindCardsByDeck(conn, id, nsfw)
 		if err != nil {
 			return nil, nil, nil, response.WrapError(err, http.StatusInternalServerError, "failed to find deck cards")
 		}
@@ -58,7 +64,7 @@ func Deck(conn primitives.Database, ub web.URLBuilder, i identifier,
 	return deck, cards, tags, nil
 }
 
-func Card(conn primitives.Database, ub web.URLBuilder, i identifier, opt option) (*primitives.Card,
+func Card(conn primitives.Database, ub web.URLBuilder, i identifier, opt Option) (*primitives.Card,
 	[]primitives.Tag, error) {
 
 	id, err := parseID(ub, i)
@@ -88,7 +94,7 @@ func Card(conn primitives.Database, ub web.URLBuilder, i identifier, opt option)
 }
 
 func Tag(conn primitives.Database, ub web.URLBuilder, i identifier,
-	opt option) (*primitives.Tag,
+	opt Option) (*primitives.Tag,
 
 	[]primitives.Card, error) {
 

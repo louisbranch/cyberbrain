@@ -86,6 +86,10 @@ func NewCardFromForm(deck primitives.Deck, form url.Values) (*primitives.Card, e
 		return nil, errors.New("card definition numbers must be the same as deck field definitions")
 	}
 
+	if form.Get("nsfw") != "" {
+		c.NSFW = true
+	}
+
 	return c, nil
 }
 

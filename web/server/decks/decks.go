@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"gitlab.com/luizbranco/cyberbrain/db"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
@@ -92,7 +93,12 @@ func Create(conn primitives.Database, ub web.URLBuilder) response.Handler {
 func Show(conn primitives.Database, ub web.URLBuilder, hash string) response.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) response.Responder {
 
-		deck, cards, tags, err := finder.Deck(conn, ub, hash, finder.WithTags|finder.WithCards)
+		opts := finder.WithTags | finder.WithCards
+		if nsfw(w, r) {
+			opts = opts | finder.NSFW
+		}
+
+		deck, cards, tags, err := finder.Deck(conn, ub, hash, opts)
 		if err != nil {
 			return err.(response.Error)
 		}
@@ -180,4 +186,29 @@ func Update(conn primitives.Database, ub web.URLBuilder, hash string) response.H
 
 		return response.Redirect{Path: path, Code: http.StatusFound}
 	}
+}
+
+func nsfw(w http.ResponseWriter, r *http.Request) bool {
+	q := r.URL.Query()
+	nsfw := q.Get("nsfw")
+
+	if nsfw == "" {
+		cookie, err := r.Cookie("nsfw")
+		if err != nil {
+			return false
+		}
+
+		nsfw = cookie.Value
+	}
+
+	cookie := http.Cookie{
+		Name:    "nsfw",
+		Value:   nsfw,
+		Path:    "/",
+		Expires: time.Now().Add(30 * time.Minute),
+	}
+
+	http.SetCookie(w, &cookie)
+
+	return nsfw == "true"
 }

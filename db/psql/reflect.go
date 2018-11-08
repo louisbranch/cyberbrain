@@ -164,6 +164,9 @@ func where(cond primitives.Query) string {
 			date := v.(db.LessOrEqual).Time
 			val := date.Format(time.RFC3339)
 			clause = append(clause, fmt.Sprintf("%s <= '%s'::date", k, val))
+		case bool:
+			val := v.(bool)
+			clause = append(clause, fmt.Sprintf("%s = %t", k, val))
 		default:
 			err := fmt.Sprintf("invalid type %q for where clause", t)
 			panic(err)

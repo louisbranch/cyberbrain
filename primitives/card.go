@@ -15,6 +15,7 @@ type Card struct {
 	ImageURL    string   `db:"image_url"`
 	SoundURL    string   `db:"sound_url"`
 	Caption     string   `db:"caption"`
+	NSFW        bool     `db:"nsfw"`
 }
 
 func (c Card) ID() ID {

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -108,9 +109,13 @@ func FindCard(db primitives.Database, id primitives.ID) (*primitives.Card, error
 	return card, nil
 }
 
-func FindCardsByDeck(db primitives.Database, deckID primitives.ID) ([]primitives.Card, error) {
+func FindCardsByDeck(db primitives.Database, deckID primitives.ID, nsfw bool) ([]primitives.Card, error) {
 	q := newCardQuery()
 	q.where["deck_id"] = deckID
+	if !nsfw {
+		q.where["nsfw"] = false
+	}
+
 	q.sortBy["updated_at"] = "DESC"
 
 	rs, err := db.Query(q)
@@ -227,23 +232,43 @@ func CountCardsScheduled(db primitives.Database, deckID primitives.ID) (int, err
 	return n, nil
 }
 
-func FindNextCardScheduled(db primitives.Database, deckID primitives.ID) (*primitives.CardSchedule, error) {
-	q := newCardScheduleQuery()
-	q.where["deck_id"] = deckID
-	q.where["next_date"] = LessOrEqual{time.Now().UTC()}
-	q.sortBy["created_at"] = "asc"
+func FindNextCardScheduled(db primitives.Database, deckID primitives.ID,
+	nsfw bool) (*primitives.Card, error) {
 
-	r, err := db.Get(q)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	nsfwWhere := ""
+	if !nsfw {
+		nsfwWhere = "AND c.nsfw = false"
+	}
+
+	raw := fmt.Sprintf(`SELECT c.* FROM cards c
+	RIGHT JOIN card_schedules cd ON c.id = cd.card_id
+	WHERE c.deck_id = %s
+	AND cd.next_date <= '%s'::date
+	%s
+	ORDER BY random()
+	LIMIT 1;
+	`, deckID, now, nsfwWhere)
+
+	q := newCardQuery()
+	q.raw = raw
+
+	rs, err := db.QueryRaw(q)
 	if err != nil {
 		return nil, err
 	}
 
-	schedule, ok := r.(*primitives.CardSchedule)
-	if !ok {
-		return nil, errors.Errorf("invalid record type %T", r)
+	cards, err := castCards(rs)
+	if err != nil {
+		return nil, err
 	}
 
-	return schedule, nil
+	if len(cards) == 0 {
+		return nil, errors.New("no next card schedule found")
+	}
+
+	return &cards[0], nil
 }
 
 func FindCardSchedule(db primitives.Database, cardID primitives.ID) (*primitives.CardSchedule, error) {

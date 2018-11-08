@@ -33,6 +33,7 @@ type Card struct {
 	SoundURL    string
 	Caption     string
 	Definitions []string
+	NSFW        bool
 
 	Path string
 
@@ -140,6 +141,7 @@ func RenderCard(ub web.URLBuilder, deck primitives.Deck, deckTags []primitives.T
 		SoundURL:    card.SoundURL,
 		Caption:     card.Caption,
 		Definitions: card.Definitions,
+		NSFW:        card.NSFW,
 	}
 
 	id, err := ub.EncodeID(card.ID())
