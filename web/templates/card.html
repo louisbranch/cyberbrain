@@ -94,6 +94,10 @@
                 <dt>{{ index $deck.Fields $i }}</dt>
                 <dd>{{ $d }}</dd>
               {{ end }}
+              {{ if .Zhuyin }}
+                <dt>Zhuyin</dt>
+                <dd>{{ .Zhuyin }}</dd>
+              {{ end }}
             </dl>
             <div>
               {{ range .Tags }}

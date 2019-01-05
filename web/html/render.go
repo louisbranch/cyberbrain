@@ -42,6 +42,8 @@ type Card struct {
 
 	Deck *Deck
 	Tags []*Tag
+
+	Zhuyin string
 }
 
 type Tag struct {
@@ -56,13 +58,6 @@ type Tag struct {
 
 func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	tags []primitives.Tag) (*Deck, error) {
-
-	// FIXME: temporary hack to display decks with Pinyin fields in Zhuyin as well
-	for _, def := range d.Fields {
-		if strings.ToLower(def) == "pinyin" {
-			d.Fields = append(d.Fields, "Zhuyin")
-		}
-	}
 
 	dr := &Deck{
 		Name:         d.Name,
@@ -146,27 +141,26 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 func RenderCard(ub web.URLBuilder, deck primitives.Deck, deckTags []primitives.Tag,
 	card primitives.Card, cardTags []primitives.Tag, recursive bool) (*Card, error) {
 
-	// FIXME: temporary hack to display cards with Pinyin fields in Zhuyin as well
-	var defs []string
-	var z string
-
-	for i, d := range card.Definitions {
-		f := deck.Fields[i]
-
-		if strings.ToLower(f) == "pinyin" {
-			z = zhuyin.EncodeZhuyin(d)
-			defs = append(defs, d, z)
-		} else {
-			defs = append(defs, d)
-		}
-	}
-
 	cr := &Card{
 		ImageURL:    card.ImageURL,
 		SoundURL:    card.SoundURL,
 		Caption:     card.Caption,
-		Definitions: defs,
+		Definitions: card.Definitions,
 		NSFW:        card.NSFW,
+	}
+
+	// FIXME: temporary hack to display decks with Pinyin fields in Zhuyin as well
+	for i, d := range card.Definitions {
+		f := deck.Fields[i]
+		if strings.ToLower(f) == "pinyin" {
+			var ps []string
+			for _, p := range strings.Split(d, " ") {
+				ps = append(ps, zhuyin.PinyinToZhuyin(p))
+			}
+			cr.Zhuyin = strings.Join(ps, " ")
+			break
+		}
+
 	}
 
 	id, err := ub.EncodeID(card.ID())
