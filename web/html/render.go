@@ -1,6 +1,9 @@
 package html
 
 import (
+	"strings"
+
+	"github.com/localvar/zhuyin"
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
 	"gitlab.com/luizbranco/cyberbrain/web"
@@ -53,6 +56,13 @@ type Tag struct {
 
 func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 	tags []primitives.Tag) (*Deck, error) {
+
+	// FIXME: temporary hack to display decks with Pinyin fields in Zhuyin as well
+	for _, def := range d.Fields {
+		if strings.ToLower(def) == "pinyin" {
+			d.Fields = append(d.Fields, "Zhuyin")
+		}
+	}
 
 	dr := &Deck{
 		Name:         d.Name,
@@ -136,11 +146,26 @@ func RenderDeck(ub web.URLBuilder, d primitives.Deck, cards []primitives.Card,
 func RenderCard(ub web.URLBuilder, deck primitives.Deck, deckTags []primitives.Tag,
 	card primitives.Card, cardTags []primitives.Tag, recursive bool) (*Card, error) {
 
+	// FIXME: temporary hack to display cards with Pinyin fields in Zhuyin as well
+	var defs []string
+	var z string
+
+	for i, d := range card.Definitions {
+		f := deck.Fields[i]
+
+		if strings.ToLower(f) == "pinyin" {
+			z = zhuyin.EncodeZhuyin(d)
+			defs = append(defs, d, z)
+		} else {
+			defs = append(defs, d)
+		}
+	}
+
 	cr := &Card{
 		ImageURL:    card.ImageURL,
 		SoundURL:    card.SoundURL,
 		Caption:     card.Caption,
-		Definitions: card.Definitions,
+		Definitions: defs,
 		NSFW:        card.NSFW,
 	}
 
