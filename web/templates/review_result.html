@@ -40,8 +40,8 @@
                {{ range .Card.Definitions }}
                  <li>{{ .}}</li>
                {{ end }}
-               {{ if .Zhuyin }}
-                 {{ .Zhuyin }}
+               {{ if .Card.Zhuyin }}
+                 <li>{{ .Card.Zhuyin }}</li>
                {{ end }}
              </ul>
              <a class="button is-primary" href="{{ .Card.Deck.NewCardReviewPath }}">Next Card</a>
