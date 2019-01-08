@@ -2,12 +2,7 @@ package worker
 
 import "gitlab.com/luizbranco/cyberbrain/primitives"
 
-type Imager interface {
-	primitives.Identifiable
-	GetImageURL() string
-	SetImageURL(string)
-}
-
+// ImageResizer allows an Imager to have its image resized to fit specific dimensions.
 type ImageResizer interface {
-	Resize(i Imager, name string, width int, height int) error
+	Resize(i primitives.Imager, name string, width int, height int) error
 }

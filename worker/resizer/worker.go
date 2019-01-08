@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	"gitlab.com/luizbranco/cyberbrain/primitives"
-	"gitlab.com/luizbranco/cyberbrain/worker"
 )
 
 const workerName = "img-resize"
@@ -41,7 +40,7 @@ func (w *Worker) Register() error {
 	return nil
 }
 
-func (w *Worker) Resize(i worker.Imager, name string, width, height int) error {
+func (w *Worker) Resize(i primitives.Imager, name string, width, height int) error {
 
 	if w.WorkerPool == nil {
 		return errors.New("invalid worker pool")

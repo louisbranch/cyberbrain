@@ -60,3 +60,15 @@ type Worker interface {
 type Job interface {
 	Run(ctx context.Context) error
 }
+
+// Imager is an interface implemented by entities that can have images.
+type Imager interface {
+	Identifiable
+	GetImageURL() string
+	SetImageURL(string)
+}
+
+// ImageUploader allows an Imager to uploads its image to an external destination.
+type ImageUploader interface {
+	Upload(ctx context.Context, i Imager, name string, img []byte) (string, error)
+}

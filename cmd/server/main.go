@@ -8,6 +8,7 @@ import (
 
 	"gitlab.com/luizbranco/cyberbrain/authentication"
 	"gitlab.com/luizbranco/cyberbrain/db/psql"
+	"gitlab.com/luizbranco/cyberbrain/s3img"
 	"gitlab.com/luizbranco/cyberbrain/web/html"
 	"gitlab.com/luizbranco/cyberbrain/web/server"
 	"gitlab.com/luizbranco/cyberbrain/web/session"
@@ -36,6 +37,9 @@ func main() {
 	blitlineID := os.Getenv("BLITLINE_ID")
 	blitlineCallbackURL := os.Getenv("BLITLINE_CALLBACK_URL")
 
+	awsID := os.Getenv("AWS_ID")
+	awsSecret := os.Getenv("AWS_SECRET")
+	awsRegion := os.Getenv("AWS_REGION")
 	awsBucket := os.Getenv("AWS_BUCKET")
 
 	piioDomain := os.Getenv("PIIO_DOMAIN")
@@ -91,6 +95,11 @@ func main() {
 
 	tpl := html.New("web/templates", env, piioDomain, piioID)
 
+	imgUploader, err := s3img.New(awsID, awsSecret, awsRegion, awsBucket)
+	if err != nil {
+		log.Fatalf("unable to initialize S3 image uploader %s", err)
+	}
+
 	srv := &server.Server{
 		Template:       tpl,
 		Database:       db,
@@ -98,6 +107,7 @@ func main() {
 		Authenticator:  auth,
 		SessionManager: session,
 		ImageResizer:   imgResizer,
+		ImageUploader:  imgUploader,
 	}
 
 	mux := srv.NewServeMux()

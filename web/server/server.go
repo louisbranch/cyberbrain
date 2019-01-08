@@ -21,6 +21,7 @@ type Server struct {
 	Authenticator  primitives.Authenticator
 	SessionManager web.SessionManager
 	ImageResizer   worker.ImageResizer
+	ImageUploader  primitives.ImageUploader
 }
 
 func (srv *Server) NewServeMux() *http.ServeMux {
